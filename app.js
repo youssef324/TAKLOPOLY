@@ -149,6 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const scanStatusMessage = document.getElementById("scan-status-message");
     let html5QrCode = null; // للمكتبة
 
+    // 🛑🛑 عناصر "السكان المجمع" (Batch Scan) الجديدة 🛑🛑
+    const scannedBatchListContainer = document.getElementById("scanned-batch-list-container");
+    const scanBatchCount = document.getElementById("scan-batch-count");
+    const scannedBatchList = document.getElementById("scanned-batch-list");
+    const submitScanBatchBtn = document.getElementById("submit-scan-batch-btn");
+    const scanBatchMessage = document.getElementById("scan-batch-message");
+    let scannedUsersBatch = []; // 🛑 القائمة المؤقتة
+
     // 🛑🛑 عناصر طباعة الـ QR (مُعدلة) 🛑🛑
     const fetchQrListBtn = document.getElementById("admin-fetch-qr-list-btn");
     const qrListResults = document.getElementById("admin-qr-list-results"); // Textarea (مخفي)
@@ -204,6 +212,13 @@ document.addEventListener("DOMContentLoaded", () => {
              html5QrCode = null; // إذا لم يكن يعمل، فقط قم بتعيينه إلى null
         }
         // 🛑🛑🛑 نهاية الإصلاح 🛑🛑🛑
+        
+        // 🛑 إخفاء وتفريغ قائمة السكان المجمع
+        if (scannedBatchListContainer) scannedBatchListContainer.style.display = "none";
+        scannedUsersBatch = [];
+        if (scannedBatchList) scannedBatchList.innerHTML = "";
+        if (scanBatchCount) scanBatchCount.textContent = "0";
+        if (scanBatchMessage) scanBatchMessage.textContent = "";
     };
 
     resetUI();
@@ -1220,6 +1235,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------------------------------
     (function setupAdminPanel() {
         let currentSearchedUser = null;
+        // 🛑 تعريف القائمة المؤقتة هنا في نطاق الأدمن
+        let scannedUsersBatch = [];
 
         // 🛑🛑 1. فورم البحث بالاسم (مُصحح للدروب ليست) 🛑🛑
         if(adminSearchForm) {
@@ -1730,75 +1747,62 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // -----------------------------------------------------
-        // 🛑🛑🛑 منطق مسح QR Code (للأدمن) - تم نقله إلى هنا 🛑🛑🛑
+        // 🛑🛑🛑 منطق مسح QR Code (مُعدل للسكان المجمع) 🛑🛑🛑
         // -----------------------------------------------------
 
-        // 🛑🛑 دالة معالجة المسح 🛑🛑
-        async function onScanSuccess(decodedText, decodedResult) {
-            scanStatusMessage.textContent = `تم مسح كود: ${decodedText}. جاري معالجة المكافأة...`;
-            scanStatusMessage.style.color = 'blue';
-
-            // 🛑🛑🛑 الإصلاح: إزالة .stop() من هنا للسماح بالمسح المتعدد 🛑🛑🛑
-            // if (html5QrCode) { ... }
-
-            // 2. تحليل بيانات المكافأة
-            const [amountStr, reason] = rewardReasonSelect.value.split(':');
-            const rewardAmount = parseInt(amountStr);
-            const scannedEmail = decodedText.trim();
-            const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
-
-            if (!scannedEmail || isNaN(rewardAmount) || rewardAmount <= 0) {
-                 scanStatusMessage.textContent = 'خطأ: بيانات الكود أو المكافأة غير صالحة.';
-                 scanStatusMessage.style.color = 'red';
-                 return;
+        // 🛑 (جديد) دالة لإعادة رسم قائمة المراجعة
+        function renderScannedBatchList() {
+            scannedBatchList.innerHTML = ""; // فرغ القائمة
+            if (scannedUsersBatch.length === 0) {
+                scannedBatchListContainer.style.display = "none"; // إخفاء الحاوية لو فارغة
+                return;
             }
 
-            // 3. إرسال إلى API المكافأة
-            try {
-                const response = await fetch(`/scan-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        scannedEmail, 
-                        rewardAmount, 
-                        reason: reason,
-                        adminEmail 
-                    })
-                });
+            scannedBatchListContainer.style.display = "block"; // إظهار الحاوية
+            scanBatchCount.textContent = scannedUsersBatch.length;
 
-                const data = await response.json();
+            scannedUsersBatch.forEach(email => {
+                const li = document.createElement('li');
+                li.className = 'scanned-user-item';
+                li.innerHTML = `
+                    <span>${email}</span>
+                    <button class="remove-scan-item-btn" data-email="${email}">X</button>
+                `;
                 
-                if (response.ok && data.success) {
-                    scanStatusMessage.textContent = `✅ نجاح! تم إضافة ${rewardAmount} نقطة لـ ${scannedEmail}.`;
-                    scanStatusMessage.style.color = 'green';
-                    // تحديث بيانات الأدمن إذا كان المستخدم الذي تم مكافأته هو الأدمن نفسه
-                    if (scannedEmail === adminEmail) {
-                        refreshUserData();
-                    }
-                    // تحديث الكارت إذا كان المستخدم الممسوح هو المعروض حالياً
-                    if (currentSearchedUser && scannedEmail === currentSearchedUser.email) {
-                        currentSearchedUser.balance = data.new_balance;
-                        searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
-                    }
-                    
-                } else {
-                    scanStatusMessage.textContent = `❌ فشل: ${data.error || 'فشل في تحديث الرصيد.'}`;
-                    scanStatusMessage.style.color = 'red';
-                }
+                // إضافة لوجيك زر الحذف
+                li.querySelector('.remove-scan-item-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const emailToRemove = e.target.dataset.email;
+                    // الحذف من القائمة المؤقتة
+                    scannedUsersBatch = scannedUsersBatch.filter(e => e !== emailToRemove);
+                    // إعادة رسم القائمة
+                    renderScannedBatchList(); 
+                });
+                
+                scannedBatchList.appendChild(li);
+            });
+        }
 
-            } catch (err) {
-                 scanStatusMessage.textContent = 'خطأ في الاتصال بالسيرفر أثناء معالجة المكافأة.';
-                 scanStatusMessage.style.color = 'red';
-                 console.error("Scan API Error:", err);
+        // 🛑🛑 دالة معالجة المسح (مُعدلة) 🛑🛑
+        async function onScanSuccess(decodedText, decodedResult) {
+            const scannedEmail = decodedText.trim();
+
+            // 1. تحقق من عدم التكرار
+            if (scannedUsersBatch.includes(scannedEmail)) {
+                scanStatusMessage.textContent = `❌ مكرر: ${scannedEmail} موجود بالفعل في القائمة.`;
+                scanStatusMessage.style.color = 'orange';
+                return; // لا تفعل شيئاً
             }
+
+            // 2. إضافة للقائمة المؤقتة
+            scannedUsersBatch.push(scannedEmail);
             
-            // 🛑🛑 إضافة: مسح الرسالة بعد ثانيتين للاستعداد للمسح التالي
-            setTimeout(() => {
-                if (scanStatusMessage.textContent.startsWith('✅') || scanStatusMessage.textContent.startsWith('❌')) {
-                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح كود QR التالي.';
-                    scanStatusMessage.style.color = 'green';
-                }
-            }, 2000);
+            // 3. تحديث الواجهة
+            renderScannedBatchList();
+            scanStatusMessage.textContent = `✅ تمت إضافة: ${scannedEmail}`;
+            scanStatusMessage.style.color = 'green';
+
+            // (لا يوجد إرسال للسيرفر هنا)
         }
         
         // 🛑🛑 زر تشغيل الماسح (مُعدل للإيقاف الصحيح) 🛑🛑
@@ -1806,13 +1810,11 @@ document.addEventListener("DOMContentLoaded", () => {
             startScanBtn.addEventListener('click', () => { // 🛑 لا نجعل هذه async
                 if (html5QrCode && html5QrCode.isScanning) {
                     // إيقاف الماسح
-                    // 🛑🛑 التصحيح: نستخدم .then() للانتظار
                     html5QrCode.stop().then(() => {
                         startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
                         readerDiv.innerHTML = '';
                         scanStatusMessage.textContent = 'تم إيقاف الماسح.';
                         scanStatusMessage.style.color = 'gray';
-                        // html5QrCode = null; // لا نضع null هنا، فقط نوقف
                     }).catch(err => {
                         scanStatusMessage.textContent = 'حدث خطأ أثناء إيقاف الماسح.';
                         scanStatusMessage.style.color = 'red';
@@ -1825,20 +1827,23 @@ document.addEventListener("DOMContentLoaded", () => {
                      html5QrCode = new Html5Qrcode("reader");
                 }
                 
-                scanStatusMessage.textContent = 'جاري تفعيل الكاميرا... قد تظهر رسالة طلب إذن.';
+                scanStatusMessage.textContent = 'جاري تفعيل الكاميرا...';
                 scanStatusMessage.style.color = 'blue';
 
+                // تفريغ القائمة القديمة عند بدء مسح جديد
+                scannedUsersBatch = [];
+                renderScannedBatchList();
+                scanBatchMessage.textContent = "";
+
                 html5QrCode.start(
-                    { facingMode: "environment" }, // استخدام الكاميرا الخلفية (الأفضل للمسح)
+                    { facingMode: "environment" }, 
                     { fps: 10, qrbox: { width: 250, height: 250 } },
-                    onScanSuccess, // دالة المعالجة التي لا توقف الكاميرا
-                    (errorMessage) => {
-                        // console.log(`QR Code no longer in sight. ${errorMessage}`);
-                    }
+                    onScanSuccess, // دالة المعالجة الجديدة
+                    (errorMessage) => { /* تجاهل الأخطاء */ }
                 )
                 .then(() => {
                     startScanBtn.textContent = 'إيقاف الماسح';
-                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح كود QR الآن.';
+                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح الأكواد...';
                     scanStatusMessage.style.color = 'green';
                 })
                 .catch((err) => {
@@ -1847,6 +1852,71 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         }
+
+        // 🛑🛑 (جديد) زر تأكيد وإرسال القائمة المجمعة 🛑🛑
+        if (submitScanBatchBtn) {
+            submitScanBatchBtn.addEventListener('click', async () => {
+                if (scannedUsersBatch.length === 0) {
+                    scanBatchMessage.textContent = "القائمة فارغة! الرجاء مسح الأكواد أولاً.";
+                    scanBatchMessage.style.color = 'red';
+                    return;
+                }
+
+                // 1. تحليل بيانات المكافأة
+                const [amountStr, reason] = rewardReasonSelect.value.split(':');
+                const rewardAmount = parseInt(amountStr);
+                const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
+
+                if (isNaN(rewardAmount) || rewardAmount <= 0) {
+                    scanBatchMessage.textContent = "الرجاء اختيار نوع مكافأة صحيح.";
+                    scanBatchMessage.style.color = 'red';
+                    return;
+                }
+
+                if (!confirm(`هل أنت متأكد من إضافة ${rewardAmount} نقطة لـ ${scannedUsersBatch.length} مستخدم؟`)) {
+                    return;
+                }
+
+                scanBatchMessage.textContent = `جاري إرسال ${scannedUsersBatch.length} مستخدم للسيرفر...`;
+                scanBatchMessage.style.color = 'blue';
+                submitScanBatchBtn.disabled = true;
+
+                try {
+                    // 2. إرسال إلى الـ API الجديد
+                    const response = await fetch('/admin-batch-scan-attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            emails: scannedUsersBatch, 
+                            rewardAmount, 
+                            reason,
+                            adminEmail 
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        scanBatchMessage.textContent = `✅ نجاح! تم تحديث رصيد ${data.updated_count} مستخدم.`;
+                        scanBatchMessage.style.color = 'green';
+                        // تفريغ القائمة بعد النجاح
+                        scannedUsersBatch = [];
+                        renderScannedBatchList();
+                    } else {
+                        scanBatchMessage.textContent = `❌ فشل: ${data.error || 'فشل في تحديث الأرصدة.'}`;
+                        scanBatchMessage.style.color = 'red';
+                    }
+
+                } catch (err) {
+                    scanBatchMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
+                    scanBatchMessage.style.color = 'red';
+                    console.error("Batch Scan API Error:", err);
+                } finally {
+                    submitScanBatchBtn.disabled = false;
+                }
+            });
+        }
+
 
         // 🛑🛑 4. كود جلب قائمة الـ QR للطباعة (مُعدل) 🛑🛑
         if(fetchQrListBtn) {
