@@ -13,7 +13,7 @@
 }
 
 .header-side {
-    font-size: 1.9em;
+    font-size: 1.6em;
     flex: 1; /* يأخذ مساحة ويساعد في التوسيط */
 }
 
@@ -967,6 +967,59 @@ form#admin-add-item-form button[type="submit"]:hover {
     min-height: 250px; 
 }
 
+/* 🛑🛑 الإضافة الجديدة: تنسيق قائمة المراجعة 🛑🛑 */
+.scanned-batch-list-container {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+}
+.scanned-batch-list-container h4 {
+    margin-top: 0;
+}
+#scanned-batch-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.scanned-user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
+.scanned-user-item:last-child {
+    border-bottom: none;
+}
+.remove-scan-item-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 25px; /* لتوسيط الـ X */
+}
+#submit-scan-batch-btn {
+    background-color: #28a745; /* أخضر */
+    color: white;
+    padding: 12px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+/* 🛑🛑 نهاية الإضافة 🛑🛑 */
+
 
 /* 🛑🛑 ستايلات واجهة الزائر (جديدة) 🛑🛑 */
 .guest-container {
@@ -1112,7 +1165,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 2. ستايلات الإعلان الهام */
 .announcement-container {
-    display: none; /* يتم التحكم به بالجافاسكريبت */
+    display: none; /* يتم التحكم به بالجافاسكري... */
     max-width: 900px; 
     margin: 2rem auto;
     padding: 15px 20px; 
