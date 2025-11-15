@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const guestResultsList = document.getElementById("guest-results-list");
     const guestMessage = document.getElementById("guest-message");
     const logoutBtnGuest = document.getElementById("logout-btn-guest");
+    const guestStatsModal = document.getElementById("guest-stats-modal");
+    const closeGuestStatsBtn = document.getElementById("close-guest-stats");
+    const guestStatsContent = document.getElementById("guest-stats-content");
+    const guestStatsName = document.getElementById("guest-stats-name");
     const userNameP = document.getElementById("user-name");
     const userFamilyP = document.getElementById("user-family");
     const userBalanceP = document.getElementById("user-balance");
@@ -150,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (userLevelP) userLevelP.textContent = "";
         if (editModalOverlay) editModalOverlay.style.display = "none";
         if (qrModalOverlay) qrModalOverlay.style.display = "none";
+        if (guestStatsModal) guestStatsModal.style.display = "none";
         if (html5QrCode && html5QrCode.isScanning) {
             try {
                 html5QrCode.stop().then(() => {
@@ -940,7 +945,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     guestMessage.style.color = 'green';
                     data.users.forEach((user, index) => {
                         const li = document.createElement('li');
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        li.style.cursor = "pointer";
+                        li.style.transition = "background-color 0.2s";
+                        li.onmouseover = () => li.style.backgroundColor = "#f1f1f1";
+                        li.onmouseout = () => li.style.backgroundColor = "transparent";
+                        li.title = "اضغط لعرض تفاصيل الحضور";
+                        li.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; width:100%;">
+                                <span>${index + 1}. ${user.name}</span> 
+                                <strong>${user.balance}</strong>
+                            </div>
+                        `;
+                        li.addEventListener('click', () => {
+                            showUserStats(user.name, user.email);
+                        });
                         guestResultsList.appendChild(li);
                     });
                 } else {
@@ -952,6 +970,48 @@ document.addEventListener("DOMContentLoaded", () => {
                 guestMessage.style.color = 'red';
             }
         });
+    });
+    async function showUserStats(name, email) {
+        guestStatsName.textContent = name;
+        guestStatsContent.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">جاري جلب البيانات...</p>';
+        guestStatsModal.style.display = "flex";
+        try {
+            const response = await fetch('/guest-get-family', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ targetEmail: email })
+            });
+            const data = await response.json();
+            if (data.success && data.mode === 'stats') {
+                let html = '';
+                for (const [key, value] of Object.entries(data.stats)) {
+                    let colorStyle = value > 0 ? 'color:#004a99; font-weight:bold;' : 'color:#aaa;';
+                    let bgStyle = value > 0 ? 'background-color:#fff;' : 'background-color:#f9f9f9;';
+                    html += `
+                        <div class="stat-item" style="${bgStyle}">
+                            <div class="stat-label">${key}</div>
+                            <div class="stat-value" style="${colorStyle}">${value}</div>
+                        </div>
+                    `;
+                }
+                guestStatsContent.innerHTML = html;
+            } else {
+                guestStatsContent.innerHTML = `<p style="color:red; grid-column: 1/-1;">فشل جلب البيانات</p>`;
+            }
+        } catch (err) {
+            console.error(err);
+            guestStatsContent.innerHTML = `<p style="color:red; grid-column: 1/-1;">خطأ في الاتصال</p>`;
+        }
+    }
+    if (closeGuestStatsBtn) {
+        closeGuestStatsBtn.onclick = () => {
+            guestStatsModal.style.display = "none";
+        };
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === guestStatsModal) {
+            guestStatsModal.style.display = "none";
+        }
     });
     (function setupAdminPanel() {
         let currentSearchedUser = null;
