@@ -1032,3 +1032,39 @@ form#admin-add-item-form button[type="submit"]:hover {
     color: #333; 
     font-weight: bold; 
 }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 5px;
+}
+.stat-item {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-color: #004a99;
+    background-color: #eef6ff;
+}
+.stat-label {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 5px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stat-value {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #212529;
+}
