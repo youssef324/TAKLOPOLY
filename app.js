@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectedUsersCount = document.getElementById("selected-users-count");
     const massUpdateAmount = document.getElementById("mass-update-amount");
     const massUpdateAddBtn = document.getElementById("mass-update-add-btn");
-    const massUpdateSubtractBtn = document.getElementById("admin-subtract-balance-btn");
+    const massUpdateSubtractBtn = document.getElementById("mass-update-subtract-btn");
     const massUpdateMessage = document.getElementById("mass-update-message");
     let selectedUsersForMassUpdate = [];
 
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🛑🛑 عناصر كود QR الجديدة 🛑🛑
     const showQrBtn = document.getElementById("show-qr-btn");
     const qrModalOverlay = document.getElementById("qr-modal-overlay");
-    const closeQrBtn = document.querySelector(".close-qr-btn"); // 🏆 هذا هو زر الإغلاق (X)
+    const closeQrBtn = document.querySelector(".close-qr-btn");
     const qrCodeContainer = document.getElementById("qr-code-container");
     const qrUserEmailDisplay = document.getElementById("qr-user-email-display");
 
@@ -176,9 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeGuestDetails = document.getElementById("close-guest-details");
     const guestDetailsTitle = document.getElementById("guest-details-title");
 
-    // 🛑🛑 عناصر مودال الأدمن الجديد 🛑🛑
-    const adminModalOverlay = document.getElementById("admin-modal-overlay");
-    const closeAdminModal = document.getElementById("close-admin-modal");
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
@@ -190,11 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshDataBtn.style.display = "none";
         unlockedItemsBtn.style.display = "none";
         if (showQrBtn) showQrBtn.style.display = "none";
-        
-        // 🏆🏆 الحل النهائي لعدم الظهور التلقائي 🏆🏆
-        if (adminModalOverlay) adminModalOverlay.style.cssText = "display: none !important;"; 
-        if (qrModalOverlay) qrModalOverlay.style.cssText = "display: none !important;"; 
-
+        adminPanelDiv.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
@@ -206,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         transactionList.innerHTML = "";
         if (userLevelP) userLevelP.textContent = "";
         if (editModalOverlay) editModalOverlay.style.display = "none";
-        
+        if (qrModalOverlay) qrModalOverlay.style.display = "none"; // 🛑 إخفاء مودال الـ QR
         if (guestDetailsModal) guestDetailsModal.style.display = "none"; // 🛑 إخفاء مودال الزائر
 
         // 🛑 إيقاف الماسح إذا كان يعمل عند تسجيل الخروج
@@ -402,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.style.color = "blue";
 
         // إخفاء الأقسام
-        if (adminModalOverlay) adminModalOverlay.style.display = "flex"; // 🛑 إظهار مودال الأدمن
+        adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         hideUserSections();
         userAnnouncementBox.style.display = "none";
@@ -753,7 +746,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
+        if (loggedInUserProfile && loggedInUserProfile.role === 'admin') return;
 
         storeContainer.style.display = "block"; // 🛑 الإظهار أولاً
         storeLoadingMessage.style.display = 'block';
@@ -1178,13 +1171,6 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarUploadInput.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         if (!file || !loggedInUserProfile) return;
-        
-        // 🛑 إغلاق مودال الأدمن
-        if (closeAdminModal) {
-            closeAdminModal.addEventListener('click', () => {
-                if (adminModalOverlay) adminModalOverlay.style.display = 'none';
-            });
-        }
 
         // إظهار رسالة "جاري الرفع"
         const originalText = userNameP.textContent;
@@ -1208,8 +1194,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // الآن، تحديث الرابط في قاعدة البيانات
             const updateResponse = await fetch('/update-profile-image', {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: loggedInUserProfile.email,
                     image_url: newImageUrl
@@ -1293,894 +1279,1097 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑 ربط زرار الريفرش 🛑
     refreshDataBtn.addEventListener('click', refreshUserData);
-// -----------------------------------------------------
-// 🛑🛑🛑 منطق توليد وعرض QR Code (لليوزر) 🛑🛑🛑
-// -----------------------------------------------------
 
-if(showQrBtn) {
-    showQrBtn.addEventListener('click', () => {
-        if (!loggedInUserProfile || !loggedInUserProfile.email) return;
-
-        // 1. تفريغ الحاوية للتوليد الجديد (مهم)
-        qrCodeContainer.innerHTML = ''; 
-
-        // 2. المحتوى المشفر
-        const qrData = loggedInUserProfile.email;
-
-        // 3. توليد كود QR (ضمان وجود مكتبة QRCode.js)
-        // نستخدم setTimeout لضمان أن الـ DOM قد تم عرضه قبل التوليد (حل شائع للمشاكل)
-        setTimeout(() => {
-            if (typeof QRCode !== 'undefined' && qrCodeContainer) {
-                new QRCode(qrCodeContainer, {
-                    text: qrData,
-                    width: 250,
-                    height: 250,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            } else {
-                console.error("QRCode library not loaded or container missing.");
-            }
-        }, 50); // تأخير بسيط جداً
-
-        // 4. عرض الإيميل تحت الكود
-        if (qrUserEmailDisplay) qrUserEmailDisplay.textContent = loggedInUserProfile.email;
-
-        // 5. إظهار النافذة
-        // 🛑 نستخدم 'flex' لإظهار المودال (الذي تم إخفاؤه في resetUI)
-        if (qrModalOverlay) qrModalOverlay.style.display = 'flex';
-    });
-}
-
-// 6. 🏆 كود ربط زر الإغلاق (X) - يجب أن يظهر مرة واحدة 🏆
-if(closeQrBtn) {
-    // 🏆🏆 إصلاح عمل زر الإغلاق (X) باستخدام onclick 🏆🏆
-    closeQrBtn.onclick = () => {
-        if (qrModalOverlay) qrModalOverlay.style.display = 'none';
-        if (qrCodeContainer) qrCodeContainer.innerHTML = ''; // تنظيف المحتوى
-    };
-}
-
-
-    // 🛑🛑 معالج فورم إضافة عنصر للمتجر (جديد) 🛑🛑
-    adminAddItemForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const name = document.getElementById("store-item-name").value.trim();
-        const price = parseInt(document.getElementById("store-item-price").value);
-        const requiredLevel = parseInt(storeItemRequiredLevel.value);
-        const imageFile = storeItemImageFile.files[0];
-
-        if (!name || isNaN(price) || price <= 0 || !imageFile) {
-            adminStoreMessage.textContent = "الرجاء ملء الاسم والسعر وإرفاق صورة.";
-            adminStoreMessage.style.color = "red";
-            return;
-        }
-
-        adminStoreMessage.textContent = "جاري رفع الصورة وإضافة العنصر...";
-        adminStoreMessage.style.color = "blue";
-
-        let imageUrl = null;
-        try {
-            // 1. رفع الصورة إلى Cloudinary
-            const resizedBlob = await resizeImage(imageFile, 400, 400, 0.8);
-            const formData = new FormData();
-            formData.append('file', resizedBlob);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-            const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
-
-            const cloudinaryData = await cloudinaryResponse.json();
-            imageUrl = cloudinaryData.secure_url;
-
-            // 2. إرسال بيانات العنصر إلى الـ API
-            const response = await fetch(`/admin-add-item`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: name,
-                    price: price,
-                    required_level: requiredLevel,
-                    image_url: imageUrl,
-                    adminEmail: loggedInUserProfile.email 
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                adminStoreMessage.textContent = `تم إضافة العنصر (${name}) بنجاح.`;
-                adminStoreMessage.style.color = "green";
-                adminAddItemForm.reset();
-                await loadAdminStoreItems(); // تحديث القائمة
-            } else {
-                adminStoreMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
-                adminStoreMessage.style.color = "red";
-            }
-        } catch (err) {
-            adminStoreMessage.textContent = `خطأ: ${err.message || "فشل غير متوقع أثناء الإضافة."}`;
-            adminStoreMessage.style.color = "red";
-            console.error("Add Item Error:", err);
-        }
-    });
-
+    // 
     // -----------------------------------------------------
-    // 🛑🛑🛑 منطق لوحة الأدمن (البحث، التعديل، التحكم) 🛑🛑🛑
+    // 🛑🛑🛑 منطق توليد وعرض QR Code (لليوزر) 🛑🛑🛑
     // -----------------------------------------------------
 
-    // --- بحث المستخدم ---
-    adminSearchForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const name = adminSearchInput.value.trim();
-        if (!name) return;
+    if (showQrBtn) {
+        showQrBtn.addEventListener('click', () => {
+            if (!loggedInUserProfile || !loggedInUserProfile.email) return;
 
-        adminSearchMessage.textContent = "جاري البحث...";
-        adminSearchMessage.style.color = "blue";
-        adminResultsListDiv.style.display = "none";
-        searchedUserCard.style.display = "none";
-        adminSelectUser.innerHTML = "";
-        currentSearchResults = [];
+            // 1. تفريغ الحاوية للتوليد الجديد
+            qrCodeContainer.innerHTML = '';
 
-        try {
-            const response = await fetch(`/admin-search-user`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name }),
+            // 2. المحتوى المشفر: نستخدم الإيميل كمعرّف
+            const qrData = loggedInUserProfile.email;
+
+            // 3. توليد كود QR
+            new QRCode(qrCodeContainer, {
+                text: qrData,
+                width: 250,
+                height: 250,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
             });
-            const data = await response.json();
 
-            if (response.ok && data.users && data.users.length > 0) {
-                currentSearchResults = data.users;
-                adminSearchMessage.textContent = `تم العثور على ${data.users.length} مستخدم.`;
-                adminSearchMessage.style.color = "green";
-                
-                // ملء قائمة الاختيار
-                adminSelectUser.innerHTML = '<option value="" disabled selected>-- اختر مستخدماً --</option>';
-                data.users.forEach((user, index) => {
-                    const option = document.createElement("option");
-                    option.value = index;
-                    option.textContent = `${user.name} (${user.email}) - ${user.family}`;
-                    adminSelectUser.appendChild(option);
-                });
-                adminResultsListDiv.style.display = "block";
-            } else {
-                adminSearchMessage.textContent = `لم يتم العثور على مستخدم بالاسم "${name}".`;
-                adminSearchMessage.style.color = "orange";
-            }
-        } catch (err) {
-            adminSearchMessage.textContent = "حدث خطأ في البحث.";
-            adminSearchMessage.style.color = "red";
-            console.error("Admin Search Error:", err);
-        }
-    });
+            // 4. عرض الإيميل تحت الكود (للتأكد)
+            qrUserEmailDisplay.textContent = loggedInUserProfile.email;
 
-    // --- عرض بيانات المستخدم المختار ---
-    adminSelectUser.addEventListener("change", (event) => {
-        const index = event.target.value;
-        if (index === "") {
-            searchedUserCard.style.display = "none";
-            currentSearchedUser = null;
-            return;
-        }
-
-        const user = currentSearchResults[index];
-        currentSearchedUser = user;
-
-        searchedUserName.textContent = user.name;
-        searchedUserFamily.textContent = user.family;
-        searchedUserBalance.textContent = `$${user.balance}`;
-        searchedUserLevel.textContent = user.level || 1; 
-
-        searchedUserCard.style.display = "block";
-        balanceMessage.textContent = "";
-        adminLevelMessage.textContent = ""; 
-        deleteMessage.textContent = ""; 
-
-        // 🛑 عرض الـ QR الخاص بالمستخدم المختار
-        adminShowUserQrBtn.onclick = () => {
-            if (currentSearchedUser && qrModalOverlay) {
-                // نفس منطق عرض الـ QR لليوزر العادي
-                qrCodeContainer.innerHTML = '';
-                const qrData = currentSearchedUser.email;
-                setTimeout(() => {
-                    if (typeof QRCode !== 'undefined' && qrCodeContainer) {
-                        new QRCode(qrCodeContainer, {
-                            text: qrData,
-                            width: 250,
-                            height: 250,
-                            colorDark : "#000000",
-                            colorLight : "#ffffff",
-                            correctLevel : QRCode.CorrectLevel.H
-                        });
-                        qrUserEmailDisplay.textContent = currentSearchedUser.email;
-                        qrModalOverlay.style.display = 'flex';
-                    }
-                }, 50);
-            }
-        };
-    });
-
-    // --- تحديث الرصيد (إضافة/خصم) ---
-    async function updateBalance(amount, type) {
-        if (!currentSearchedUser) return;
-        const reason = prompt(`الرجاء إدخال سبب ${type === 'add' ? 'الإضافة' : 'الخصم'} (${amount} نقطة):`);
-        if (!reason) return;
-
-        balanceMessage.textContent = "جاري تحديث الرصيد...";
-        balanceMessage.style.color = "blue";
-        
-        try {
-            const response = await fetch(`/admin-update-balance`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: currentSearchedUser.email,
-                    amount: type === 'add' ? amount : -amount,
-                    reason: reason,
-                    adminEmail: loggedInUserProfile.email
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.user.balance}`;
-                balanceMessage.style.color = "green";
-                searchedUserBalance.textContent = `$${data.user.balance}`;
-                currentSearchedUser.balance = data.user.balance;
-                await loadTransactionHistory(currentSearchedUser.email);
-            } else {
-                balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
-                balanceMessage.style.color = "red";
-            }
-        } catch (err) {
-            balanceMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-            balanceMessage.style.color = "red";
-            console.error("Update Balance Error:", err);
-        }
-    }
-
-    addBalanceBtn.addEventListener("click", () => {
-        const amount = parseInt(balanceAmountInput.value);
-        if (isNaN(amount) || amount <= 0) {
-            balanceMessage.textContent = "الرجاء إدخال كمية صحيحة موجبة.";
-            balanceMessage.style.color = "red";
-            return;
-        }
-        updateBalance(amount, 'add');
-    });
-
-    subtractBalanceBtn.addEventListener("click", () => {
-        const amount = parseInt(balanceAmountInput.value);
-        if (isNaN(amount) || amount <= 0) {
-            balanceMessage.textContent = "الرجاء إدخال كمية صحيحة موجبة.";
-            balanceMessage.style.color = "red";
-            return;
-        }
-        updateBalance(amount, 'subtract');
-    });
-
-    // --- تحديث المستوى ---
-    adminUpdateLevelBtn.addEventListener("click", async () => {
-        if (!currentSearchedUser) return;
-        const newLevel = parseInt(adminLevelAmount.value);
-        if (isNaN(newLevel) || newLevel < 1) {
-            adminLevelMessage.textContent = "الرجاء إدخال مستوى صحيح (1 أو أعلى).";
-            adminLevelMessage.style.color = "red";
-            return;
-        }
-
-        adminLevelMessage.textContent = "جاري تحديث المستوى...";
-        adminLevelMessage.style.color = "blue";
-
-        try {
-            const response = await fetch(`/admin-update-level`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: currentSearchedUser.email,
-                    level: newLevel,
-                    adminEmail: loggedInUserProfile.email
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                adminLevelMessage.textContent = `تم تحديث المستوى بنجاح. المستوى الجديد: ${data.user.level}`;
-                adminLevelMessage.style.color = "green";
-                searchedUserLevel.textContent = data.user.level;
-                currentSearchedUser.level = data.user.level;
-            } else {
-                adminLevelMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
-                adminLevelMessage.style.color = "red";
-            }
-        } catch (err) {
-            adminLevelMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-            adminLevelMessage.style.color = "red";
-            console.error("Update Level Error:", err);
-        }
-    });
-
-    // --- حذف المستخدم ---
-    deleteUserBtn.addEventListener("click", async () => {
-        if (!currentSearchedUser) return;
-        if (!confirm(`هل أنت متأكد من حذف المستخدم ${currentSearchedUser.name} نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
-
-        deleteMessage.textContent = "جاري الحذف...";
-        deleteMessage.style.color = "blue";
-
-        try {
-            const response = await fetch(`/admin-delete-user`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: currentSearchedUser.email }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                deleteMessage.textContent = `تم حذف المستخدم ${currentSearchedUser.name} بنجاح.`;
-                deleteMessage.style.color = "green";
-                searchedUserCard.style.display = "none";
-                currentSearchedUser = null;
-                adminSelectUser.innerHTML = ""; // إفراغ القائمة
-                adminResultsListDiv.style.display = "none";
-            } else {
-                deleteMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير محدد"}`;
-                deleteMessage.style.color = "red";
-            }
-        } catch (err) {
-            deleteMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-            deleteMessage.style.color = "red";
-            console.error("Delete User Error:", err);
-        }
-    });
-
-    // --- عرض قائمة عائلة معينة ---
-    familyButtons.forEach(button => {
-        button.addEventListener("click", async (event) => {
-            const family = event.target.dataset.family;
-            adminFamilyResultsDiv.innerHTML = "جاري التحميل...";
-            adminFamilyMessage.textContent = "";
-            massUpdateControls.style.display = "none";
-            selectedUsersForMassUpdate = [];
-            selectedUsersCount.textContent = "0";
-
-            try {
-                const response = await fetch(`/admin-get-family`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family }),
-                });
-                const data = await response.json();
-
-                if (response.ok && data.users) {
-                    adminFamilyMessage.textContent = `عرض مستخدمي: ${family} (${data.users.length} مستخدم)`;
-                    adminFamilyMessage.style.color = "blue";
-                    adminFamilyResultsDiv.innerHTML = `<ul id="family-user-list"></ul>`;
-                    const ul = document.getElementById("family-user-list");
-
-                    data.users.forEach(user => {
-                        const li = document.createElement("li");
-                        li.className = "family-user-item";
-                        li.innerHTML = `
-                            <input type="checkbox" data-email="${user.email}" data-name="${user.name}">
-                            <span>${user.name}</span>
-                            <strong>($${user.balance})</strong>
-                        `;
-                        ul.appendChild(li);
-                    });
-
-                    // إضافة معالج لعمليات التحديد
-                    ul.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.addEventListener('change', (e) => {
-                            const email = e.target.dataset.email;
-                            const name = e.target.dataset.name;
-                            if (e.target.checked) {
-                                selectedUsersForMassUpdate.push({ email, name });
-                            } else {
-                                selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u.email !== email);
-                            }
-                            selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
-                            massUpdateControls.style.display = selectedUsersForMassUpdate.length > 0 ? "block" : "none";
-                        });
-                    });
-
-                } else {
-                    adminFamilyMessage.textContent = `فشل جلب بيانات العائلة: ${data.error || "خطأ غير محدد"}`;
-                    adminFamilyMessage.style.color = "red";
-                    adminFamilyResultsDiv.innerHTML = "";
-                }
-            } catch (err) {
-                adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-                adminFamilyMessage.style.color = "red";
-                adminFamilyResultsDiv.innerHTML = "";
-                console.error("Admin Get Family Error:", err);
-            }
+            // 5. إظهار النافذة
+            qrModalOverlay.style.display = 'flex';
         });
-    });
-
-    // --- تحديث الرصيد الجماعي ---
-    async function massUpdateBalance(type) {
-        if (selectedUsersForMassUpdate.length === 0) return;
-        const amount = parseInt(massUpdateAmount.value);
-        if (isNaN(amount) || amount === 0) {
-            massUpdateMessage.textContent = "الرجاء إدخال كمية صحيحة (موجبة أو سالبة).";
-            massUpdateMessage.style.color = "red";
-            return;
-        }
-
-        const reason = prompt(`الرجاء إدخال سبب التعديل الجماعي (${selectedUsersForMassUpdate.length} مستخدم):`);
-        if (!reason) return;
-
-        massUpdateMessage.textContent = `جاري تعديل رصيد ${selectedUsersForMassUpdate.length} مستخدم...`;
-        massUpdateMessage.style.color = "blue";
-
-        const finalAmount = type === 'add' ? amount : -amount;
-        const emails = selectedUsersForMassUpdate.map(u => u.email);
-
-        try {
-            const response = await fetch(`/admin-mass-update-balance`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    emails: emails,
-                    amount: finalAmount,
-                    reason: reason,
-                    adminEmail: loggedInUserProfile.email
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                massUpdateMessage.textContent = `تم تعديل رصيد ${data.successful_updates} مستخدم بنجاح. (${data.failed_updates} فشل)`;
-                massUpdateMessage.style.color = "green";
-                massUpdateAmount.value = "";
-                
-                // إعادة تحميل القائمة بعد 3 ثوانٍ
-                setTimeout(() => {
-                    const lastFamilyButton = document.querySelector(`.family-btn[data-family="${currentSearchedUser ? currentSearchedUser.family : ''}"]`);
-                    if (lastFamilyButton) lastFamilyButton.click();
-                    else loadLeaderboards(); // تحديث لوحة الصدارة إذا لم يتم اختيار عائلة
-                }, 3000);
-            } else {
-                massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
-                massUpdateMessage.style.color = "red";
-            }
-        } catch (err) {
-            massUpdateMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-            massUpdateMessage.style.color = "red";
-            console.error("Mass Update Error:", err);
-        }
     }
 
-    massUpdateAddBtn.addEventListener("click", () => massUpdateBalance('add'));
-    massUpdateSubtractBtn.addEventListener("click", () => massUpdateBalance('subtract'));
-
-
-    // --- 🛑🛑 منطق المسح الجماعي QR (Admin Scan) 🛑🛑 ---
-    startScanBtn.addEventListener('click', async () => {
-        if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
-            // طلب إذن الكاميرا وتحديد الكاميرا الأمامية/الخلفية
-            Html5Qrcode.getCameras().then(devices => {
-                if (devices && devices.length) {
-                    // اختيار الكاميرا الخلفية (غالباً ما تكون الأخيرة)
-                    const cameraId = devices.length > 1 ? devices[devices.length - 1].id : devices[0].id;
-                    
-                    html5QrCode.start(
-                        cameraId, 
-                        config, 
-                        (decodedText) => {
-                            handleScanSuccess(decodedText);
-                        },
-                        (errorMessage) => {
-                            // يتم استدعاؤها بشكل مستمر ولا تحتاج إلى إظهارها
-                        }
-                    )
-                    .then(() => {
-                        scanStatusMessage.textContent = "الكاميرا قيد التشغيل. ابدأ المسح...";
-                        scanStatusMessage.style.color = "green";
-                        startScanBtn.textContent = "إيقاف المسح";
-                        startScanBtn.style.backgroundColor = "#dc3545";
-                        scannedListContainer.style.display = "block";
-                        batchAddPointsBtn.style.display = "block";
-                    })
-                    .catch(err => {
-                        scanStatusMessage.textContent = `خطأ في تشغيل الكاميرا: ${err}`;
-                        scanStatusMessage.style.color = "red";
-                        html5QrCode = null;
-                    });
-                } else {
-                    scanStatusMessage.textContent = "لم يتم العثور على كاميرا.";
-                    scanStatusMessage.style.color = "red";
-                    html5QrCode = null;
-                }
-            }).catch(err => {
-                scanStatusMessage.textContent = "خطأ في الوصول إلى الكاميرات. تأكد من إعطاء الإذن.";
-                scanStatusMessage.style.color = "red";
-                html5QrCode = null;
-            });
-        } else {
-            // إيقاف الماسح
-            try {
-                await html5QrCode.stop();
-            } catch(e) {
-                console.warn("Scanner stop failed:", e);
-            }
-            html5QrCode = null;
-            scanStatusMessage.textContent = "تم إيقاف الماسح.";
-            scanStatusMessage.style.color = "blue";
-            startScanBtn.textContent = "تشغيل الكاميرا والمسح";
-            startScanBtn.style.backgroundColor = "#f472b6";
-            
-        }
-    });
-
-    async function handleScanSuccess(email) {
-        // التحقق من تكرار الإيميل في الجلسة الحالية
-        if (scannedBatch.find(u => u.email === email)) {
-            scanStatusMessage.textContent = `تم مسح الإيميل ${email} مسبقاً في هذه الجلسة.`;
-            scanStatusMessage.style.color = "orange";
-            return;
-        }
-
-        // جلب بيانات المستخدم للتأكد من وجوده وعرض اسمه
-        try {
-            const response = await fetch(`/get-user-profile`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.user) {
-                const user = data.user;
-                scannedBatch.push({ email: user.email, name: user.name });
-
-                const li = document.createElement("li");
-                li.innerHTML = `✅ ${user.name} (${user.email})`;
-                scannedUsersList.appendChild(li);
-
-                scanStatusMessage.textContent = `تم مسح ${user.name}. (الإجمالي: ${scannedBatch.length})`;
-                scanStatusMessage.style.color = "green";
-
-            } else {
-                scanStatusMessage.textContent = `فشل مسح: لم يتم العثور على مستخدم لهذا الإيميل: ${email}`;
-                scanStatusMessage.style.color = "red";
-            }
-        } catch (e) {
-            scanStatusMessage.textContent = `خطأ في الاتصال بالخادم عند المسح.`;
-            scanStatusMessage.style.color = "red";
-            console.error("Scan API Error:", e);
-        }
-    }
-
-    // --- إضافة النقاط المجمعة (Batch Add) ---
-    batchAddPointsBtn.addEventListener('click', async () => {
-        if (scannedBatch.length === 0) {
-            scanStatusMessage.textContent = "الرجاء مسح بعض الأكواد أولاً.";
-            scanStatusMessage.style.color = "orange";
-            return;
-        }
-
-        if (!confirm(`هل أنت متأكد من إضافة نقاط لـ ${scannedBatch.length} مستخدم؟`)) return;
-
-        const [amountStr, reason] = rewardReasonSelect.value.split(':');
-        const amount = parseInt(amountStr);
-        const emails = scannedBatch.map(u => u.email);
-
-        scanStatusMessage.textContent = `جاري إضافة نقاط ${amount} لـ ${scannedBatch.length} مستخدم بسبب: ${reason}...`;
-        scanStatusMessage.style.color = "blue";
-        batchAddPointsBtn.disabled = true;
-
-        try {
-            const response = await fetch(`/admin-mass-update-balance`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    emails: emails,
-                    amount: amount,
-                    reason: reason,
-                    adminEmail: loggedInUserProfile.email
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                scanStatusMessage.textContent = `✅ تم إضافة نقاط لـ ${data.successful_updates} مستخدم بنجاح.`;
-                scanStatusMessage.style.color = "green";
-
-                // إعادة تعيين القائمة
-                scannedBatch = [];
-                scannedUsersList.innerHTML = "";
-                scannedListContainer.style.display = "none";
-                batchAddPointsBtn.style.display = "none";
-
-            } else {
-                scanStatusMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
-                scanStatusMessage.style.color = "red";
-            }
-        } catch (e) {
-            scanStatusMessage.textContent = "خطأ في الاتصال بالشبكة أثناء إضافة النقاط.";
-            scanStatusMessage.style.color = "red";
-            console.error("Batch Add Error:", e);
-        } finally {
-            batchAddPointsBtn.disabled = false;
-        }
-    });
-
-    // --- 🛑🛑 منطق طباعة أكواد QR (Admin Print) 🛑🛑 ---
-
-    // 1. جلب القائمة
-    fetchQrListBtn.addEventListener('click', async () => {
-        qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
-        qrListMessage.style.color = "blue";
-        qrListResults.style.display = "none";
-        printableCardsContainer.innerHTML = "";
-        generatePrintCardsBtn.style.display = "none";
-        downloadCardsAsImageBtn.style.display = "none";
-
-        try {
-            const response = await fetch(`/admin-get-all-users-for-qr`, { method: "POST" });
-            const data = await response.json();
-
-            if (response.ok && data.users && data.users.length > 0) {
-                const listText = data.users.map(u => `${u.name} | ${u.family} | ${u.email}`).join('\n');
-                qrListResults.value = listText;
-                qrListResults.style.display = "block";
-                qrListMessage.textContent = `تم جلب ${data.users.length} مستخدم. اضغط "توليد الكروت".`;
-                qrListMessage.style.color = "green";
-                generatePrintCardsBtn.style.display = "block";
-            } else {
-                qrListMessage.textContent = `لم يتم العثور على مستخدمين للطباعة.`;
-                qrListMessage.style.color = "orange";
-            }
-        } catch (e) {
-            qrListMessage.textContent = "خطأ في جلب القائمة من الخادم.";
-            qrListMessage.style.color = "red";
-            console.error("Fetch QR List Error:", e);
-        }
-    });
-
-    // 2. توليد الكروت (QR Codes)
-    generatePrintCardsBtn.addEventListener('click', () => {
-        const userList = qrListResults.value.trim().split('\n').filter(line => line);
-        if (userList.length === 0) {
-            qrListMessage.textContent = "الرجاء جلب القائمة أولاً.";
-            qrListMessage.style.color = "orange";
-            return;
-        }
-
-        qrListMessage.textContent = `جاري توليد ${userList.length} كرت...`;
-        qrListMessage.style.color = "blue";
-        printableCardsContainer.innerHTML = "";
-        downloadCardsAsImageBtn.style.display = "none";
-
-        // تأجيل التوليد قليلاً لضمان عرض الرسالة
-        setTimeout(() => {
-            try {
-                userList.forEach(line => {
-                    const parts = line.split(' | ');
-                    if (parts.length < 3) return;
-
-                    const name = parts[0].trim();
-                    const family = parts[1].trim();
-                    const email = parts[2].trim();
-                    const qrData = email;
-
-                    const card = document.createElement('div');
-                    card.className = 'print-qr-card'; // كلاس للتنسيق في CSS
-                    const qrDivId = `qr-print-${email.replace(/[^a-zA-Z0-9]/g, '')}`;
-                    
-                    card.innerHTML = `
-                        <div class="qr-info-text">
-                            <h4 style="margin: 0;">${name}</h4>
-                            <p style="margin: 5px 0 10px;">أسرة: ${family}</p>
-                        </div>
-                        <div id="${qrDivId}" class="qr-code-print-area"></div>
-                    `;
-                    printableCardsContainer.appendChild(card);
-
-                    // توليد QR Code داخل العنصر المخصص
-                    if (typeof QRCode !== 'undefined') {
-                        new QRCode(document.getElementById(qrDivId), {
-                            text: qrData,
-                            width: 150,
-                            height: 150,
-                            colorDark : "#000000",
-                            colorLight : "#ffffff",
-                            correctLevel : QRCode.CorrectLevel.H
-                        });
-                    }
-                });
-
-                qrListMessage.textContent = `تم توليد ${userList.length} كرت بنجاح. يمكنك الآن الطباعة أو التحميل.`;
-                qrListMessage.style.color = "green";
-                downloadCardsAsImageBtn.style.display = "block";
-                
-            } catch (e) {
-                qrListMessage.textContent = "خطأ أثناء توليد الأكواد.";
-                qrListMessage.style.color = "red";
-                console.error("QR Generation Error:", e);
-            }
-        }, 100);
-    });
-
-    // 3. تحميل كصورة (PNG)
-    downloadCardsAsImageBtn.addEventListener('click', () => {
-        if (printableCardsContainer.children.length === 0) {
-            qrListMessage.textContent = "الرجاء توليد الكروت أولاً.";
-            qrListMessage.style.color = "orange";
-            return;
-        }
-
-        qrListMessage.textContent = "جاري تحويل الكروت إلى صورة (قد يستغرق وقتاً)...";
-        qrListMessage.style.color = "blue";
-
-        // استخدام html2canvas لتحويل الحاوية بالكامل إلى صورة
-        html2canvas(printableCardsContainer, {
-            scale: 2, // لزيادة الجودة
-            useCORS: true 
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'Taklopoly_QR_Codes.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            qrListMessage.textContent = "تم تحميل الكروت بنجاح.";
-            qrListMessage.style.color = "green";
-        }).catch(err => {
-            qrListMessage.textContent = "فشل التحميل كصورة. (تأكد أن كل الموارد قد حملت).";
-            qrListMessage.style.color = "red";
-            console.error("Download Image Error:", err);
+    // 6. إغلاق النافذة
+    if (closeQrBtn) {
+        closeQrBtn.addEventListener('click', () => {
+            qrModalOverlay.style.display = 'none';
         });
-    });
+    }
 
-    // --- 🛑🛑 منطق التحكم في الإعلانات (Admin Announcement) 🛑🛑 ---
-    adminAnnouncementForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const tickerText = adminTickerText.value.trim();
-        const announcementText = adminAnnouncementText.value.trim();
-
-        if (!tickerText && !announcementText) {
-            adminAnnouncementMessage.textContent = "الرجاء إدخال نص واحد على الأقل.";
-            adminAnnouncementMessage.style.color = "orange";
-            return;
-        }
-
-        adminAnnouncementMessage.textContent = "جاري النشر...";
-        adminAnnouncementMessage.style.color = "blue";
-
-        try {
-            const response = await fetch(`/admin-post-announcement`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ticker_message: tickerText,
-                    message: announcementText,
-                    adminEmail: loggedInUserProfile.email 
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                adminAnnouncementMessage.textContent = "تم نشر الإعلانات بنجاح!";
-                adminAnnouncementMessage.style.color = "green";
-                await loadAnnouncements(); // تحديث شريط الأخبار والإعلان فوراً
-            } else {
-                adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
-                adminAnnouncementMessage.style.color = "red";
-            }
-        } catch (e) {
-            adminAnnouncementMessage.textContent = "خطأ في الاتصال بالشبكة.";
-            adminAnnouncementMessage.style.color = "red";
-        }
-    });
-
-    // --- 🛑🛑 منطق إضافة سؤال (Admin Quiz) 🛑🛑 ---
-    adminQuizForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const question_text = document.getElementById("quiz-question").value.trim();
-        const option_a = document.getElementById("quiz-opt-a").value.trim();
-        const option_b = document.getElementById("quiz-opt-b").value.trim();
-        const option_c = document.getElementById("quiz-opt-c").value.trim();
-        const correct_option = document.getElementById("quiz-correct-opt").value;
-        const points = parseInt(document.getElementById("quiz-points").value);
-
-        if (!question_text || !option_a || !option_b || !option_c || !correct_option || isNaN(points) || points <= 0) {
-            adminQuizMessage.textContent = "الرجاء ملء جميع الحقول بشكل صحيح.";
-            adminQuizMessage.style.color = "red";
-            return;
-        }
-
-        adminQuizMessage.textContent = "جاري إضافة السؤال...";
-        adminQuizMessage.style.color = "blue";
-
-        try {
-            const response = await fetch(`/admin-add-quiz`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    question_text,
-                    option_a,
-                    option_b,
-                    option_c,
-                    correct_option,
-                    points,
-                    adminEmail: loggedInUserProfile.email
-                }),
-            });
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                adminQuizMessage.textContent = "تم إضافة السؤال وتفعيله بنجاح!";
-                adminQuizMessage.style.color = "green";
-                adminQuizForm.reset();
-            } else {
-                adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
-                adminQuizMessage.style.color = "red";
-            }
-        } catch (e) {
-            adminQuizMessage.textContent = "خطأ في الاتصال بالشبكة.";
-            adminQuizMessage.style.color = "red";
-        }
-    });
-
-    // --- 🛑🛑 منطق واجهة الزائر (Guest View) 🛑🛑 ---
-
-    // جلب قائمة المستخدمين لعائلة معينة
+    // -----------------------------------------------------
+    // 🛑🛑🛑 منطق واجهة الزائر (مُعدل ليشمل فتح التفاصيل) 🛑🛑🛑
+    // -----------------------------------------------------
     guestFamilyButtons.forEach(button => {
-        button.addEventListener("click", async (event) => {
-            const family = event.target.dataset.family;
-            guestResultsList.innerHTML = "<li>جاري التحميل...</li>";
-            guestMessage.textContent = `قائمة مستخدمي: ${family}`;
+        button.addEventListener('click', async () => {
+            const familyName = button.dataset.family;
+            guestMessage.textContent = `جاري تحميل أسرة ${familyName}...`;
+            guestMessage.style.color = 'blue';
+            guestResultsList.innerHTML = '';
 
             try {
-                const response = await fetch(`/admin-get-family`, {
+                // 🛑🛑 التعديل: استدعاء الفانكشن الجديدة 🛑🛑
+                const response = await fetch('/guest-get-family', { // ⬅️ الرابط المُصحح
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family }),
+                    body: JSON.stringify({ family: familyName })
                 });
+
+                if (!response.ok) throw new Error('فشل تحميل القائمة');
+
                 const data = await response.json();
 
-                if (response.ok && data.users) {
-                    guestResultsList.innerHTML = "";
-                    data.users.sort((a, b) => b.balance - a.balance).forEach((user, index) => {
-                        const li = document.createElement("li");
-                        li.className = "guest-user-item";
-                        li.innerHTML = `
-                            <span>${index + 1}. ${user.name}</span>
-                            <strong>$${user.balance}</strong>
-                        `;
-                        // إضافة معالج لفتح تفاصيل الحضور
-                        li.addEventListener('click', () => openGuestDetails(user));
+                if (data.users && data.users.length > 0) {
+                    // 🛑 عرض العدد الإجمالي (مُصحح)
+                    guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
+                    guestMessage.style.color = 'green';
+                    data.users.forEach((user, index) => {
+                        const li = document.createElement('li');
+                        // نستخدم نفس تنسيق لوحة الصدارة
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        
+                        // --- 🛑🛑 إضافة جديدة: ربط فتح التفاصيل 🛑🛑 ---
+                        li.style.cursor = "pointer";
+                        li.onclick = () => openGuestDetails(user);
+                        // --- 🛑🛑 نهاية الإضافة 🛑🛑 ---
+                        
                         guestResultsList.appendChild(li);
                     });
                 } else {
-                    guestMessage.textContent = `فشل جلب البيانات: ${data.error || "خطأ غير محدد"}`;
-                    guestMessage.style.color = "red";
-                    guestResultsList.innerHTML = "";
+                    guestMessage.textContent = 'لا يوجد مستخدمين لعرضهم في هذه الأسرة.';
+                    guestMessage.style.color = 'black';
                 }
             } catch (err) {
-                guestMessage.textContent = "حدث خطأ في الاتصال بالشبكة.";
-                guestMessage.style.color = "red";
-                guestResultsList.innerHTML = "";
-                console.error("Guest Get Family Error:", err);
+                guestMessage.textContent = `خطأ: ${err.message}`;
+                guestMessage.style.color = 'red';
             }
         });
     });
 
-    // 🛑 تشغيل دالة loadLeaderboards مباشرة عند التحميل لأي مستخدم (بما أن الزائر يراها أيضاً)
-    loadLeaderboards(); 
-});
+
+    // -----------------------------------------------------
+    // 🛑🛑🛑 أكواد الأدمن (النسخة الكاملة والمُصححة) 🛑🛑🛑
+    // -----------------------------------------------------
+    (function setupAdminPanel() {
+        let currentSearchedUser = null; // نستخدم المتغير المعرف هنا
+
+        // 🛑🛑 1. فورم البحث بالاسم (مُصحح للدروب ليست) 🛑🛑
+        if (adminSearchForm) {
+            adminSearchForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const name = document.getElementById("admin-search-name").value.trim();
+
+                adminSearchMessage.textContent = `جاري البحث عن ${name}...`;
+                adminSearchMessage.style.color = "blue";
+                adminSelectUser.innerHTML = '<option value="">اختر مستخدم...</option>'; // 🛑 الإصلاح: تفريغ الدروب ليست
+                adminResultsListDiv.style.display = "none";
+                searchedUserCard.style.display = "none";
+                currentSearchedUser = null;
+
+                if (!name) {
+                    adminSearchMessage.textContent = "الرجاء إدخال اسم للبحث.";
+                    adminSearchMessage.style.color = "red";
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/admin-search`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: name }),
+                    });
+
+                    const data = await response.json().catch(() => ({ error: 'رد سيرفر غير صالح' }));
+
+                    if (!response.ok) {
+                        adminSearchMessage.textContent = `فشل البحث: ${data.error || "خطأ غير محدد"}`;
+                        adminSearchMessage.style.color = "red";
+                        return;
+                    }
+
+                    currentSearchResults = data.users; // تحديث المتغير الخارجي
+
+                    if (currentSearchResults.length === 0) {
+                        adminSearchMessage.textContent = `لم يتم العثور على مستخدمين بالاسم "${name}".`;
+                        adminSearchMessage.style.color = "black";
+                        adminResultsListDiv.style.display = "none";
+                    } else if (currentSearchResults.length === 1) {
+                        adminSearchMessage.textContent = `تم العثور على مستخدم واحد.`;
+                        adminSearchMessage.style.color = "green";
+                        populateAdminCard(currentSearchResults[0]);
+                        adminResultsListDiv.style.display = "none";
+                    } else {
+                        // 🛑 اللوجيك المطلوب: عرض الدروب ليست للأسماء المكررة 🛑
+                        adminSearchMessage.textContent = `تم العثور على ${currentSearchResults.length} مستخدم. يرجى الاختيار:`;
+                        adminSearchMessage.style.color = "orange";
+
+                        currentSearchResults.forEach(user => {
+                            const option = document.createElement("option");
+                            option.value = user.email;
+                            option.textContent = `${user.name} (${user.family})`;
+                            adminSelectUser.appendChild(option);
+                        });
+
+                        adminResultsListDiv.style.display = "block"; // 🛑 الإصلاح: إظهار الدروب ليست
+                        adminSelectUser.value = currentSearchResults[0].email;
+                        populateAdminCard(currentSearchResults[0]);
+                    }
+                } catch (err) {
+                    adminSearchMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                    adminSearchMessage.style.color = "red";
+                    console.error("Admin Search Error:", err);
+                }
+            });
+        }
+
+        // --- فانكشن ملء الكارت ---
+        function populateAdminCard(user) {
+            searchedUserName.textContent = `الاسم: ${user.name}`;
+            searchedUserFamily.textContent = `العائلة: ${user.family}`;
+            searchedUserEmail.textContent = `الإيميل: ${user.email}`;
+            searchedUserBalance.textContent = `الرصيد: $${user.balance}`;
+            searchedUserLevel.textContent = `${user.level || 1}`; // 🛑 تحديث المستوى
+            searchedUserCard.style.display = "block";
+            currentSearchedUser = user;
+            balanceMessage.textContent = "";
+            deleteMessage.textContent = "";
+            adminLevelMessage.textContent = ""; // 🛑 إضافة
+            adminLevelAmount.value = user.level || 1; // 🛑 إضافة
+
+            // 🛑🛑 ربط زرار عرض QR الخاص بالأدمن (جديد) 🛑🛑
+            // نستخدم نفس النافذة المنبثقة (Modal) الخاصة باليوزر
+            if (adminShowUserQrBtn) {
+                adminShowUserQrBtn.onclick = () => {
+                    if (!user || !user.email) return;
+
+                    // 1. تفريغ الحاوية للتوليد الجديد
+                    qrCodeContainer.innerHTML = '';
+
+                    // 2. المحتوى المشفر: نستخدم إيميل "المستخدم الذي يتم البحث عنه"
+                    const qrData = user.email;
+
+                    // 3. توليد كود QR
+                    new QRCode(qrCodeContainer, {
+                        text: qrData,
+                        width: 250,
+                        height: 250,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    // 4. عرض الإيميل تحت الكود
+                    qrUserEmailDisplay.textContent = user.email;
+
+                    // 5. إظهار النافذة
+                    qrModalOverlay.style.display = 'flex';
+                };
+            }
+            // 🛑🛑 نهاية ربط الزر 🛑🛑
+        }
+
+        // --- كود الدروب ليست ---
+        if (adminSelectUser) {
+            adminSelectUser.addEventListener("change", () => {
+                const selectedEmail = document.getElementById("admin-select-user").value;
+                const user = currentSearchResults.find(u => u.email === selectedEmail);
+                if (user) {
+                    populateAdminCard(user);
+                    searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+
+        // --- فانكشن تعديل الرصيد الأساسية (مُحصنة) ---
+        async function updateBalance(amount, reason) {
+            if (!currentSearchedUser) {
+                balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                balanceMessage.style.color = "red";
+                return;
+            }
+            balanceMessage.textContent = "جاري تحديث الرصيد...";
+            balanceMessage.style.color = "blue";
+            addBalanceBtn.disabled = true;
+            subtractBalanceBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/admin-update-balance`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: currentSearchedUser.email,
+                        amount: amount,
+                        reason: reason
+                    }),
+                });
+                const data = await response.json().catch(() => ({ error: 'رد سيرفر غير صالح' }));
+                if (response.ok) {
+                    balanceMessage.textContent = `تم التحديث بنجاح. الرصيد الجديد: $${data.new_balance}`;
+                    balanceMessage.style.color = "green";
+                    currentSearchedUser.balance = data.new_balance;
+                    searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
+                    balanceAmountInput.value = "";
+                    if (loggedInUserProfile.email === currentSearchedUser.email) {
+                        refreshUserData();
+                    }
+                } else {
+                    balanceMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                    balanceMessage.style.color = "red";
+                }
+            } catch (err) {
+                balanceMessage.textContent = "خطأ في الاتصال بالـ API.";
+                balanceMessage.style.color = "red";
+                console.error("Balance Update Error:", err);
+            } finally {
+                addBalanceBtn.disabled = false;
+                subtractBalanceBtn.disabled = false;
+            }
+        }
+
+        // --- زراير الرصيد (الفردي) ---
+        if (addBalanceBtn) {
+            addBalanceBtn.addEventListener("click", () => {
+                const amount = parseInt(document.getElementById("admin-balance-amount").value);
+                if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                    balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                    balanceMessage.style.color = "red";
+                    return;
+                }
+                updateBalance(amount, "إضافة يدوية من الأدمن");
+            });
+        }
+        if (subtractBalanceBtn) {
+            subtractBalanceBtn.addEventListener("click", () => {
+                const amount = parseInt(document.getElementById("admin-balance-amount").value);
+                if (isNaN(amount) || amount <= 0 || !currentSearchedUser) {
+                    balanceMessage.textContent = "الرجاء تحديد مستخدم وإدخال قيمة صحيحة.";
+                    balanceMessage.style.color = "red";
+                    return;
+                }
+                updateBalance(-amount, "خصم يدوي من الأدمن");
+            });
+        }
+
+        // 🛑🛑 زرار تحديث المستوى (جديد) 🛑🛑
+        if (adminUpdateLevelBtn) {
+            adminUpdateLevelBtn.addEventListener("click", async () => {
+                const newLevel = parseInt(adminLevelAmount.value);
+                if (!currentSearchedUser) {
+                    adminLevelMessage.textContent = "الرجاء اختيار مستخدم أولاً.";
+                    adminLevelMessage.style.color = "red";
+                    return;
+                }
+                if (isNaN(newLevel) || newLevel < 1) {
+                    adminLevelMessage.textContent = "الرجاء إدخال مستوى صحيح (1 أو أعلى).";
+                    adminLevelMessage.style.color = "red";
+                    return;
+                }
+
+                adminLevelMessage.textContent = "جاري تحديث المستوى...";
+                adminLevelMessage.style.color = "blue";
+                adminUpdateLevelBtn.disabled = true;
+
+                try {
+                    // نفترض وجود API endpoint جديد
+                    const response = await fetch(`/admin-update-level`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            adminEmail: loggedInUserProfile.email,
+                            targetEmail: currentSearchedUser.email,
+                            newLevel: newLevel
+                        }),
+                    });
+
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        adminLevelMessage.textContent = `تم تحديث المستوى بنجاح إلى ${data.new_level}.`;
+                        adminLevelMessage.style.color = "green";
+                        currentSearchedUser.level = data.new_level;
+                        searchedUserLevel.textContent = `${data.new_level}`;
+
+                        // إذا كان الأدمن يعدل مستواه، نحدث الكارت الرئيسي
+                        if (loggedInUserProfile.email === currentSearchedUser.email) {
+                            refreshUserData();
+                        }
+                    } else {
+                        adminLevelMessage.textContent = `فشل التحديث: ${data.error || "خطأ غير محدد"}`;
+                        adminLevelMessage.style.color = "red";
+                    }
+                } catch (err) {
+                    adminLevelMessage.textContent = "خطأ في الاتصال بالـ API.";
+                    adminLevelMessage.style.color = "red";
+                } finally {
+                    adminUpdateLevelBtn.disabled = false;
+                }
+            });
+        }
+
+
+        // 🛑🛑 زرار حذف المستخدم (مُحصن) 🛑🛑
+        if (deleteUserBtn) {
+            deleteUserBtn.addEventListener("click", async () => {
+                // 🛑 CRITICAL EXTRACTION AND FINAL CHECK 🛑
+                const targetEmail = currentSearchedUser && currentSearchedUser.email;
+                const currentAdminEmail = loggedInUserProfile && loggedInUserProfile.email;
+
+                if (!targetEmail) {
+                    deleteMessage.textContent = "خطأ: لم يتم تحديد إيميل المستخدم المراد حذفه بشكل صحيح.";
+                    deleteMessage.style.color = "red";
+                    return;
+                }
+                if (!currentAdminEmail) {
+                    deleteMessage.textContent = "خطأ: لم يتم التعرف على إيميل الأدمن الحالي. (يرجى إعادة تسجيل الدخول)";
+                    deleteMessage.style.color = "red";
+                    return;
+                }
+
+                if (targetEmail === currentAdminEmail) {
+                    deleteMessage.textContent = "لا يمكن حذف حساب الأدمن الحالي.";
+                    deleteMessage.style.color = "red";
+                    return;
+                }
+
+                if (!confirm(`تحذير: أنت على وشك حذف ${currentSearchedUser.name} نهائياً. هل أنت متأكد؟ (سيتم حذف كل سجلاته)`)) {
+                    return;
+                }
+
+                deleteMessage.textContent = "جاري حذف المستخدم وكافة سجلاته...";
+                deleteMessage.style.color = "blue";
+                deleteUserBtn.disabled = true;
+
+                try {
+                    // 🛑 هذا الطلب سيتصل بدالة admin-delete-user.js في الخلفية
+                    const response = await fetch(`/admin-delete-user`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        // نرسل الإيميل لحذفه وإيميل الأدمن للتحقق من الصلاحيات
+                        body: JSON.stringify({
+                            emailToDelete: targetEmail,
+                            adminEmail: currentAdminEmail
+                        }),
+                    });
+
+                    // التأكد من قراءة الرد سواء كان ناجحاً أو فاشلاً
+                    const data = await response.json().catch(() => ({ success: false, error: 'رد سيرفر غير صالح' }));
+
+                    if (response.ok && data.success) {
+                        deleteMessage.textContent = data.message;
+                        deleteMessage.style.color = "green";
+                        searchedUserCard.style.display = "none";
+                        currentSearchedUser = null;
+                        document.getElementById("admin-search-form").reset();
+                    } else {
+                        deleteMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير معروف"}`;
+                        deleteMessage.style.color = "red";
+                        // تنبيه: هذا يحدث إذا كان هناك خطأ Foreign Key
+                        if (data.error && data.error.includes("FOREIGN KEY")) {
+                            deleteMessage.textContent = "فشل الحذف: المستخدم لديه سجلات مرتبطة (معاملات/مشتريات). يجب استخدام دالة الحذف المتسلسل الآمنة في الخلفية.";
+                        }
+                    }
+                } catch (err) {
+                    deleteMessage.textContent = "خطأ في الاتصال بالشبكة.";
+                    deleteMessage.style.color = "red";
+                    console.error("Delete User Error:", err);
+                } finally {
+                    deleteUserBtn.disabled = false;
+                }
+            });
+        }
+
+        // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
+        document.querySelectorAll(".family-btn").forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const familyName = button.dataset.family;
+
+                adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
+                adminFamilyMessage.style.color = "blue";
+                adminFamilyResultsDiv.innerHTML = '';
+                massUpdateControls.style.display = 'none';
+                selectedUsersForMassUpdate = [];
+                selectedUsersCount.textContent = '0';
+
+                try {
+                    const response = await fetch(`/admin-get-family`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ family: familyName }),
+                    });
+                    const data = await response.json().catch(() => ({ error: 'رد سيرفر غير صالح' }));
+                    if (!response.ok) {
+                        adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
+                        adminFamilyMessage.style.color = "red";
+                        massUpdateControls.style.display = "none";
+                        return;
+                    }
+                    const users = data.users;
+
+                    if (!users || users.length === 0) {
+                        adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
+                        adminFamilyMessage.style.color = "black";
+                        massUpdateControls.style.display = "none";
+                    } else {
+                        adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                        massUpdateControls.style.display = "block";
+                        users.forEach(user => {
+                            const userItem = document.createElement("div");
+                            userItem.className = "family-user-item";
+                            const checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.className = "mass-update-checkbox";
+                            checkbox.dataset.email = user.email;
+                            if (selectedUsersForMassUpdate.includes(user.email)) {
+                                checkbox.checked = true;
+                            }
+                            const userInfo = document.createElement("div");
+                            userInfo.className = "user-info";
+                            userInfo.innerHTML = `
+                                <span>${user.name} (${user.email})</span>
+                                <strong>الرصيد: $${user.balance}</strong>
+                            `;
+                            userInfo.addEventListener('click', () => {
+                                user.family = familyName;
+                                populateAdminCard(user);
+                                searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            });
+                            userItem.appendChild(checkbox);
+                            userItem.appendChild(userInfo);
+                            adminFamilyResultsDiv.appendChild(userItem);
+                        });
+                        selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                    }
+                } catch (err) {
+                    adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                    adminFamilyMessage.style.color = "red";
+                    massUpdateControls.style.display = "none";
+                }
+            });
+        });
+
+        // 🛑 كود متابعة الـ Checkboxes وتحديث اللوحة الجماعية 🛑
+        if (adminFamilyResultsDiv) {
+            adminFamilyResultsDiv.addEventListener('change', (e) => {
+                if (e.target.classList.contains('mass-update-checkbox')) {
+                    const email = e.target.dataset.email;
+                    if (e.target.checked) {
+                        if (!selectedUsersForMassUpdate.includes(email)) {
+                            selectedUsersForMassUpdate.push(email);
+                        }
+                    } else {
+                        selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(u => u !== email);
+                    }
+                    selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                    if (selectedUsersForMassUpdate.length > 0) {
+                        massUpdateControls.style.display = 'block';
+                    } else {
+                        massUpdateControls.style.display = 'none';
+                    }
+                    massUpdateMessage.textContent = '';
+                }
+            });
+        }
+
+
+        // 🛑🛑🛑 فانكشن تعديل الرصيد الجماعي (التحديث الجديد: عدم الإخفاء) 🛑🛑🛑
+        async function handleMassUpdate(amount) {
+            if (selectedUsersForMassUpdate.length === 0) {
+                massUpdateMessage.textContent = "الرجاء اختيار مستخدم واحد على الأقل.";
+                massUpdateMessage.style.color = "red";
+                return;
+            }
+            if (isNaN(amount) || amount === 0) {
+                massUpdateMessage.textContent = "الرجاء إدخال كمية صحيحة.";
+                massUpdateMessage.style.color = "red";
+                return;
+            }
+            const isAdd = amount > 0;
+            const absoluteAmount = Math.abs(amount);
+            const action = isAdd ? "إضافة" : "خصم";
+            const reason = isAdd ? "إضافة جماعية من الأدمن" : "خصم جماعي من الأدمن";
+
+            if (!confirm(`هل أنت متأكد من ${action} ${absoluteAmount} نقطة لـ ${selectedUsersForMassUpdate.length} مستخدم؟`)) {
+                return;
+            }
+            massUpdateMessage.textContent = `جاري ${action} الرصيد لـ ${selectedUsersForMassUpdate.length} مستخدم...`;
+            massUpdateMessage.style.color = "blue";
+            massUpdateAddBtn.disabled = true;
+            massUpdateSubtractBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/admin-mass-update`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        emails: selectedUsersForMassUpdate,
+                        amount: amount,
+                        reason: reason
+                    }),
+                });
+                const data = await response.json().catch(() => ({ error: 'رد سيرفر غير صالح' }));
+
+                // 🛑🛑🛑 هذا هو التعديل 🛑🛑🛑
+                if (response.ok) {
+                    massUpdateMessage.textContent = `تم ${action} الرصيد بنجاح لـ ${data.updated_count} مستخدم.`;
+                    massUpdateMessage.style.color = "green";
+
+                    // سنقوم بتفريغ المدخلات
+                    selectedUsersForMassUpdate = [];
+                    selectedUsersCount.textContent = "0";
+                    massUpdateAmount.value = "";
+
+                    // قم بإلغاء تحديد كل الـ checkboxes يدوياً
+                    const checkboxes = adminFamilyResultsDiv.querySelectorAll('.mass-update-checkbox');
+                    checkboxes.forEach(cb => cb.checked = false);
+
+                    refreshUserData();
+                } else {
+                    massUpdateMessage.textContent = `فشل التحديث الجماعي: ${data.error || "خطأ غير محدد"}`;
+                    massUpdateMessage.style.color = "red";
+                }
+            } catch (err) {
+                massUpdateMessage.textContent = "خطأ في الاتصال بالـ API.";
+                massUpdateMessage.style.color = "red";
+                console.error("Mass Update Error:", err);
+            } finally {
+                massUpdateAddBtn.disabled = false;
+                massUpdateSubtractBtn.disabled = false;
+            }
+        }
+
+        // (ربط زراير التعديل الجماعي)
+        if (massUpdateAddBtn) {
+            massUpdateAddBtn.addEventListener('click', () => {
+                const amount = parseInt(document.getElementById("mass-update-amount").value);
+                if (!isNaN(amount) && amount > 0) {
+                    handleMassUpdate(amount);
+                } else {
+                    massUpdateMessage.textContent = "الرجاء إدخال قيمة صحيحة وموجبة.";
+                    massUpdateMessage.style.color = "red";
+                }
+            });
+        }
+        if (massUpdateSubtractBtn) {
+            massUpdateSubtractBtn.addEventListener('click', () => {
+                const amount = parseInt(document.getElementById("mass-update-amount").value);
+                if (!isNaN(amount) && amount > 0) {
+                    handleMassUpdate(-amount); // إرسال قيمة سالبة للخصم
+                } else {
+                    massUpdateMessage.textContent = "الرجاء إدخال قيمة صحيحة وموجبة.";
+                    massUpdateMessage.style.color = "red";
+                }
+            });
+        }
+
+        // -----------------------------------------------------
+        // 🛑🛑🛑 استبدال: منطق مسح QR Code (للأدمن) - ليصبح مسح جماعي 🛑🛑🛑
+        // -----------------------------------------------------
+
+        // 🛑 دالة معالجة المسح (الجديدة)
+        function onScanSuccess(decodedText) {
+            const email = decodedText.trim();
+            if (!scannedBatch.includes(email)) {
+                scannedBatch.push(email);
+                scanStatusMessage.textContent = `✅ تم إضافة: ${email}`;
+                scanStatusMessage.style.color = 'green';
+                renderScannedList();
+            } else {
+                scanStatusMessage.textContent = `⚠️ ${email} تم مسحه بالفعل.`;
+                scanStatusMessage.style.color = 'orange';
+            }
+            // لا نوقف الكاميرا
+        }
+
+        // 🛑 دالة عرض القائمة الممسوحة
+        function renderScannedList() {
+            scannedUsersList.innerHTML = "";
+            scannedBatch.forEach((email, index) => {
+                const li = document.createElement('li');
+                li.className = 'scanned-item';
+                li.innerHTML = `<span>${email}</span><span class="delete-scan-btn" data-index="${index}">&times;</span>`;
+                li.querySelector('.delete-scan-btn').onclick = () => removeScan(index);
+                scannedUsersList.appendChild(li);
+            });
+            
+            if (scannedBatch.length > 0) {
+                scannedListContainer.style.display = "block";
+                batchAddPointsBtn.style.display = "block";
+            } else {
+                scannedListContainer.style.display = "none";
+                batchAddPointsBtn.style.display = "none";
+            }
+        }
+        
+        // 🛑 دالة حذف عنصر من القائمة
+        window.removeScan = (index) => {
+            scannedBatch.splice(index, 1);
+            renderScannedList();
+        };
+
+        // 🛑 زر تشغيل/إيقاف الماسح (الجديد)
+        if (startScanBtn) {
+            startScanBtn.addEventListener('click', () => {
+                if (html5QrCode && html5QrCode.isScanning) {
+                    // إيقاف الماسح
+                    html5QrCode.stop().then(() => {
+                        startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
+                        readerDiv.innerHTML = '';
+                        scanStatusMessage.textContent = 'تم إيقاف الماسح.';
+                        scanStatusMessage.style.color = 'gray';
+                    }).catch(err => {
+                        scanStatusMessage.textContent = 'حدث خطأ أثناء إيقاف الماسح.';
+                        scanStatusMessage.style.color = 'red';
+                    });
+                    return;
+                }
+
+                // تهيئة وتفعيل الماسح
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
+                }
+                
+                scanStatusMessage.textContent = 'جاري تفعيل الكاميرا...';
+                scanStatusMessage.style.color = 'blue';
+
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess, // دالة المعالجة الجديدة
+                    (errorMessage) => { /* console.log(errorMessage) */ }
+                )
+                .then(() => {
+                    startScanBtn.textContent = 'إيقاف الماسح';
+                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح الأكواد...';
+                    scanStatusMessage.style.color = 'green';
+                })
+                .catch((err) => {
+                    scanStatusMessage.textContent = `❌ فشل تفعيل الكاميرا: ${err}.`;
+                    scanStatusMessage.style.color = 'red';
+                });
+            });
+        }
+
+        // 🛑 زر إرسال الدفعة الجماعية (الجديد)
+        if (batchAddPointsBtn) {
+            batchAddPointsBtn.onclick = async () => {
+                const [amt, reason] = rewardReasonSelect.value.split(':');
+                const rewardAmount = parseInt(amt);
+                
+                if (isNaN(rewardAmount) || rewardAmount <= 0) {
+                     scanStatusMessage.textContent = 'الرجاء اختيار سبب مكافأة صحيح.';
+                     scanStatusMessage.style.color = 'red';
+                     return;
+                }
+                if (scannedBatch.length === 0) {
+                     scanStatusMessage.textContent = 'القائمة فارغة.';
+                     scanStatusMessage.style.color = 'red';
+                     return;
+                }
+
+                if (!confirm(`هل أنت متأكد من إضافة ${rewardAmount} نقطة لـ ${scannedBatch.length} مستخدم؟`)) {
+                    return;
+                }
+                
+                scanStatusMessage.textContent = 'جاري إرسال النقاط للد...';
+                
+                try {
+                    const response = await fetch(`/admin-batch-scan-attendance`, { // 🛑 استخدام الرابط الجديد
+                        method: "POST", 
+                        headers: { "Content-Type": "application/json" }, 
+                        body: JSON.stringify({ 
+                            emails: scannedBatch, 
+                            rewardAmount: rewardAmount, 
+                            reason: reason, 
+                            adminEmail: loggedInUserProfile.email 
+                        }) 
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        scanStatusMessage.textContent = `✅ نجاح! تم تحديث ${data.updated_count} مستخدم.`;
+                        scanStatusMessage.style.color = 'green';
+                        scannedBatch = [];
+                        renderScannedList();
+                    } else {
+                        scanStatusMessage.textContent = `❌ فشل: ${data.error || 'خطأ في السيرفر'}`;
+                        scanStatusMessage.style.color = 'red';
+                    }
+                    
+                } catch (e) {
+                    scanStatusMessage.textContent = '❌ فشل الاتصال بالسيرفر.';
+                    scanStatusMessage.style.color = 'red';
+                }
+            };
+        }
+        // -----------------------------------------------------
+        // 🛑🛑🛑 نهاية استبدال منطق المسح 🛑🛑🛑
+        // -----------------------------------------------------
+
+
+        // 🛑🛑 4. كود جلب قائمة الـ QR للطباعة (مُعدل) 🛑🛑
+        if (fetchQrListBtn) {
+            fetchQrListBtn.addEventListener('click', async () => {
+                if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
+                    qrListMessage.textContent = "خطأ: غير مصرح لك.";
+                    qrListMessage.style.color = "red";
+                    return;
+                }
+
+                qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
+                qrListMessage.style.color = "blue";
+                qrListResults.value = ""; // تفريغ المربع
+                fetchQrListBtn.disabled = true;
+
+                try {
+                    const response = await fetch(`/admin-get-qr-list`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            adminEmail: loggedInUserProfile.email
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        qrListMessage.textContent = `✅ نجاح! تم جلب ${data.users.length} مستخدم. اضغط "الخطوة 2" للتوليد.`;
+                        qrListMessage.style.color = 'green';
+                        // 🛑 تخزين الـ JSON في مربع النص (المخفي)
+                        qrListResults.value = JSON.stringify(data.users);
+                    } else {
+                        qrListMessage.textContent = `❌ فشل: ${data.error || 'فشل في جلب القائمة.'}`;
+                        qrListMessage.style.color = 'red';
+                    }
+
+                } catch (err) {
+                    qrListMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
+                    qrListMessage.style.color = 'red';
+                    console.error("Fetch QR List Error:", err);
+                } finally {
+                    fetchQrListBtn.disabled = false;
+                }
+            });
+        }
+
+        // 🛑🛑 5. كود توليد كروت الطباعة (جديد) 🛑🛑
+        if (generatePrintCardsBtn) {
+            generatePrintCardsBtn.addEventListener('click', () => {
+                const jsonData = qrListResults.value;
+                if (!jsonData) {
+                    qrListMessage.textContent = "الرجاء الضغط على 'الخطوة 1' أولاً لجلب البيانات.";
+                    qrListMessage.style.color = "red";
+                    return;
+                }
+
+                try {
+                    const users = JSON.parse(jsonData);
+                    printableCardsContainer.innerHTML = ''; // تفريغ الحاوية
+                    qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
+
+                    if (users.length === 0) {
+                        qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
+                        return;
+                    }
+
+                    // استخدام setTimeout لتقسيم العمليات ومنع "تجمد" المتصفح
+                    let i = 0;
+                    function processBatch() {
+                        let count = 0;
+                        while (count < 50 && i < users.length) { // معالجة 50 كارت في المرة
+                            const user = users[i];
+
+                            // 1. إنشاء الكارت
+                            const card = document.createElement('div');
+                            card.className = 'print-card';
+
+                            // 2. إنشاء الاسم والعائلة
+                            const nameEl = document.createElement('div');
+                            nameEl.className = 'print-card-name';
+                            nameEl.textContent = user.name || 'اسم غير معروف';
+
+                            const familyEl = document.createElement('div');
+                            familyEl.className = 'print-card-family';
+                            familyEl.textContent = user.family || 'أسرة غير معروفة';
+
+                            // 3. إنشاء حاوية الـ QR
+                            const qrEl = document.createElement('div');
+                            qrEl.className = 'print-card-qr';
+
+                            // 4. إضافة العناصر للكارت
+                            card.appendChild(nameEl);
+                            card.appendChild(familyEl);
+                            card.appendChild(qrEl);
+
+                            // 5. إضافة الكارت للحاوية الرئيسية
+                            printableCardsContainer.appendChild(card);
+
+                            // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
+                            new QRCode(qrEl, {
+                                text: user.email,
+                                width: 120,
+                                height: 120,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.M // M يكفي للإيميلات
+                            });
+
+                            count++;
+                            i++;
+                        }
+
+                        if (i < users.length) {
+                            // لو لسه فيه تاني، كمل بعد 100 مللي ثانية
+                            qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
+                            setTimeout(processBatch, 100);
+                        } else {
+                            // خلصنا
+                            qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كصورة أو للطباعة.`;
+                            qrListMessage.style.color = 'green';
+                            alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كصورة أو استخدام (Ctrl+P) لطباعتها.");
+                        }
+                    }
+
+                    processBatch(); // بدء أول دفعة
+
+                } catch (e) {
+                    qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
+                    qrListMessage.style.color = "red";
+                    console.error("Failed to parse JSON for printing:", e);
+                }
+            });
+        }
+
+        // 🛑🛑 6. كود تحميل الكروت كصورة (جديد) 🛑🛑
+        if (downloadCardsAsImageBtn) {
+            downloadCardsAsImageBtn.addEventListener('click', () => {
+                const containerToCapture = printableCardsContainer; // The <div> with all the cards
+                if (containerToCapture.children.length === 0) {
+                    qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
+                    qrListMessage.style.color = "red";
+                    return;
+                }
+
+                qrListMessage.textContent = "جاري تحويل الكروت إلى صورة... قد يستغرق هذا بعض الوقت...";
+                qrListMessage.style.color = "blue";
+
+                // استخدام html2canvas (المكتبة التي أضفناها في index.html)
+                html2canvas(containerToCapture, {
+                    scrollX: 0,
+                    scrollY: -window.scrollY, // بدء الالتقاط من أعلى الحاوية
+                    scale: 2 // زيادة الدقة (Scale) لجودة طباعة أفضل
+                }).then(canvas => {
+                    // إنشاء لينك لتحميل الصورة
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'kiropay-qr-cards.png';
+
+                    // تفعيل التحميل
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    qrListMessage.textContent = "✅ تم تحميل الصورة بنجاح! يمكنك الآن طباعتها.";
+                    qrListMessage.style.color = "green";
+
+                }).catch(err => {
+                    qrListMessage.textContent = "❌ فشل تحويل الصورة. حاول مرة أخرى.";
+                    qrListMessage.style.color = "red";
+                    console.error("html2canvas error:", err);
+                });
+            });
+        }
+
+
+        // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
+        if (adminQuizForm) {
+            adminQuizForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                // 🛑 التأكد من أن IDs الحقول صحيحة ومطابقة لـ index.html
+                const question = document.getElementById("quiz-question").value.trim();
+                const optionA = document.getElementById("quiz-opt-a").value.trim();
+                const optionB = document.getElementById("quiz-opt-b").value.trim();
+                const optionC = document.getElementById("quiz-opt-c").value.trim();
+                const answer = document.getElementById("quiz-correct-opt").value.trim(); // ID الصحيح
+                const pointsInput = document.getElementById("quiz-points").value;
+                const points = parseInt(pointsInput);
+
+                // منطق التحقق
+                if (!question || !optionA || !optionB || !optionC || !answer || isNaN(points) || points <= 0 || pointsInput.trim() === '') {
+                    adminQuizMessage.textContent = "فشل الإضافة: الرجاء ملء جميع الحقول بشكل صحيح (بما في ذلك النقاط).";
+                    adminQuizMessage.style.color = "red";
+                    return;
+                }
+
+                adminQuizMessage.textContent = "جاري إضافة السؤال...";
+                adminQuizMessage.style.color = "blue";
+
+                try {
+                    const response = await fetch(`/admin-create-quiz`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            question: question,
+                            opt_a: optionA, // 🛑 إرسال الاسم الصحيح للـ API
+                            opt_b: optionB,
+                            opt_c: optionC,
+                            correct_opt: answer, // 🛑 إرسال الاسم الصحيح للـ API
+                            points: points
+                        }),
+                    });
+
+                    const data = await response.json().catch(() => ({ error: 'رد سيرفر غير صالح' }));
+
+                    if (response.ok) {
+                        adminQuizMessage.textContent = `تم إضافة السؤال بنجاح!`;
+                        adminQuizMessage.style.color = "green";
+                        adminQuizForm.reset();
+                    } else {
+                        adminQuizMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                        adminQuizMessage.style.color = "red";
+                    }
+                } catch (err) {
+                    adminQuizMessage.textContent = "خطأ في الاتصال بالـ API لإضافة الكويز.";
+                    adminQuizMessage.style.color = "red";
+                    console.error("Quiz Creation Error:", err);
+                }
+            });
+        }
+
+        // --- 🛑🛑 استبدال: كود فورم الإعلانات (ليشمل الشريط الإخباري) 🛑🛑 ---
+        if (adminAnnouncementForm) {
+            adminAnnouncementForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                adminAnnouncementMessage.textContent = "جاري النشر...";
+                adminAnnouncementMessage.style.color = "blue";
+                try {
+                    const response = await fetch(`/admin-set-announcement`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            message: adminAnnouncementText.value.trim(),
+                            ticker_message: adminTickerText.value.trim() // إرسال الشريط
+                        })
+                    });
+                    if (response.ok) {
+                        adminAnnouncementMessage.textContent = "تم التحديث بنجاح!";
+                        adminAnnouncementMessage.style.color = "green";
+                        loadAnnouncements(); // إعادة تحميل الإعلانات
+                    } else {
+                        adminAnnouncementMessage.textContent = "فشل النشر.";
+                        adminAnnouncementMessage.style.color = "red";
+                    }
+                } catch (err) { 
+                    adminAnnouncementMessage.textContent = "خطأ في الاتصال."; 
+                    adminAnnouncementMessage.style.color = "red";
+                }
+            });
+        }
+        // --- 🛑🛑 نهاية الاستبدال 🛑🛑 ---
+
+        // 9. --- فورم إضافة عنصر جديد (المعدل لرفع الملفات) ---
+        if (adminAddItemForm) {
+            adminAddItemForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const name = document.getElementById("store-item-name").value.trim();
+                const price = parseInt(document.getElementById("store-item-price").value);
+                const requiredLevel = parseInt(document.getElementById("store-item-required-level").value) || 1; // 🛑 جلب المستوى
+                const imageFile = storeItemImageFile.files[0]; // 🛑 جلب الملف
+
+                // 🛑🛑 التعديل لجعل الصورة اختيارية 🛑🛑
+                if (!name || isNaN(price) || price <= 0 || isNaN(requiredLevel) || requiredLevel < 1) { // 🛑 إضافة التحقق
+                    adminStoreMessage.textContent = "الرجاء ملء الاسم والسعر والمستوى المطلوب بشكل صحيح.";
+                    adminStoreMessage.style.color = "red";
+                    return;
+                }
+
+                adminStoreMessage.textContent = "جاري التحقق والإضافة...";
+                adminStoreMessage.style.color = "blue";
+
+                let final_image_url = '';
+
+                try {
+                    if (imageFile) { // 🛑 فقط إذا اختار المستخدم ملفاً، نقوم بالرفع
+                        adminStoreMessage.textContent = "جاري رفع الصورة وضغطها...";
+                        // 🛑 منطق رفع الصورة إلى Cloudinary مع الضغط 🛑
+                        const resizedBlob = await resizeImage(imageFile, 400, 400, 0.8); // ضغط الصورة
+                        const formData = new FormData();
+                        formData.append('file', resizedBlob);
+                        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                        const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+
+                        const cloudinaryData = await cloudinaryResponse.json();
+                        final_image_url = cloudinaryData.secure_url;
+                    }
+
+                    adminStoreMessage.textContent = "جاري إرسال بيانات المنتج...";
+
+                    // 🛑 إرسال الرابط (الذي قد يكون فارغاً) إلى الـ Function 🛑
+                    const response = await fetch(`/admin-add-item`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            name,
+                            price,
+                            image_url: final_image_url,
+                            required_level: requiredLevel, // 🛑 إرسال المستوى
+                            email: loggedInUserProfile.email // 🛑 إرسال إيميل الأدمن للتحقق
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        adminStoreMessage.textContent = `تم إضافة المنتج: ${name} بنجاح!`;
+                        adminStoreMessage.style.color = "green";
+                        adminAddItemForm.reset();
+                        await loadAdminStoreItems(); // تحديث القائمة بعد الإضافة
+                    } else {
+                        adminStoreMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                        adminStoreMessage.style.color = "red";
+                    }
+                } catch (err) {
+                    adminStoreMessage.textContent = `خطأ: ${err.message || "فشل غير متوقع أثناء رفع الصورة أو الإضافة."}`;
+                    adminStoreMessage.style.color = "red";
+                    console.error("Add Item Error:", err);
+                }
+            });
+        }
+
+        // 🛑 استدعاء وظائف الأدمن عند اللوجن 🛑
+        // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
+
+    })(); // 🛑 نهاية أكواد الأدمن 🛑
+
+}); // نهاية "DOMContentLoaded"
