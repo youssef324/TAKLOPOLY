@@ -491,3 +491,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ... (processScansBtn.addEventListener) ...
 // ...
 // (نهاية ملف app.js)
+})(); // 🛑 نهاية دالة setupAdminPanel() التي تغلف أكواد الأدمن 🛑
+
+}); // 🛑 القوس النهائي لـ document.addEventListener("DOMContentLoaded", ...) 🛑
