@@ -1032,32 +1032,49 @@ document.addEventListener("DOMContentLoaded", () => {
             guestStatsModal.style.display = "none";
         }
     });
+ // ... existing code ...
     (function setupAdminPanel() {
         let currentSearchedUser = null;
+        let scannedUsersBatch = [];
+        
+        // 🛑🛑 منطق القائمة الرئيسية (Dashboard Navigation) - بديل الـ Accordion 🛑🛑
         const menuButtons = document.querySelectorAll('.admin-menu-btn');
-        const backButtons = document.querySelectorAll('.back-to-admin-menu');
+        const closeButtons = document.querySelectorAll('.close-section-btn'); // 🛑 التعديل: اختيار زر الإغلاق
         const adminMenu = document.getElementById('admin-main-menu');
         const adminViews = document.querySelectorAll('.admin-section-view');
+
+        // 1. عند الضغط على زر في القائمة الرئيسية
         if (menuButtons) {
             menuButtons.forEach(btn => {
                 btn.onclick = () => {
                     const targetId = btn.dataset.target;
+                    // إخفاء القائمة الرئيسية
                     if(adminMenu) adminMenu.style.display = 'none';
+                    // إخفاء أي قسم مفتوح
                     if(adminViews) adminViews.forEach(view => view.style.display = 'none');
+                    // إظهار القسم المطلوب
                     const targetSection = document.getElementById(targetId);
                     if(targetSection) targetSection.style.display = 'block';
                 }
             });
         }
-        if (backButtons) {
-            backButtons.forEach(btn => {
+
+        // 2. عند الضغط على زر "الإغلاق X"
+        if (closeButtons) {
+            closeButtons.forEach(btn => {
                 btn.onclick = () => {
+                    // إخفاء القسم الحالي
                     const parentSection = btn.closest('.admin-section-view');
                     if(parentSection) parentSection.style.display = 'none';
+                    // إظهار القائمة الرئيسية
                     if(adminMenu) adminMenu.style.display = 'grid';
                 }
             });
         }
+        // 🛑🛑 نهاية منطق القائمة 🛑🛑
+
+        if(adminSearchForm) {
+// ... existing code ...
         if(adminSearchForm) {
             adminSearchForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
