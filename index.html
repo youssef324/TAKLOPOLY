@@ -93,6 +93,7 @@
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
+    <!-- 🛑 صندوق الإعلان الهام (منفصل) 🛑 -->
     <div class="announcement-container" id="user-announcement-box">
         <h3>📢 إعلان هام</h3>
         <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
@@ -100,7 +101,7 @@
 
     <div class="guest-container" id="guest-container" style="display: none;">
         <h2>🏆 عرض نقاط الأسر 🏆</h2>
-        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة ثم اضغط على أي مستخدم لعرض تفاصيله.</p>
         <div class="guest-family-buttons">
             <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
             <button class="guest-family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
@@ -145,12 +146,12 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- 🛑🛑 لوحة الأدمن (الهيكل الجديد: قائمة + أقسام) 🛑🛑 -->
+    <!-- 🛑🛑 لوحة الأدمن (نوافذ منبثقة) 🛑🛑 -->
     <div class="admin-panel-container">
         <div id="admin-panel" style="display: none;">
             <h2>🛠️ لوحة تحكم الأدمن</h2>
             
-            <!-- 🛑 القائمة الرئيسية للأدمن 🛑 -->
+            <!-- القائمة الرئيسية -->
             <div id="admin-main-menu" class="admin-grid-menu">
                 <button class="admin-menu-btn" data-target="section-search">🔍 البحث وتعديل المستخدمين</button>
                 <button class="admin-menu-btn" data-target="section-families">👥 إدارة الأسر والرصيد الجماعي</button>
@@ -163,7 +164,8 @@
 
             <!-- قسم 1: البحث -->
             <div id="section-search" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🔍 البحث عن مستخدم</h3>
                 <form id="admin-search-form">
                     <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
@@ -205,7 +207,8 @@
             
             <!-- قسم 2: الأسر -->
             <div id="section-families" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>👥 الأسر والرصيد الجماعي</h3>
                 <div class="family-buttons-container">
                     <button class="family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
@@ -227,7 +230,8 @@
 
             <!-- قسم 3: مسح الحضور -->
             <div id="section-scan" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>📱 مسح كود الحضور (Scan)</h3>
                 <div id="admin-scan-controls">
                     <label>نوع المكافأة:</label>
@@ -258,7 +262,8 @@
             
             <!-- قسم 4: الطباعة -->
             <div id="section-print" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🖨️ طباعة أكواد الحضور</h3>
                 <div id="admin-qr-list-controls">
                     <button id="admin-fetch-qr-list-btn">الخطوة 1: جلب القائمة</button>
@@ -272,7 +277,8 @@
 
             <!-- قسم 5: الكويز -->
             <div id="section-quiz" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>❓ إضافة كويز جديد</h3>
                 <form id="admin-quiz-form">
                     <input type="text" id="quiz-question" placeholder="نص السؤال" required>
@@ -295,7 +301,8 @@
 
             <!-- قسم 6: الإعلانات -->
             <div id="section-announcements" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>📢 إدارة الإعلانات</h3>
                 <form id="admin-announcement-form">
                     <label>1. الإعلان الهام (الصندوق الأصفر):</label>
@@ -311,7 +318,8 @@
             
             <!-- قسم 7: المتجر -->
             <div id="section-store" class="admin-section-view" style="display: none;">
-                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <!-- 🛑 زر الإغلاق الجديد -->
+                <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🛒 إدارة المتجر</h3>
                 <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
                     <h5>إضافة عنصر جديد</h5>
@@ -388,6 +396,7 @@
             <p id="qr-user-email-display" style="font-weight: bold; color: #333;"></p>
         </div>
     </div>
+    <!-- 🛑🛑 نافذة إحصائيات المستخدم للجيست 🛑🛑 -->
     <div id="guest-stats-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
             <span class="close-btn" id="close-guest-stats">&times;</span>
