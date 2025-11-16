@@ -1,24 +1,30 @@
 /*
  * API Endpoint: /admin-set-announcement
- * (لحفظ الإعلان في KV)
+ * (نسخة KV المُصححة - لحفظ الرسالتين معاً)
  */
 export async function onRequestPost(context) {
   try {
-    const data = await context.request.json();
-    // 🛑 التحقق من وجود الحقل الصحيح الذي يرسله app.js
-    const newText = data.message || ""; 
-    
-    // 🛑 KIROPAY_KV هو الاسم الذي تم ربطه. نستخدم نفس الـ Key للجلب.
-    await context.env.KIROPAY_KV.put('current_announcement', newText);
-    
-    return new Response(JSON.stringify({ success: true, message: "تم نشر الإعلان!" }), {
+    // 🛑 استقبال الرسالتين من الـ Request
+    const { message, ticker_message } = await context.request.json();
+
+    // 🛑 تجميعهم في كائن واحد (Object)
+    const announcementData = {
+      message: message || "",          // رسالة الصندوق الأصفر
+      ticker_message: ticker_message || "" // رسالة الشريط المتحرك
+    };
+
+    // 🛑 حفظ الكائن كنص JSON في KV
+    await context.env.KIROPAY_KV.put('current_announcement', JSON.stringify(announcementData));
+
+    return new Response(JSON.stringify({ success: true, message: "تم تحديث الإعلانات بنجاح!" }), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), {
-      status: 500
+      status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
