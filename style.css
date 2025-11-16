@@ -304,30 +304,44 @@ form#admin-add-item-form button[type="submit"]:hover { background-color: #218838
 .stat-label { font-size: 0.85em; color: #6c757d; margin-bottom: 5px; min-height: 30px; display: flex; align-items: center; justify-content: center; }
 .stat-value { font-size: 1.4em; font-weight: bold; color: #212529; }
 /* 🛑🛑 ستايل زر الإغلاق (X) الجديد للأدمن 🛑🛑 */
+/* 🛑🛑 تحويل أقسام الأدمن لنوافذ منبثقة (Modals) 🛑🛑 */
 .admin-section-view {
-    position: relative; /* ضروري عشان الزرار يتحط في الزاوية */
+    display: none; /* مخفي افتراضياً */
+    
+    /* التثبيت في نص الشاشة */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* الحجم */
+    width: 90%;
+    max-width: 600px; 
+    max-height: 90vh; /* عشان لو القائمة طويلة */
+    overflow-y: auto; /* سكرول داخلي */
+    
+    /* الشكل */
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    z-index: 9999; /* عشان يظهر فوق كل حاجة */
+    
+    /* 💡 الخدعة السحرية: ظل ضخم جداً بيعمل كأنه Overlay غامق */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 0 0 2000px rgba(0,0,0,0.6);
+    border: 1px solid #eee;
 }
 
+/* تظبيط مكان زرار الإغلاق X جوه النافذة */
 .close-section-btn {
     position: absolute;
-    top: 10px;
-    left: 15px; /* مكان الزرار في الشمال */
-    font-size: 35px; /* حجم كبير */
-    font-weight: bold;
+    top: 15px;
+    left: 20px;
+    font-size: 30px;
     color: #aaa;
     cursor: pointer;
     line-height: 1;
-    transition: color 0.2s;
+    z-index: 2;
 }
-
 .close-section-btn:hover {
-    color: #dc3545; /* لون أحمر لما تقف عليه */
-}
-
-/* تعديل بسيط لعناوين الأقسام عشان متبقاش لازقة في الزرار */
-.admin-section-view h3 {
-    margin-top: 0;
-    padding-left: 40px; /* مسافة عشان الكلام ميدخلش في الـ X */
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    color: #dc3545;
 }
