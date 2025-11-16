@@ -1068,3 +1068,62 @@ form#admin-add-item-form button[type="submit"]:hover {
     font-weight: bold;
     color: #212529;
 }
+/* 🛑🛑 ستايل شريط الأخبار المتحرك 🛑🛑 */
+.news-ticker-container {
+    width: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    height: 40px;
+    overflow: hidden;
+    border-bottom: 2px solid #b22222; /* خط أحمر تحت الشريط */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.ticker-label {
+    background-color: #b22222; /* لون أحمر "عاجل" */
+    color: white;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1em;
+    z-index: 2; /* عشان يفضل ثابت فوق الكلام */
+    white-space: nowrap;
+}
+
+.ticker-wrap {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background-color: #222;
+}
+
+.ticker-move {
+    display: inline-block;
+    white-space: nowrap;
+    padding-right: 100%; /* مسافة عشان يبدأ من بره الشاشة */
+    animation: ticker-scroll 20s linear infinite; /* سرعة الحركة */
+}
+
+#ticker-text-display {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* الأنيميشن (الحركة من اليمين للشمال) */
+@keyframes ticker-scroll {
+    0% {
+        transform: translate3d(100%, 0, 0);
+    }
+    100% {
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+/* 🛑 إخفاء صندوق الإعلان القديم الثابت (اختياري) */
+/* لو عايز الشريط بس هو اللي يظهر، شيل علامة التعليق من السطر اللي تحت */
+/* .announcement-container { display: none !important; } */
