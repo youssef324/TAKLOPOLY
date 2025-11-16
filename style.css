@@ -284,17 +284,17 @@ body {
 }
 
 .champion-card { 
-    width: 250px; /* تحديد عرض ثابت للكارت لضمان شكل موحد */
+    width: 250px; 
     padding: 10px;
     margin: 0; 
-    flex-basis: auto; /* الحفاظ على الترتيب الطبيعي */
+    flex-basis: auto; 
 }
 
 /* 🛑 تكبير صور الأبطال 🛑 */
 .champion-card img,
 .champion-card .card-img { 
-    width: 180px; /* 🛑 تم التكبير بشكل ملحوظ 🛑 */
-    height: 180px; /* 🛑 تم التكبير بشكل ملحوظ 🛑 */
+    width: 180px; 
+    height: 180px; 
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
@@ -364,7 +364,7 @@ body {
 .modal-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.8); 
-    display: flex; /* 🛑 لضمان التوسيط الأفقي والعمودي */
+    display: flex; 
     justify-content: center; 
     align-items: center;   
     z-index: 2000; 
@@ -378,7 +378,7 @@ body {
     cursor: pointer; font-size: 24px; color: #333; 
 }
 
-/* 🛑🛑 إصلاح نهائي: ستايل كود الحضور (QR Modal) 🛑🛑 */
+/* --- 🛑🛑 إصلاح نهائي: ستايل كود الحضور (QR Modal) 🛑🛑 --- */
 #qr-modal-overlay { 
     display: flex !important; 
     justify-content: center !important; 
@@ -389,12 +389,12 @@ body {
     background-color: white; padding: 25px; border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
     text-align: center;
-    max-width: 300px !important; 
+    max-width: 300px !important; /* الحجم المضغوط المطلوب */
     width: 90%; 
     position: relative;
     max-height: 90vh; 
     overflow-y: hidden; 
-    /* 🏆 إزالة margin: auto هنا. الـ align-items: center في الـ overlay سيتولى التوسيط العمودي. */
+    margin: auto; /* هذا يضمن التوسيط العمودي بشكل سليم */
 }
 #qr-code-container {
     margin: 15px auto;
