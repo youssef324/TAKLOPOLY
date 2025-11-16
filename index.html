@@ -6,41 +6,44 @@
     <title>KiroPay Project</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- 🛑🛑 المكتبات المطلوبة للـ QR (مهم جداً) 🛑🛑 -->
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
-    <!-- 🛑🛑 المكتبة الجديدة لتحويل HTML إلى صورة (للتحميل) 🛑🛑 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* 🛑 إعدادات الظهور الأولية 🛑 */
         .card-container { display: none; }
-        .form-container { display: flex; } 
+        .form-container { display: flex; }
 
-        /* (باقي أكواد الـ CSS موجودة في style.css الآن) */
+        /* 🛑🛑 الحل القاطع لفرض إخفاء لوحة الأدمن عند التحميل 🛑🛑 */
+        #admin-panel { 
+            display: none !important; 
+            visibility: hidden !important; /* طبقة أمان إضافية */
+        }
+        /* 🛑🛑 نهاية الحل القاطع 🛑🛑 */
         
         .avatar-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); color: white; 
-            display: flex; justify-content: center; align-items: center; 
+            background-color: rgba(0, 0, 0, 0.5); color: white;
+            display: flex; justify-content: center; align-items: center;
             font-weight: bold; border-radius: 50%;
             opacity: 0.7; transition: opacity 0.2s;
-            cursor: pointer; text-align: center; font-size: 1rem; 
+            cursor: pointer; text-align: center; font-size: 1rem;
         }
         .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
         #avatar-upload-input { display: none; }
         
         .announcement-container {
             display: none; max-width: 900px; margin: 2rem auto;
-            padding: 15px 20px; background-color: #fff3cd; 
+            padding: 15px 20px; background-color: #fff3cd;
             border: 1px solid #ffeeba; border-radius: 8px; text-align: center;
         }
         .announcement-container h3 { margin: 0 0 10px 0; color: #856404; }
         
-        #user-announcement-text { 
+        #user-announcement-text {
             font-size: 1.3em; /* تكبير الخط */
-            color: #333; 
+            color: #333;
             font-weight: bold; /* خط عريض */
         }
         
@@ -84,7 +87,6 @@
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
-                    <!-- 🛑🛑 حقل المستوى الجديد للمستخدم 🛑🛑 -->
                     <p id="user-level">المستوى: </p>
 
                     <div class="transaction-history">
@@ -96,7 +98,6 @@
             </div>
             
             <div class="button-group">
-                <!-- 🛑🛑 زر كود الحضور الجديد 🛑🛑 -->
                 <button id="show-qr-btn" style="display: none; background-color: #28a745; color: white;">كود الحضور 📋</button>
                 <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
                 <button id="unlocked-items-btn" style="display: none;">مشترياتي</button>
@@ -133,8 +134,8 @@
                     <button type="submit">Sign Up</button>
                 </form>
             </div>
-            </div> 
-    </div> 
+            </div>
+    </div>
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
@@ -143,7 +144,7 @@
         <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
     </div>
 
-    <div class="quiz-container" id="quiz-container">
+    <div class="quiz-container" id="quiz-container" style="display: none !important;">
         <h2>سؤال اليوم 🎁</h2>
         <p id="quiz-question-text">جاري تحميل السؤال...</p>
         <div class="quiz-options">
@@ -155,9 +156,8 @@
         <p id="quiz-message"></p>
     </div>
 
-    <!-- 🛑🛑 تغيير اسم المتجر 🛑🛑 -->
-    <div class="store-container" id="store-container" style="display: none;">
-        <h2>🛒 TAKLOPOLY STORE</h2> 
+    <div class="store-container" id="store-container" style="display: none !important;">
+        <h2>🛒 TAKLOPOLY STORE</h2>
         <p style="text-align: center; color: #555;">استبدل نقاطك بعناصر مميزة.</p>
         <div class="store-items-grid" id="store-items-list">
             <p style="text-align: center;" id="store-loading-message">جاري تحميل عناصر المتجر...</p>
@@ -165,7 +165,7 @@
         <p id="store-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
     </div>
     
-    <div class="unlocked-items-container" id="unlocked-items-container" style="display: none;">
+    <div class="unlocked-items-container" id="unlocked-items-container" style="display: none !important;">
         <button id="back-to-store-btn" style="margin-bottom: 20px;">▶️ العودة للقائمة الرئيسية</button>
         
         <h2>🛒 مشترياتي السابقة</h2>
@@ -174,10 +174,8 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- 🛑🛑 حاوية الزائر الجديدة (مخفية افتراضياً) 🛑🛑 -->
-    <div class="guest-container" id="guest-container" style="display: none;">
+    <div class="guest-container" id="guest-container" style="display: none !important;">
         <h2>🏆 عرض نقاط الأسر 🏆</h2>
-        <!-- 🛑🛑 تم تصحيح النص هنا 🛑🛑 -->
         <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
         
         <div class="guest-family-buttons">
@@ -196,18 +194,13 @@
         
         <div class="guest-results-container">
             <ul class="leaderboard-list" id="guest-results-list">
-                <!-- ستظهر النتائج هنا -->
-            </ul>
+                </ul>
         </div>
         
-        <!-- هذا الزر سيظهر للزائر (سنعيد استخدام الزر الرئيسي) -->
         <div class="button-group" style="max-width: 600px;">
              <button id="logout-btn-guest" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
         </div>
     </div>
-    <!-- 🛑🛑 نهاية حاوية الزائر 🛑🛑 -->
-
-
     <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none !important;">
@@ -236,10 +229,8 @@
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
-                    <!-- 🛑🛑 حقل المستوى الجديد في كارت الأدمن 🛑🛑 -->
                     <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
                     
-                    <!-- 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑 -->
                     <button id="admin-show-user-qr-btn">
                         عرض كود QR لهذا المستخدم
                     </button>
@@ -254,7 +245,6 @@
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
                     
-                    <!-- 🛑🛑 قسم تعديل المستوى الجديد 🛑🛑 -->
                     <hr style="margin: 1rem 0;">
                     <h4>تعديل مستوى المستخدم</h4>
                     <div id="admin-level-controls">
@@ -303,50 +293,45 @@
                     </div>
             </div>
 
-            <!-- 🛑🛑 قسم مسح الحضور والمكافآت (جديد) 🛑🛑 -->
-<div class="admin-section scan-section">
-    <h4>📷 مسح كود الحضور والمكافأة</h4>
-    <p style="font-size: 0.9em; color: #555;">
-        امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية (يمكنك مسح عدة أشخاص قبل التأكيد).
-    </p>
-    <div id="admin-scan-controls">
-        <label for="reward-reason-select">نوع المكافأة:</label>
-        <select id="reward-reason-select">
-            <option value="300:القداس">القداس (300 نقطة)</option>
-            <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
-            <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
-            <option value="200:عشية">عشية (200 نقطة)</option>
-            <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
-            <option value="200:تسبحة">تسبحة (200 نقطة)</option>
-            <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
-            <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
-            <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
-            <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
-             <option value="150:مسابقة">مسابقة (150 نقطة)</option>
-            <option value="500:اعتراف">اعتراف (500 نقطة)</option>
-            <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
-        </select>
-        <button id="start-scan-btn" style="background-color: #f472b6;">
-            تشغيل الكاميرا والمسح
-        </button>
-        <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
-    </div>
-    
-    <div id="scanned-list-container" style="margin-top: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #fff;">
-        <h5 style="text-align: center; margin-top: 0;">الممسوحون حالياً (<span id="queue-count">0</span>):</h5>
-        <ul id="scanned-users-list" style="list-style: none; padding: 0;">
-            </ul>
-        <button id="process-scans-btn" disabled style="background-color: #28a745; margin-top: 10px; width: 100%;">
-            تأكيد إضافة المكافأة (نقاط) لـ الكل
-        </button>
-    </div>
-    
-    <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
-</div>
+            <div class="admin-section scan-section">
+                <h4>📷 مسح كود الحضور والمكافأة</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية (يمكنك مسح عدة أشخاص قبل التأكيد).
+                </p>
+                <div id="admin-scan-controls">
+                    <label for="reward-reason-select">نوع المكافأة:</label>
+                    <select id="reward-reason-select">
+                        <option value="300:القداس">القداس (300 نقطة)</option>
+                        <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+                        <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+                        <option value="200:عشية">عشية (200 نقطة)</option>
+                        <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+                        <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+                        <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+                        <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+                        <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
+                        <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+                        <option value="150:مسابقة">مسابقة (150 نقطة)</option>
+                        <option value="500:اعتراف">اعتراف (500 نقطة)</option>
+                        <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+                    </select>
+                    <button id="start-scan-btn" style="background-color: #f472b6;">
+                        تشغيل الكاميرا والمسح
+                    </button>
+                    <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
+                </div>
+                
+                <div id="scanned-list-container" style="margin-top: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 4px; background: #fff;">
+                    <h5 style="text-align: center; margin-top: 0;">الممسوحون حالياً (<span id="queue-count">0</span>):</h5>
+                    <ul id="scanned-users-list" style="list-style: none; padding: 0;">
+                        </ul>
+                    <button id="process-scans-btn" disabled style="background-color: #28a745; margin-top: 10px; width: 100%;">
+                        تأكيد إضافة المكافأة (نقاط) لـ الكل
+                    </button>
+                </div>
+                
+                <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
             </div>
-            <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
-            
-            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
             <div class="admin-section">
                 <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
                 <p style="font-size: 0.9em; color: #555;">
@@ -356,28 +341,21 @@
                     <button id="admin-fetch-qr-list-btn">
                         الخطوة 1: جلب قائمة المستخدمين
                     </button>
-                    <!-- مربع نص لعرض النتائج (مخفي، يستخدم للتخزين فقط) -->
                     <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
                     
                     <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
                         الخطوة 2: توليد بطاقات الطباعة
                     </button>
                     
-                    <!-- 🛑🛑 الزر الجديد للتحميل كصورة 🛑🛑 -->
                     <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
                         الخطوة 3: تحميل الكروت كصورة (PNG)
                     </button>
                 </div>
                 <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
 
-                <!-- 🛑🛑 الحاوية الجديدة للطباعة 🛑🛑 -->
                 <div id="admin-printable-cards-container">
-                    <!-- سيتم ملء الكروت هنا بواسطة الجافاسكريبت -->
-                </div>
+                    </div>
             </div>
-            <!-- 🛑🛑 نهاية قسم طباعة الـ QR 🛑🛑 -->
-
-
             <div class="admin-section">
                 <h4>إضافة سؤال جديد (Quiz)</h4>
                 <p style="font-size: 0.9em; color: #555;">
@@ -424,7 +402,6 @@
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
                     
-                    <!-- 🛑🛑 حقل المستوى المطلوب للمنتج 🛑🛑 -->
                     <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
                     <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
 
@@ -442,7 +419,7 @@
             </div>
             </div>
     </div>
-    <div class="leaderboard-container" id="leaderboard-container">
+    <div class="leaderboard-container" id="leaderboard-container" style="display: none !important;">
         <h2>🏆 أبطال الأسر 🏆</h2>
         <div class="champions-container" id="top-champions-list">
             </div>
@@ -493,7 +470,6 @@
                 <label for="edit-item-price">السعر (نقاط):</label>
                 <input type="number" id="edit-item-price" required min="1">
 
-                <!-- 🛑🛑 حقل تعديل المستوى المطلوب 🛑🛑 -->
                 <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
                 <input type="number" id="edit-item-required-level" required min="1">
 
@@ -506,15 +482,13 @@
             </form>
         </div>
     </div>
-    <!-- 🛑🛑 نافذة عرض كود QR المنبثقة 🛑🛑 -->
     <div id="qr-modal-overlay">
         <div id="qr-modal-content">
             <span class="close-qr-btn">&times;</span>
             <h3>كود الحضور الخاص بك</h3>
             <p style="font-size: 0.9em; color: #6c757d;">اعرض هذا الكود للأدمن ليتم تسجيل حضورك.</p>
             <div id="qr-code-container">
-                <!-- سيتم وضع كود QR هنا -->
-            </div>
+                </div>
             <small id="qr-user-email-display" style="display: block; margin-top: 10px; font-weight: bold;"></small>
         </div>
     </div>
