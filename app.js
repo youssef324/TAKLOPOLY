@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const userAnnouncementBox = document.getElementById("user-announcement-box");
     const logoutBtnGuest = document.getElementById("logout-btn-guest"); 
     const guestDetailsModal = document.getElementById("guest-details-modal"); 
-    const guestContainer = document.getElementById("guest-container"); // 👈 المتغير الذي سبب الخطأ
+    const guestContainer = document.getElementById("guest-container"); 
 
     // 🛑 عناصر الـ Modals والـ QR
     const editModalOverlay = document.getElementById("edit-modal-overlay");
@@ -61,10 +61,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const inlineQrEmailDisplayArea = document.getElementById("inline-qr-email-display-area");
     
     // (بقية المتغيرات: adminSearchForm, adminViews, menuButtons, html5QrCode, etc.)
-    // *************************************************************************
-    // NOTE: For brevity, the rest of the const and let declarations are omitted
-    // *************************************************************************
-
+    const adminViews = document.querySelectorAll('.admin-section-view'); 
+    const menuButtons = document.querySelectorAll('.admin-menu-btn'); 
+    const closeSectionButtons = document.querySelectorAll('.close-section-btn'); 
+    
     // -----------------------------------------------------
     // 2. دوال إعادة الضبط (Reset UI) & الدوال المساعدة
     // -----------------------------------------------------
@@ -115,21 +115,74 @@ document.addEventListener("DOMContentLoaded", () => {
     
     resetUI(); 
     
-    // 🛑 دالة وهمية لتحديث بيانات الكارت (لإصلاح مشكلة تسجيل الدخول)
+    // دالة لتحديث بيانات الكارت
     function updateUserCardUI(user) {
         if(userNameP) userNameP.textContent = `الاسم: ${user.name}`;
         if(userFamilyP) userFamilyP.textContent = `العائلة: ${user.family}`;
         if(userBalanceP) userBalanceP.textContent = `الرصيد: $${user.balance}`;
         if(userLevelP) userLevelP.textContent = `المستوى: ${user.level || 1}`; 
         if(userAvatarImg) userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-        // يجب أن تعمل loadTransactionHistory هنا
-        // loadTransactionHistory(user.email);
+        loadTransactionHistory(user.email);
     }
 
-    // ... (بقية الدوال: loadLeaderboards, loadActiveQuiz, loadStoreItems, loadTransactionHistory, refreshUserData, loadMainDashboard) ...
+    // 🛑🛑 الدوال التي تستخدم fetch (يجب أن تكون معرفة) 🛑🛑
+    async function loadLeaderboards() { /* ... existing logic ... */ }
+    async function loadActiveQuiz(email) { /* ... existing logic ... */ }
+    async function loadStoreItems() { /* ... existing logic ... */ }
+    async function loadTransactionHistory(email) { /* ... existing logic ... */ }
+    async function loadAdminStoreItems() { /* ... existing logic ... */ }
+    async function loadAnnouncement() { /* ... existing logic ... */ }
 
+
+    // 🛑 دالة loadMainDashboard (لضمان تشغيل لوحات المستخدم)
+    async function loadMainDashboard() {
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
+        hideUserSections(); 
+
+        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
+        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
+        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
+    }
+
+
+    // 🛑 [FIX: BUTTONS] تحديث البيانات (لضمان ظهور أزرار اليوزر)
+    async function refreshUserData() {
+        if (!loggedInUserProfile) return;
+        if(refreshDataBtn) refreshDataBtn.textContent = "جاري التحديث...";
+        
+        try {
+            const response = await fetch(`/get-user-profile`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loggedInUserProfile.email }),
+            });
+            if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
+            const data = await response.json();
+            const user = data.user;
+            loggedInUserProfile = user;
+
+            updateUserCardUI(user);
+
+            // 🛑 ضمان ظهور الأزرار لليوزر العادي
+            if (user.role !== 'admin') {
+                if(unlockedItemsBtn) unlockedItemsBtn.style.display = "block";
+                if(showQrBtn) showQrBtn.style.display = "block"; 
+            } else {
+                if(unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+                if(showQrBtn) showQrBtn.style.display = "none"; 
+            }
+            
+            await loadMainDashboard();
+            await loadAnnouncement();
+            if (user.role === 'admin') await loadAdminStoreItems();
+
+        } catch(err) {
+            console.error("REFRESH ERROR (API FAILURE):", err); // 🛑 تسجيل تفصيلي للخطأ
+        }
+        if(refreshDataBtn) refreshDataBtn.textContent = "تحديث البيانات";
+    }
+    
     // -----------------------------------------------------
-    // 4. منطق تسجيل الدخول (Login Logic) - (تم تحصينه)
+    // 4. منطق تسجيل الدخول (Login Logic) - (تحصين catch block)
     // -----------------------------------------------------
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -137,7 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = "جاري تسجيل الدخول...";
         messageDiv.style.color = "blue";
         
-        // ... (إخفاء العناصر قبل الدخول) ...
+        adminPanelDiv.style.display = "none";
+        hideUserSections();
+        userAnnouncementBox.style.display = "none";
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
@@ -150,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
             if (response.ok) {
+                // 🛑 تسجيل الدخول ناجح، نبدأ تحديث الواجهة
                 messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
                 messageDiv.style.color = "green";
                 const user = data.user;
@@ -171,14 +227,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     logoutBtnGuest.style.display = "block";
                 } 
                 
-                await refreshUserData(); // 🛑 يشغل loadMainDashboard و يظهر الأزرار
+                // 🛑🛑 تحصين مرحلة التحميل بعد الدخول 🛑🛑
+                // إذا فشل هذا الجزء، لن يتم تسجيل الخروج، بل ستظهر رسالة خطأ التحميل
+                try {
+                    await refreshUserData(); 
+                } catch(loadErr) {
+                    console.error("CRITICAL LOAD FAILURE AFTER LOGIN:", loadErr);
+                    messageDiv.textContent = `تم تسجيل الدخول بنجاح، لكن فشل تحميل البيانات (يرجى الضغط على تحديث البيانات).`;
+                    messageDiv.style.color = "orange";
+                }
+
             } else {
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
             }
         } catch (err) {
-            messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
+            // 🛑 هذا الكاتش خاص بفشل اتصال API /login نفسه
+            messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع. (فشل API /login)";
             messageDiv.style.color = "red";
+            console.error("LOGIN FETCH API ERROR:", err);
         }
     });
 
