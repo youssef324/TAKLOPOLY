@@ -1,6 +1,6 @@
 /* --- إعدادات الصفحة العامة --- */
 body {
-    font-family: Arial, sans-serif; /* الخط البسيط */
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
@@ -16,7 +16,7 @@ body {
     padding: 20px;
 }
 
-/* --- 🛑 الهيدر الأزرق (الذي طلبته) 🛑 --- */
+/* --- الهيدر الأزرق --- */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -38,10 +38,10 @@ body {
     .header-part.right, .header-part.left { text-align: center; }
 }
 
-/* --- 🛑 شريط الإعلانات الأسود (المعدل حسب طلبك) 🛑 --- */
+/* --- 🛑 شريط الإعلانات الأسود (المعدل) 🛑 --- */
 .ticker-wrap {
     width: 100%;
-    background-color: #222; /* 🛑 لون أسود */
+    background-color: #222; /* لون أسود */
     overflow: hidden;
     height: 40px;
     display: flex;
@@ -53,9 +53,9 @@ body {
     display: inline-block;
     padding-left: 100%;
     animation: ticker-move 25s linear infinite;
-    color: #ffffff; /* 🛑 لون أبيض */
-    font-weight: bold; /* 🛑 خط عريض */
-    font-size: 1.2em; /* 🛑 خط أكبر */
+    color: #ffffff; /* لون أبيض */
+    font-weight: bold; /* خط عريض */
+    font-size: 1.2em; /* خط أكبر */
     white-space: nowrap;
 }
 @keyframes ticker-move {
@@ -124,7 +124,9 @@ body {
 
 
 /* --- 🛑 لوحة الأدمن (مدمجة: شكل الأصلي + هيكل الأكورديون) 🛑 --- */
-/* هذا الـ ID خاص بالمودال المنبثق الذي طلبته */
+#admin-modal-overlay {
+    /* هذا ستايل عام للمودال، موجود بالأسفل */
+}
 #admin-modal-content {
     max-width: 900px !important; /* عرض أكبر للمودال */
     max-height: 90vh; /* طول أقصى */
@@ -162,7 +164,6 @@ body {
 }
 .accordion-header:hover { background-color: #f1f1f1; }
 
-/* إخفاء علامة + و ✖ من الملف الجديد */
 .accordion-header::after { content: '🔽'; font-size: 0.8em; color: #999; }
 .accordion-header.active::after { content: '🔼'; color: #007bff; } 
 
@@ -189,10 +190,11 @@ body {
     margin-top: 1.5rem;
 }
 
+/* 🛑🛑 تعديل: زيادة استدارة الكروت 🛑🛑 */
 .store-item-card {
     background-color: #f8f9fa;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 16px; /* 🛑 تم التعديل 🛑 */
     padding: 15px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -218,7 +220,7 @@ body {
 }
 .store-item-card p.level-req {
     font-size: 0.9em;
-    color: #dc3545; /* أحمر تحذيري */
+    color: #dc3545;
     font-weight: bold;
     margin: 5px 0 10px 0;
 }
@@ -261,13 +263,13 @@ body {
 
 /* 🛑🛑 تعديل: تكبير صور الأبطال 🛑🛑 */
 .champion-card img,
-.champion-card .card-img { /* لضمان التوافق مع الكود القديم */
+.champion-card .card-img { 
     width: 140px; /* 🛑 تم التكبير */
     height: 140px; /* 🛑 تم التكبير */
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
-    border: 3px solid gold; /* إضافة بوردر ذهبي للأبطال */
+    border: 3px solid gold; 
 }
 
 .champion-card .name {
@@ -316,28 +318,65 @@ body {
     margin: 0;
 }
 
-/* --- المودال والطباعة --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; }
-.modal-content { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; text-align: right; }
-.close-btn, .close-qr-btn { position: absolute; top: 10px; left: 10px; cursor: pointer; font-size: 24px; color: #333; }
+/* --- 🛑 المودال العام (Modal) 🛑 --- */
+.modal-overlay { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); display: none; 
+    justify-content: center; align-items: center; z-index: 2000; 
+}
+.modal-content { 
+    background: white; padding: 30px; border-radius: 8px; 
+    width: 90%; max-width: 500px; position: relative; text-align: right; 
+}
+.close-btn { 
+    position: absolute; top: 10px; left: 10px; 
+    cursor: pointer; font-size: 24px; color: #333; 
+}
 
-/* 🛑 نافذة تفاصيل الزائر (Grid) 🛑 */
+/* --- 🛑🛑 إضافة: ستايل كود الحضور (QR Modal) الأصلي 🛑🛑 --- */
+/* هذا الكود يحدد تنسيق نافذة الـ QR الخاصة باليوزر لتكون أصغر وأنسب */
+#qr-modal-overlay {
+    /* يرث من .modal-overlay */
+}
+#qr-modal-content {
+    background-color: white; padding: 25px; border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); text-align: center;
+    max-width: 300px; /* 🛑 هذا هو الحجم الأصلي الأفضل */
+    width: 90%; position: relative;
+}
+#qr-code-container {
+    margin: 15px auto;
+    width: 250px; /* 🛑 الحجم الأصلي */
+    height: 250px; /* 🛑 الحجم الأصلي */
+    border: 1px solid #ccc; padding: 5px;
+}
+.close-qr-btn {
+    position: absolute; top: 10px; left: 10px; font-size: 24px;
+    font-weight: bold; color: #aaa; cursor: pointer;
+}
+/* 🛑🛑 نهاية إضافة ستايل الـ QR 🛑🛑 */
+
+
+/* --- 🛑 إضافة: نافذة تفاصيل الزائر (Grid) 🛑 --- */
 #guest-details-modal .modal-content {
     max-width: 450px;
 }
-.guest-details-grid { 
+.guest-details-grid, .attendance-grid { /* استخدام الاسمين لضمان التوافق */
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
     gap: 10px; 
     margin-top: 20px; 
 }
-.detail-item { 
+.detail-item, .att-box { /* استخدام الاسمين لضمان التوافق */
     border: 1px solid #ddd; border-radius: 4px; padding: 10px; 
     text-align: center; background-color: #f9f9f9; 
-    font-size: 0.9em; color: #555;
 }
-.detail-item strong {
+.detail-item strong, .att-val { /* استخدام الاسمين لضمان التوافق */
     font-size: 1.3em; font-weight: bold; color: #007bff; display: block;
+}
+.att-label { /* ستايل خاص بالليبل من ملف 2 */
+    font-size: 0.9em; color: #555; display: flex; 
+    align-items: center; justify-content: center; height: 40px;
 }
 
 
@@ -360,7 +399,7 @@ body {
 #admin-fetch-qr-list-btn { background-color: #007bff; color: white; }
 #admin-generate-print-cards-btn { background-color: #28a745; color: white; }
 #admin-download-cards-as-image-btn { background-color: #ffc107; color: #212529; }
-#admin-qr-list-results { display: none; } /* مخفي، يستخدم للتخزين فقط */
+#admin-qr-list-results { display: none; } 
 
 /* 🛑 حاوية كروت الطباعة 🛑 */
 #admin-printable-cards-container {
@@ -407,7 +446,7 @@ body {
     #admin-printable-cards-container { 
         position: absolute; top: 0; left: 0; width: 100%; 
         display: grid !important; 
-        grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
+        grid-template-columns: 1fr 1fr 1fr; 
         gap: 15px; 
         margin: 0; padding: 10px; border: none !important;
     }
