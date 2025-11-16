@@ -1032,47 +1032,58 @@ document.addEventListener("DOMContentLoaded", () => {
             guestStatsModal.style.display = "none";
         }
     });
- // ... existing code ...
-    (function setupAdminPanel() {
+ (function setupAdminPanel() {
         let currentSearchedUser = null;
         let scannedUsersBatch = [];
-        
-        // 🛑🛑 منطق القائمة الرئيسية (Dashboard Navigation) - بديل الـ Accordion 🛑🛑
+
+        // 🛑🛑 انسخ من هنا (بداية التعديل) 🛑🛑
+
+        // تعريف العناصر
         const menuButtons = document.querySelectorAll('.admin-menu-btn');
-        const closeButtons = document.querySelectorAll('.close-section-btn'); // 🛑 التعديل: اختيار زر الإغلاق
+        // لاحظ هنا بنختار زرار الإغلاق (X) بالكلاس الجديد
+        const closeButtons = document.querySelectorAll('.close-section-btn'); 
         const adminMenu = document.getElementById('admin-main-menu');
         const adminViews = document.querySelectorAll('.admin-section-view');
 
-        // 1. عند الضغط على زر في القائمة الرئيسية
+        // 1. تشغيل أزرار القائمة الرئيسية
         if (menuButtons) {
             menuButtons.forEach(btn => {
-                btn.onclick = () => {
+                btn.onclick = (e) => {
+                    e.preventDefault(); // منع أي سلوك افتراضي
                     const targetId = btn.dataset.target;
-                    // إخفاء القائمة الرئيسية
+                    
+                    // إخفاء القائمة
                     if(adminMenu) adminMenu.style.display = 'none';
-                    // إخفاء أي قسم مفتوح
+                    
+                    // إخفاء كل الأقسام
                     if(adminViews) adminViews.forEach(view => view.style.display = 'none');
-                    // إظهار القسم المطلوب
+                    
+                    // إظهار القسم المختار
                     const targetSection = document.getElementById(targetId);
                     if(targetSection) targetSection.style.display = 'block';
                 }
             });
         }
 
-        // 2. عند الضغط على زر "الإغلاق X"
+        // 2. تشغيل أزرار الإغلاق (X)
         if (closeButtons) {
             closeButtons.forEach(btn => {
-                btn.onclick = () => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
                     // إخفاء القسم الحالي
                     const parentSection = btn.closest('.admin-section-view');
                     if(parentSection) parentSection.style.display = 'none';
-                    // إظهار القائمة الرئيسية
+                    
+                    // إعادة إظهار القائمة الرئيسية
                     if(adminMenu) adminMenu.style.display = 'grid';
                 }
             });
         }
-        // 🛑🛑 نهاية منطق القائمة 🛑🛑
+        
+        // 🛑🛑 انتهى التعديل (تأكد إن باقي الكود تحته زي ما هو) 🛑🛑
 
+        if(adminSearchForm) {
+            // ... باقي الكود ...
         if(adminSearchForm) {
 // ... existing code ...
         if(adminSearchForm) {
