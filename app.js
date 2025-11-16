@@ -360,135 +360,117 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- فورم اللوجن ---
-    loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        messageDiv.textContent = "جاري تسجيل الدخول...";
-        messageDiv.style.color = "blue";
+   // ... (الكود الذي أرسلته: دوال loadUserUnlockedItems, loadMainDashboard, loadAnnouncement, إلخ)
+
+// --- فورم اللوجن ---
+loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    messageDiv.textContent = "جاري تسجيل الدخول...";
+    messageDiv.style.color = "blue";
+    
+    // إعادة الإخفاء قبل المعالجة
+    adminPanelDiv.style.display = "none";
+    adminPanelDiv.style.visibility = "hidden"; // 🛑 إعادة تعيين حالة الرؤية
+    transactionList.innerHTML = "";
+    hideUserSections();
+    userAnnouncementBox.style.display = "none";
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch(`/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
         
-        // إعادة الإخفاء قبل المعالجة
-        adminPanelDiv.style.display = "none";
-        adminPanelDiv.style.visibility = "hidden"; // 🛑 إعادة تعيين حالة الرؤية
-        transactionList.innerHTML = "";
-        hideUserSections();
-        userAnnouncementBox.style.display = "none";
+        // 🛑🛑 تم حذف catch في الـ JSON هنا لكي لا يقفز الكود إلى catch الخارجية 🛑🛑
+        const data = await response.json(); 
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        if (response.ok && data.user) { // 🛑 التحقق من النجاح ووجود كائن المستخدم
+            messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
+            messageDiv.style.color = "green";
+            const user = data.user;
+            loggedInUserProfile = user;
 
-        try {
-            const response = await fetch(`/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+            // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
+            if (user.role === 'admin') {
+                // 1. عرض لوحة الأدمن (ADMIN VIEW)
+                messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
+                
+                adminPanelDiv.style.display = "block";
+                adminPanelDiv.style.visibility = "visible";
+                
+                cardContainer.style.display = "flex";
+                avatarOverlayLabel.style.display = "flex";
+                
+                // ملء بيانات كارت الأدمن
+                userNameP.textContent = `الاسم: ${user.name}`;
+                userFamilyP.textContent = `العائلة: ${user.family}`;
+                userBalanceP.textContent = `الرصيد: $${user.balance}`;
+                userLevelP.textContent = `المستوى: ${user.level || 1}`;
+                userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+                
+                // 🛑 تنفيذ الدوال التي كانت تفشل بسبب النطاق 🛑
+                await loadTransactionHistory(user.email);
+                await loadAnnouncement();
+                await loadAdminStoreItems();
 
-            if (response.ok) {
-                messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
-                messageDiv.style.color = "green";
-                const user = data.user;
-                loggedInUserProfile = user;
+                // إخفاء أشياء اليوزر العادي
+                formContainer.style.display = "none";
+                logoutBtn.style.display = "block";
+                refreshDataBtn.style.display = "block";
+                unlockedItemsBtn.style.display = "none";
+                if (showQrBtn) showQrBtn.style.display = "none";
+                hideUserSections();
 
-                // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
-                if (user.role === 'admin') {
-                    // 1. عرض لوحة الأدمن (ADMIN VIEW)
-                    messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
-                    
-                    // 🛑🛑 الإظهار القاطع للوحة الأدمن 🛑🛑
-                    adminPanelDiv.style.display = "block";
-                    adminPanelDiv.style.visibility = "visible";
-                    
-                    cardContainer.style.display = "flex"; // الأدمن يرى الكارت الخاص به
-                    avatarOverlayLabel.style.display = "flex";
-                    
-                    // ملء بيانات كارت الأدمن (نفس بيانات اليوزر العادي)
-                    userNameP.textContent = `الاسم: ${user.name}`;
-                    userFamilyP.textContent = `العائلة: ${user.family}`;
-                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-                    
-                    await loadTransactionHistory(user.email);
-                    await loadAnnouncement();
-                    await loadAdminStoreItems();
-
-                    // إخفاء أشياء اليوزر العادي
-                    formContainer.style.display = "none";
-                    logoutBtn.style.display = "block";
-                    refreshDataBtn.style.display = "block";
-                    unlockedItemsBtn.style.display = "none";
-                    if (showQrBtn) showQrBtn.style.display = "none";
-                    hideUserSections();
-
-                } else if (user.role === 'guest') {
-                    // 2. عرض لوحة الزائر (GUEST VIEW)
-                    messageDiv.textContent = "مرحباً أيها الزائر!";
-                    guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
-                    logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
-                    
-                    // 🛑 إخفاء كل شيء آخر
-                    cardContainer.style.display = "none";
-                    formContainer.style.display = "none";
-                    avatarOverlayLabel.style.display = "none";
-                    refreshDataBtn.style.display = "none";
-                    unlockedItemsBtn.style.display = "none";
-                    if (showQrBtn) showQrBtn.style.display = "none";
-                    hideUserSections();
-                    leaderboardContainer.style.display = "none";
-                    adminPanelDiv.style.display = "none"; // 🛑 تأكيد الإخفاء للـ Guest
-                    adminPanelDiv.style.visibility = "hidden";
-
-                } else {
-                    // 3. عرض لوحة المستخدم العادي (USER VIEW)
-                    userNameP.textContent = `الاسم: ${user.name}`;
-                    userFamilyP.textContent = `العائلة: ${user.family}`;
-                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-                    
-                    cardContainer.style.display = "flex";
-                    formContainer.style.display = "none";
-                    logoutBtn.style.display = "block";
-                    refreshDataBtn.style.display = "block";
-                    avatarOverlayLabel.style.display = "flex";
-
-                    await loadTransactionHistory(user.email);
-                    
-                    unlockedItemsBtn.style.display = "block";
-                    if (showQrBtn) showQrBtn.style.display = "block";
-                    await loadMainDashboard();
-                    await loadAnnouncement();
-                    // 🛑 الإظهار للمستخدم العادي 🛑
-                    leaderboardContainer.style.display = "block";
-                    quizContainer.style.display = "block";
-                    storeContainer.style.display = "block";
-                    // 🛑 الإخفاء للمستخدم العادي 🛑
-                    adminPanelDiv.style.display = "none";
-                    adminPanelDiv.style.visibility = "hidden";
-                }
-                // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
+            } else if (user.role === 'guest') {
+                // 2. عرض لوحة الزائر (GUEST VIEW)
+                messageDiv.textContent = "مرحباً أيها الزائر!";
+                guestContainer.style.display = "block";
+                logoutBtnGuest.style.display = "block";
+                
+                // ... (إخفاء كل شيء آخر) ...
+                leaderboardContainer.style.display = "none";
+                adminPanelDiv.style.display = "none";
+                adminPanelDiv.style.visibility = "hidden";
 
             } else {
-                messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
-                messageDiv.style.color = "red";
+                // 3. عرض لوحة المستخدم العادي (USER VIEW)
+                // ... (ملء البيانات) ...
+                
+                // 🛑 تنفيذ الدوال التي كانت تفشل بسبب النطاق 🛑
+                await loadTransactionHistory(user.email);
+                await loadMainDashboard();
+                await loadAnnouncement();
+                
+                // 🛑 الإظهار للمستخدم العادي 🛑
+                leaderboardContainer.style.display = "block";
+                quizContainer.style.display = "block";
+                storeContainer.style.display = "block";
+                
+                // 🛑 الإخفاء للمستخدم العادي 🛑
+                adminPanelDiv.style.display = "none";
+                adminPanelDiv.style.visibility = "hidden";
             }
-        } catch (err) {
-            messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
+            // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
+
+        } else {
+            messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
             messageDiv.style.color = "red";
         }
-    });
-});
-// ... (بقية app.js كما أرسلتها في المراجعة الأخيرة) ...
-// (بقية الدوال مثل loadAdminStoreItems, loadLeaderboards, loadActiveQuiz, الخ)
-// (بقية logic الأدمن بما في ذلك وظيفة المسح الجماعي الجديدة)
-// ...
-// 🛑🛑 دالة تحديث قائمة العرض (الجديدة) 🛑🛑
-// ... (دالة updateScannedUsersList) ...
-// 🛑🛑 دالة معالجة المسح (المعدلة للمسح المستمر) 🛑🛑
-// ... (دالة onScanSuccess) ...
-// 🛑🛑 معالج الإضافة الجماعية (لزر processScansBtn) 🛑🛑
-// ... (processScansBtn.addEventListener) ...
-// ...
-// (نهاية ملف app.js)
+    } catch (err) {
+        // 🛑 هذا الجزء يعالج فقط أخطاء الشبكة/الخادم 500/الاتصال 🛑
+        messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع. (تحقق من Log Server 500)";
+        messageDiv.style.color = "red";
+    }
+}); 
+// ... (بقية app.js) ...
+
+// 🛑🛑🛑🛑🛑🛑🛑
+// يجب أن تكون جميع الدوال المساعدة (مثل loadAdminStoreItems)
+// موجودة قبل هذا السطر الأخير:
+// }); 
+// 🛑🛑🛑🛑🛑🛑🛑
