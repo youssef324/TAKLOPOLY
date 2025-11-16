@@ -16,7 +16,7 @@ body {
     padding: 20px;
 }
 
-/* --- الهيدر الأزرق --- */
+/* --- 🛑 الهيدر الأزرق (بخط كبير و Bold) 🛑 --- */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -29,9 +29,10 @@ body {
 .header-part { flex: 1; text-align: center; }
 .header-part.right { text-align: right; }
 .header-part.left { text-align: left; }
-.header-part h1 { font-size: 1.8em; margin: 5px 0; font-weight: bold; }
-.header-part h2 { font-size: 1.4em; margin: 0; color: #ffdd57; }
-.header-part h3 { font-size: 1.1em; margin: 0; font-weight: normal; }
+/* 🛑 تم التكبير والـ Bold 🛑 */
+.header-part h1 { font-size: 2.0em; margin: 5px 0; font-weight: bold; }
+.header-part h2 { font-size: 1.6em; margin: 0; color: #ffdd57; font-weight: bold; }
+.header-part h3 { font-size: 1.2em; margin: 0; font-weight: bold; }
 
 @media (max-width: 768px) {
     .main-header { flex-direction: column; text-align: center; gap: 10px; }
@@ -125,7 +126,7 @@ body {
 
 /* --- 🛑 لوحة الأدمن (مدمجة: شكل الأصلي + هيكل الأكورديون) 🛑 --- */
 #admin-modal-overlay {
-    /* هذا ستايل عام للمودال، موجود بالأسفل */
+    /* ستايل عام للمودال موجود بالأسفل */
 }
 #admin-modal-content {
     max-width: 900px !important; /* عرض أكبر للمودال */
@@ -158,7 +159,7 @@ body {
     cursor: pointer;
     display: flex; justify-content: space-between; align-items: center;
     font-weight: bold; color: #333;
-    font-size: 1.15em; /* تكبير بسيط للرأس */
+    font-size: 1.15em;
     border-bottom: 2px solid #007bff; /* 🛑 هذا هو الستايل الأصلي 🛑 */
     transition: background 0.2s;
 }
@@ -171,10 +172,10 @@ body {
     padding: 20px;
     display: none;
     background-color: #fafafa;
-    border-top: 1px solid #ddd; /* فصل بسيط */
+    border-top: 1px solid #ddd;
 }
 
-/* --- 🛑 المتجر (التصميم الأصلي + ميزة الإظلام) 🛑 --- */
+/* --- 🛑 المتجر (بحواف دائرية) 🛑 --- */
 .store-container {
     display: none; 
     max-width: 900px; margin: 2rem auto; padding: 20px;
@@ -245,7 +246,7 @@ body {
     cursor: not-allowed;
 }
 
-/* --- 🛑 لوحة الصدارة (مع صور الأبطال المكبرة) 🛑 --- */
+/* --- 🛑 لوحة الصدارة (بتنسيق هرمي 1-2) 🛑 --- */
 .leaderboard-container {
     display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
     background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -254,29 +255,66 @@ body {
     text-align: center; color: #007bff; margin-top: 0;
     border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
 }
-.champions-container {
-    display: flex; justify-content: space-around; text-align: center;
-    margin: 2rem 0; flex-wrap: wrap;
-}
-.champion-card { flex-basis: 200px; }
-.champion-card .rank { font-size: 2.5em; }
 
-/* 🛑🛑 تعديل: تكبير صور الأبطال 🛑🛑 */
+/* 🛑🛑 تعديل: تنسيق هرمي 1-2 🛑🛑 */
+.champions-container {
+    display: flex; 
+    justify-content: center; /* توسيط البطل الثاني والثالث */
+    align-items: center;
+    text-align: center;
+    margin: 2rem 0; 
+    flex-wrap: wrap; /* للسماح بالالتفاف */
+}
+.champion-card { 
+    flex-basis: 250px; /* حجم أكبر للكروت */
+    padding: 10px;
+}
+/* 🛑 الأول فوق 🛑 */
+.champion-card:first-child {
+    flex-basis: 100%; /* البطل الأول يأخذ سطر كامل */
+    margin-bottom: 20px; /* مسافة */
+}
+/* 🛑 تكبير البطل الأول بشكل إضافي 🛑 */
+.champion-card:first-child .rank {
+    font-size: 4.0em; 
+}
+.champion-card:first-child img {
+    width: 180px; 
+    height: 180px; 
+    border-width: 5px; /* بوردر ذهبي أسمك */
+}
+.champion-card:first-child .name {
+    font-size: 1.5em; 
+}
+
+/* 🛑 حجم عام للأبطال 🛑 */
+.champion-card .rank {
+    font-size: 3.0em; /* تكبير الميداليات */
+}
 .champion-card img,
 .champion-card .card-img { 
-    width: 140px; /* 🛑 تم التكبير */
-    height: 140px; /* 🛑 تم التكبير */
+    width: 140px; 
+    height: 140px; 
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
     border: 3px solid gold; 
 }
-
 .champion-card .name {
-    font-size: 1.2em; font-weight: bold; color: #333; display: block;
+    font-size: 1.3em; /* تكبير الخط */
+    font-weight: bold; 
+    color: #333; 
+    display: block;
 }
 .champion-card small {
     display: block; color: #555;
+}
+/* تمييز الثاني والثالث */
+.champion-card:nth-child(2) img {
+     border-color: #C0C0C0; /* فضي */
+}
+.champion-card:nth-child(3) img {
+     border-color: #CD7F32; /* برونزي */
 }
 
 .leaderboard-columns {
@@ -292,7 +330,6 @@ body {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px; border-bottom: 1px solid #f0f0f0;
 }
-.leaderboard-list li:last-child { border-bottom: none; }
 
 
 /* --- 🛑 واجهة الزائر (Guest) 🛑 --- */
@@ -333,16 +370,16 @@ body {
     cursor: pointer; font-size: 24px; color: #333; 
 }
 
-/* --- 🛑🛑 إضافة: ستايل كود الحضور (QR Modal) الأصلي 🛑🛑 --- */
-/* هذا الكود يحدد تنسيق نافذة الـ QR الخاصة باليوزر لتكون أصغر وأنسب */
-#qr-modal-overlay {
-    /* يرث من .modal-overlay */
-}
-#qr-modal-content {
+/* --- 🛑🛑 تعديل: ستايل كود الحضور (QR Modal) الأصلي 🛑🛑 --- */
+/* هذا الكود يعيد الشكل المضبوط الذي طلبته للـ QR */
+#qr-modal-overlay .modal-content, /* هذا السطر يطبق الستايل على المودال المفتوح */
+#qr-modal-content { /* وهذا السطر يضمن التطبيق لو الـ ID تغير */
     background-color: white; padding: 25px; border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); text-align: center;
-    max-width: 300px; /* 🛑 هذا هو الحجم الأصلي الأفضل */
+    max-width: 300px !important; /* 🛑 فرض الحجم الأصلي الأفضل */
     width: 90%; position: relative;
+    max-height: 90vh; /* منع أي طول زائد */
+    overflow-y: hidden; /* لا نحتاج سكرول هنا */
 }
 #qr-code-container {
     margin: 15px auto;
@@ -354,30 +391,32 @@ body {
     position: absolute; top: 10px; left: 10px; font-size: 24px;
     font-weight: bold; color: #aaa; cursor: pointer;
 }
-/* 🛑🛑 نهاية إضافة ستايل الـ QR 🛑🛑 */
+/* 🛑🛑 نهاية تعديل ستايل الـ QR 🛑🛑 */
 
 
-/* --- 🛑 إضافة: نافذة تفاصيل الزائر (Grid) 🛑 --- */
+/* --- 🛑 تعديل: نافذة تفاصيل الزائر (Grid) 🛑 --- */
+/* هذا الكود يعيد تصميم الشبكة الجميل الذي أعجبك */
 #guest-details-modal .modal-content {
     max-width: 450px;
 }
-.guest-details-grid, .attendance-grid { /* استخدام الاسمين لضمان التوافق */
+.guest-details-grid, .attendance-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
     gap: 10px; 
     margin-top: 20px; 
 }
-.detail-item, .att-box { /* استخدام الاسمين لضمان التوافق */
+.detail-item, .att-box { 
     border: 1px solid #ddd; border-radius: 4px; padding: 10px; 
     text-align: center; background-color: #f9f9f9; 
 }
-.detail-item strong, .att-val { /* استخدام الاسمين لضمان التوافق */
+.detail-item strong, .att-val { 
     font-size: 1.3em; font-weight: bold; color: #007bff; display: block;
 }
-.att-label { /* ستايل خاص بالليبل من ملف 2 */
+.att-label { /* هذا الستايل يضبط العنوان ليكون في المنتصف */
     font-size: 0.9em; color: #555; display: flex; 
     align-items: center; justify-content: center; height: 40px;
 }
+/* 🛑 نهاية تعديل تفاصيل الزائر 🛑 */
 
 
 /* 🛑🛑 ستايل قسم طباعة الـ QR (معدل) 🛑🛑 */
@@ -540,7 +579,7 @@ body {
     font-size: 1.2em; width: 100%; margin-top: 1.5rem;
 }
 
-/* (تنسيقات باقي العناصر مأخوذة من الملف الأصلي) */
+/* (تنسيقات داخلية للوحة الأدمن - من الملف الأصلي) */
 #admin-search-form input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
 #admin-search-form button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #007bff; }
 #admin-balance-controls { display: flex; gap: 10px; margin-top: 0.5rem; }
