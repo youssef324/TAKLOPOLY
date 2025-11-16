@@ -394,7 +394,7 @@ body {
     position: relative;
     max-height: 90vh; 
     overflow-y: hidden; 
-    margin: auto; /* هذا يضمن التوسيط العمودي بشكل سليم */
+    margin: auto; /* 🏆 هذا يضمن التوسيط العمودي بشكل سليم 🏆 */
 }
 #qr-code-container {
     margin: 15px auto;
@@ -542,10 +542,6 @@ body {
     margin-top: 20px;
     border-top: 2px solid #db2777;
     padding-top: 15px;
-}
-#scanned-users-list {
-    list-style: none; padding: 0; max-height: 200px; overflow-y: auto;
-    background: #fff; border: 1px solid #ddd; border-radius: 4px;
 }
 .scanned-item {
     display: flex; justify-content: space-between; align-items: center;
