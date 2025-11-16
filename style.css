@@ -394,6 +394,7 @@ body {
     position: relative;
     max-height: 90vh; 
     overflow-y: hidden; 
+    margin: auto;
 }
 #qr-code-container {
     margin: 15px auto;
