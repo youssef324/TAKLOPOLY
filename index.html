@@ -93,7 +93,6 @@
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
-    <!-- 🛑 صندوق الإعلان الهام 🛑 -->
     <div class="announcement-container" id="user-announcement-box">
         <h3>📢 إعلان هام</h3>
         <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
@@ -101,7 +100,7 @@
 
     <div class="guest-container" id="guest-container" style="display: none;">
         <h2>🏆 عرض نقاط الأسر 🏆</h2>
-        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة ثم اضغط على أي مستخدم لعرض تفاصيله.</p>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
         <div class="guest-family-buttons">
             <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
             <button class="guest-family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
@@ -146,219 +145,186 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- 🛑🛑 لوحة الأدمن 🛑🛑 -->
+    <!-- 🛑🛑 لوحة الأدمن (الهيكل الجديد: قائمة + أقسام) 🛑🛑 -->
     <div class="admin-panel-container">
         <div id="admin-panel" style="display: none;">
-            <h2>لوحة تحكم الأدمن</h2>
+            <h2>🛠️ لوحة تحكم الأدمن</h2>
             
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h4>🔍 البحث عن مستخدم وتعديله</h4>
-                    <span class="toggle-icon">▼</span>
-                </div>
-                <div class="admin-section-content">
-                    <form id="admin-search-form">
-                        <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
-                        <button type="submit">بحث</button>
-                    </form>
-                    <div id="admin-results-list" style="display: none; margin-top: 15px;">
-                        <label for="admin-select-user" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                            تم العثور على عدة مستخدمين، اختر واحد:
-                        </label>
-                        <select id="admin-select-user" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white;">
-                        </select>
-                    </div>
-                    <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
-                    <div id="admin-searched-user-card" style="display: none;">
-                        <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
-                        <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
-                        <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
-                        <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
-                        <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
-                        <hr style="margin: 1rem 0;">
-                        <h4>تعديل الرصيد</h4>
-                        <div id="admin-balance-controls">
-                            <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
-                            <button id="admin-add-balance-btn">إضافة (+)</button>
-                            <button id="admin-subtract-balance-btn">خصم (-)</button>
-                        </div>
-                        <p id="admin-balance-message" style="color: green;"></p>
-                        <hr style="margin: 1rem 0;">
-                        <h4>تعديل مستوى المستخدم</h4>
-                        <div id="admin-level-controls">
-                            <input type="number" id="admin-level-amount" placeholder="المستوى الجديد" required min="1">
-                            <button id="admin-update-level-btn">تحديث المستوى</button>
-                        </div>
-                        <p id="admin-level-message" style="color: green;"></p>
-                        <hr style="margin: 1rem 0;">
-                        <button id="admin-show-user-qr-btn">
-                            عرض كود QR لهذا المستخدم
-                        </button>
-                        <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
-                        <button id="admin-delete-user-btn">
-                            حذف هذا المستخدم نهائياً
-                        </button>
-                        <p id="admin-delete-message"></p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h4>👥 عرض المستخدمين حسب الأسرة</h4>
-                    <span class="toggle-icon">▼</span>
-                </div>
-                <div class="admin-section-content">
-                    <div class="family-buttons-container">
-                        <button class="family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
-                        <button class="family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
-                        <button class="family-btn" data-family="اسرة الانبا كاراس">اسرة الانبا كاراس</button>
-                    </div>
-                    <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
-                    <div class="mass-update-controls" id="mass-update-controls">
-                        <h5>تعديل رصيد (<span id="selected-users-count">0</span>) مستخدم:</h5>
-                        <input type="number" id="mass-update-amount" placeholder="الكمية (اكتب سالب للخصم)" required>
-                        <div class="mass-update-buttons">
-                            <button id="mass-update-add-btn">إضافة (+)</button>
-                            <button id="mass-update-subtract-btn">خصم (-)</button>
-                        </div>
-                        <p id="mass-update-message" style="color: green; margin-top: 10px; text-align: center;"></p>
-                    </div>
-                    <div id="admin-family-results" style="margin-top: 1rem;"></div>
-                </div>
+            <!-- 🛑 القائمة الرئيسية للأدمن 🛑 -->
+            <div id="admin-main-menu" class="admin-grid-menu">
+                <button class="admin-menu-btn" data-target="section-search">🔍 البحث وتعديل المستخدمين</button>
+                <button class="admin-menu-btn" data-target="section-families">👥 إدارة الأسر والرصيد الجماعي</button>
+                <button class="admin-menu-btn" data-target="section-scan">📱 مسح كود الحضور (Scan)</button>
+                <button class="admin-menu-btn" data-target="section-print">🖨️ طباعة أكواد QR</button>
+                <button class="admin-menu-btn" data-target="section-quiz">❓ إدارة الكويز اليومي</button>
+                <button class="admin-menu-btn" data-target="section-announcements">📢 إدارة الإعلانات</button>
+                <button class="admin-menu-btn" data-target="section-store">🛒 إدارة المتجر</button>
             </div>
 
-            <div class="admin-section scan-section">
-                <div class="admin-section-header">
-                    <h4>📱 مسح كود الحضور (Scan)</h4>
-                    <span class="toggle-icon">▼</span>
+            <!-- قسم 1: البحث -->
+            <div id="section-search" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>🔍 البحث عن مستخدم</h3>
+                <form id="admin-search-form">
+                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
+                    <button type="submit">بحث</button>
+                </form>
+                <div id="admin-results-list" style="display: none; margin-top: 15px;">
+                    <label for="admin-select-user">اختر مستخدم:</label>
+                    <select id="admin-select-user" style="width: 100%; padding: 10px;"></select>
                 </div>
-                <div class="admin-section-content">
-                    <p style="font-size: 0.9em; color: #555;">امسح كود QR الخاص بالمستخدم لإضافة النقاط تلقائياً.</p>
-                    <div id="admin-scan-controls">
-                        <label for="reward-reason-select">نوع المكافأة:</label>
-                        <select id="reward-reason-select">
-                            <option value="300:القداس">القداس (300 نقطة)</option>
-                            <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
-                            <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
-                            <option value="200:عشية">عشية (200 نقطة)</option>
-                            <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
-                            <option value="200:تسبحة">تسبحة (200 نقطة)</option>
-                            <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
-                            <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
-                            <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
-                            <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
-                            <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
-                        </select>
-                        <button id="start-scan-btn" style="background-color: #f472b6;">
-                            تشغيل الكاميرا والمسح
-                        </button>
+                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
+                <div id="admin-searched-user-card" style="display: none;">
+                    <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
+                    <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
+                    <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
+                    <p><strong>الرصيد:</strong> <span id="searched-user-balance"></span></p>
+                    <p><strong>المستوى:</strong> <span id="searched-user-level"></span></p>
+                    <hr>
+                    <h4>تعديل الرصيد</h4>
+                    <div id="admin-balance-controls">
+                        <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
+                        <button id="admin-add-balance-btn">إضافة (+)</button>
+                        <button id="admin-subtract-balance-btn">خصم (-)</button>
                     </div>
-                    <div id="reader" style="width: 100%; margin-top: 15px;"></div>
-                    <p id="scan-status-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
-                    <div class="scanned-batch-list-container" id="scanned-batch-list-container">
-                        <h4>قائمة الحضور للمراجعة (<span id="scan-batch-count">0</span>)</h4>
-                        <ul id="scanned-batch-list"></ul>
-                        <button id="submit-scan-batch-btn">تأكيد وإضافة النقاط للكل</button>
-                        <p id="scan-batch-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+                    <p id="admin-balance-message" style="color: green;"></p>
+                    <hr>
+                    <h4>تعديل المستوى</h4>
+                    <div id="admin-level-controls">
+                        <input type="number" id="admin-level-amount" placeholder="المستوى الجديد" required min="1">
+                        <button id="admin-update-level-btn">تحديث</button>
                     </div>
+                    <p id="admin-level-message" style="color: green;"></p>
+                    <hr>
+                    <button id="admin-show-user-qr-btn">عرض QR للمستخدم</button>
+                    <h4 style="color: #dc3545; margin-top: 1rem;">حذف المستخدم</h4>
+                    <button id="admin-delete-user-btn">حذف نهائياً</button>
+                    <p id="admin-delete-message"></p>
                 </div>
             </div>
             
-            <div class="admin-section print-section">
-                <div class="admin-section-header">
-                    <h4>🖨️ طباعة أكواد الحضور (Print)</h4>
-                    <span class="toggle-icon">▼</span>
+            <!-- قسم 2: الأسر -->
+            <div id="section-families" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>👥 الأسر والرصيد الجماعي</h3>
+                <div class="family-buttons-container">
+                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
+                    <button class="family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
+                    <button class="family-btn" data-family="اسرة الانبا كاراس">اسرة الانبا كاراس</button>
                 </div>
-                <div class="admin-section-content">
-                    <p style="font-size: 0.9em; color: #555;">
-                        لتجهيز بطاقات الحضور. قم بتوليد الكروت ثم اطبع الصفحة أو حملها كصورة.
-                    </p>
-                    <div id="admin-qr-list-controls">
-                        <button id="admin-fetch-qr-list-btn">الخطوة 1: جلب قائمة المستخدمين</button>
-                        <button id="admin-generate-print-cards-btn">الخطوة 2: توليد بطاقات الطباعة</button>
-                        <button id="admin-download-cards-as-image-btn">الخطوة 3: تحميل الكروت كصورة (PNG)</button>
-                        <p id="admin-qr-list-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
-                        <textarea id="admin-qr-list-results" style="display: none;"></textarea>
+                <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
+                <div class="mass-update-controls" id="mass-update-controls">
+                    <h5>تعديل رصيد (<span id="selected-users-count">0</span>) مستخدم:</h5>
+                    <input type="number" id="mass-update-amount" placeholder="الكمية" required>
+                    <div class="mass-update-buttons">
+                        <button id="mass-update-add-btn">إضافة (+)</button>
+                        <button id="mass-update-subtract-btn">خصم (-)</button>
                     </div>
-                    <div id="admin-printable-cards-container"></div>
+                    <p id="mass-update-message" style="color: green; text-align: center;"></p>
                 </div>
+                <div id="admin-family-results" style="margin-top: 1rem;"></div>
             </div>
 
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h4>❓ إضافة سؤال جديد (Quiz)</h4>
-                    <span class="toggle-icon">▼</span>
+            <!-- قسم 3: مسح الحضور -->
+            <div id="section-scan" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>📱 مسح كود الحضور (Scan)</h3>
+                <div id="admin-scan-controls">
+                    <label>نوع المكافأة:</label>
+                    <select id="reward-reason-select">
+                        <option value="300:القداس">القداس (300 نقطة)</option>
+                        <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+                        <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+                        <option value="200:عشية">عشية (200 نقطة)</option>
+                        <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+                        <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+                        <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+                        <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+                        <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+                        <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+                        <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
+                    </select>
+                    <button id="start-scan-btn" style="background-color: #f472b6;">تشغيل الكاميرا والمسح</button>
                 </div>
-                <div class="admin-section-content">
-                    <p style="font-size: 0.9em; color: #555;">
-                        ملحوظة: إضافة سؤال جديد سيقوم بإلغاء تنشيط السؤال القديم أوتوماتيكياً.
-                    </p>
-                    <form id="admin-quiz-form">
-                        <input type="text" id="quiz-question" placeholder="نص السؤال" required>
-                        <input type="text" id="quiz-opt-a" placeholder="الاختيار الأول (أ)" required>
-                        <input type="text" id="quiz-opt-b" placeholder="الاختيار الثاني (ب)" required>
-                        <input type="text" id="quiz-opt-c" placeholder="الاختيار الثالث (ج)" required>
-                        <label for="quiz-correct-opt">الإجابة الصحيحة:</label>
-                        <select id="quiz-correct-opt" required>
-                            <option value="" disabled selected>-- اختر الإجابة --</option>
-                            <option value="option_a">الاختيار الأول (أ)</option>
-                            <option value="option_b">الاختيار الثاني (ب)</option>
-                            <option value="option_c">الاختيار الثالث (ج)</option>
-                        </select>
-                        <label for="quiz-points">عدد النقاط:</label>
-                        <input type="number" id="quiz-points" placeholder="النقاط (مثال: 10)" required>
-                        <button type="submit">إضافة السؤال</button>
-                    </form>
-                    <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
-                </div>
-            </div>
-
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h4>📢 إدارة الإعلانات (مُحدث)</h4>
-                    <span class="toggle-icon">▼</span>
-                </div>
-                <div class="admin-section-content">
-                    <form id="admin-announcement-form">
-                        <label>الإعلان الهام (الصندوق الأصفر):</label>
-                        <textarea id="admin-announcement-text" placeholder="اكتب الإعلان الثابت هنا..."></textarea>
-                        
-                        <label style="margin-top:10px; display:block;">شريط الأخبار (المتحرك):</label>
-                        <!-- 🛑🛑 التعديل هنا: Placeholder يوضح طريقة الفصل 🛑🛑 -->
-                        <input type="text" id="admin-ticker-text" placeholder="اكتب الأخبار هنا... (افصل بين الرسائل بعلامة | )" style="width:100%; padding:10px;">
-                        
-                        <button type="submit">نشر التحديثات</button>
-                    </form>
-                    <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
+                <div id="reader" style="width: 100%; margin-top: 15px;"></div>
+                <p id="scan-status-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+                <div class="scanned-batch-list-container" id="scanned-batch-list-container">
+                    <h4>قائمة الحضور للمراجعة (<span id="scan-batch-count">0</span>)</h4>
+                    <ul id="scanned-batch-list"></ul>
+                    <button id="submit-scan-batch-btn">تأكيد وإضافة النقاط للكل</button>
+                    <p id="scan-batch-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
                 </div>
             </div>
             
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h4>🛒 إدارة عناصر المتجر</h4>
-                    <span class="toggle-icon">▼</span>
+            <!-- قسم 4: الطباعة -->
+            <div id="section-print" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>🖨️ طباعة أكواد الحضور</h3>
+                <div id="admin-qr-list-controls">
+                    <button id="admin-fetch-qr-list-btn">الخطوة 1: جلب القائمة</button>
+                    <button id="admin-generate-print-cards-btn">الخطوة 2: توليد الكروت</button>
+                    <button id="admin-download-cards-as-image-btn">الخطوة 3: تحميل كصورة</button>
+                    <p id="admin-qr-list-message" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+                    <textarea id="admin-qr-list-results" style="display: none;"></textarea>
                 </div>
-                <div class="admin-section-content">
-                    <p style="font-size: 0.9em; color: #555;">
-                        أضف أو احذف العناصر المتاحة للشراء في المتجر.
-                    </p>
-                    <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
-                        <h5>إضافة عنصر جديد</h5>
-                        <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
-                        <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
-                        <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
-                        <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
-                        <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (اختياري):</label>
-                        <input type="file" id="store-item-image-file" accept="image/png, image/jpeg">
-                        <button type="submit" style="background-color: #007bff; margin-top: 10px;">إضافة العنصر للمتجر</button>
-                    </form>
-                    <p id="admin-store-message" style="color: green; margin-top: 10px;"></p>
-                    <h5>العناصر الحالية في المتجر:</h5>
-                    <ul id="admin-store-items-list" style="list-style: none; padding: 0;">
-                        <li>جاري تحميل العناصر...</li>
-                    </ul>
-                </div>
+                <div id="admin-printable-cards-container"></div>
+            </div>
+
+            <!-- قسم 5: الكويز -->
+            <div id="section-quiz" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>❓ إضافة كويز جديد</h3>
+                <form id="admin-quiz-form">
+                    <input type="text" id="quiz-question" placeholder="نص السؤال" required>
+                    <input type="text" id="quiz-opt-a" placeholder="أ" required>
+                    <input type="text" id="quiz-opt-b" placeholder="ب" required>
+                    <input type="text" id="quiz-opt-c" placeholder="ج" required>
+                    <label>الإجابة الصحيحة:</label>
+                    <select id="quiz-correct-opt" required>
+                        <option value="" disabled selected>-- اختر --</option>
+                        <option value="option_a">أ</option>
+                        <option value="option_b">ب</option>
+                        <option value="option_c">ج</option>
+                    </select>
+                    <label>النقاط:</label>
+                    <input type="number" id="quiz-points" placeholder="10" required>
+                    <button type="submit">إضافة السؤال</button>
+                </form>
+                <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
+            </div>
+
+            <!-- قسم 6: الإعلانات -->
+            <div id="section-announcements" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>📢 إدارة الإعلانات</h3>
+                <form id="admin-announcement-form">
+                    <label>1. الإعلان الهام (الصندوق الأصفر):</label>
+                    <textarea id="admin-announcement-text" placeholder="اكتب الإعلان الثابت هنا..."></textarea>
+                    
+                    <label style="margin-top:15px; display:block;">2. شريط الأخبار المتحرك (أعلى الشاشة):</label>
+                    <input type="text" id="admin-ticker-text" placeholder="اكتب الأخبار هنا... (افصل بينها بـ | )" style="width:100%; padding:10px;">
+                    
+                    <button type="submit" style="margin-top: 15px;">نشر التحديثات</button>
+                </form>
+                <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
+            </div>
+            
+            <!-- قسم 7: المتجر -->
+            <div id="section-store" class="admin-section-view" style="display: none;">
+                <button class="back-to-admin-menu">⬅️ رجوع للقائمة</button>
+                <h3>🛒 إدارة المتجر</h3>
+                <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                    <h5>إضافة عنصر جديد</h5>
+                    <input type="text" id="store-item-name" placeholder="اسم العنصر" required>
+                    <input type="number" id="store-item-price" placeholder="السعر" required>
+                    <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب" required min="1" value="1">
+                    <label>صورة المنتج (اختياري):</label>
+                    <input type="file" id="store-item-image-file" accept="image/png, image/jpeg">
+                    <button type="submit" style="background-color: #007bff; margin-top: 10px;">إضافة</button>
+                </form>
+                <p id="admin-store-message" style="color: green; margin-top: 10px;"></p>
+                <h5>العناصر الحالية:</h5>
+                <ul id="admin-store-items-list" style="list-style: none; padding: 0;"></ul>
             </div>
         </div>
     </div>
