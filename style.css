@@ -9,7 +9,7 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: 
 @media (max-width: 768px) { .main-header { flex-direction: column; text-align: center; gap: 10px; } .header-part.right, .header-part.left { text-align: center; } }
 .ticker-wrap { width: 100%; background-color: #17a2b8; overflow: hidden; height: 40px; display: flex; align-items: center; border-bottom: 2px solid #117a8b; }
 .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 20s linear infinite; color: white; font-weight: bold; font-size: 1.1em; }
-@keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(100%, 0, 0); } }
+@keyframes ticker { 0% { transform: translate3d(-100%, 0, 0); } 100% { transform: translate3d(100%, 0, 0); } }
 .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
 .card-and-forms-wrapper { background-image: url('/hero2.jpg'); background-size: cover; background-position: center center; border-radius: 8px; padding: 20px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); margin-bottom: 20px; }
 .card-container { display: flex; justify-content: center; margin-bottom: 20px; }
@@ -18,11 +18,11 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: 
 .form-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
 .form-container form { background-color: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 10px; }
 .form-container h3 { text-align: center; color: #007bff; margin-bottom: 15px; }
-.form-container input, .form-container select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.form-container input, .form-container select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; background-color: white; }
 .form-container button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
 .admin-panel-container { padding: 20px; max-width: 900px; margin: 2rem auto; }
 #admin-panel { background-color: #f0f0f0; padding: 1.5rem; border-radius: 8px; border: 2px dashed #007bff; }
-.admin-section { margin-top: 10px; background: #fafafa; border-radius: 4px; overflow: hidden; }
+.admin-section { margin-top: 10px; background: #fafafa; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; }
 .accordion-header { background-color: #e9ecef; padding: 15px; margin: 0; cursor: pointer; border-bottom: 1px solid #ddd; transition: background-color 0.2s; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
 .accordion-header:hover { background-color: #dde2e6; }
 .accordion-header::after { content: '▼'; font-size: 0.8em; }
@@ -43,6 +43,7 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: 
 .store-items-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
 .store-item-card { background: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
 .store-item-card img { width: 100px; height: 100px; object-fit: contain; }
+.store-item-card button { background-color: #007bff; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 5px; }
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; position: relative; }
 .close-btn, .close-qr-btn { position: absolute; top: 10px; left: 10px; cursor: pointer; font-size: 24px; }
