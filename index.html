@@ -101,7 +101,7 @@
                     <p id="user-name">Name: </p>
                     <p id="user-family">Family: </p>
                     <p id="user-balance">Balance: </p>
-                                       <p id="user-level">المستوى: </p>
+                    <p id="user-level">المستوى: </p>
 
                     <div class="transaction-history">
                         <h4>سجل المعاملات</h4>
@@ -112,7 +112,7 @@
             </div>
             
             <div class="button-group">
-                               <button id="show-qr-btn" style="display: none; background-color: #28a745; color: white;">كود الحضور 📋</button>
+                <button id="show-qr-btn" style="display: none; background-color: #28a745; color: white;">كود الحضور 📋</button>
                 <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
                 <button id="unlocked-items-btn" style="display: none;">مشترياتي</button>
                 <button id="logout-btn">تسجيل الخروج</button>
@@ -148,7 +148,7 @@
                     <button type="submit">Sign Up</button>
                 </form>
             </div>
-            </div> 
+        </div> 
     </div> 
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
@@ -170,7 +170,7 @@
         <p id="quiz-message"></p>
     </div>
 
-       <div class="store-container" id="store-container" style="display: none;">
+    <div class="store-container" id="store-container" style="display: none;">
         <h2>🛒 TAKLOPOLY STORE</h2> 
         <p style="text-align: center; color: #555;">استبدل نقاطك بعناصر مميزة.</p>
         <div class="store-items-grid" id="store-items-list">
@@ -188,9 +188,9 @@
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-       <div class="guest-container" id="guest-container" style="display: none;">
+    <div class="guest-container" id="guest-container" style="display: none;">
         <h2>🏆 عرض نقاط الأسر 🏆</h2>
-               <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
         
         <div class="guest-family-buttons">
             <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">
@@ -211,11 +211,12 @@
                            </ul>
         </div>
         
-               <div class="button-group" style="max-width: 600px;">
+        <div class="button-group" style="max-width: 600px;">
              <button id="logout-btn-guest" style="background-color: #6c757d; color: white;">تسجيل الخروج</button>
         </div>
     </div>
-       <div class="admin-panel-container">
+
+    <div class="admin-panel-container">
         
         <div id="admin-panel" style="display: none;">
             
@@ -243,9 +244,9 @@
                     <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
                     <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
                     <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
-                                       <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
+                    <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
                     
-                                       <button id="admin-show-user-qr-btn">
+                    <button id="admin-show-user-qr-btn">
                         عرض كود QR لهذا المستخدم
                     </button>
                     
@@ -259,7 +260,7 @@
                     </div>
                     <p id="admin-balance-message" style="color: green;"></p>
                     
-                                       <hr style="margin: 1rem 0;">
+                    <hr style="margin: 1rem 0;">
                     <h4>تعديل مستوى المستخدم</h4>
                     <div id="admin-level-controls">
                         <input type="number" id="admin-level-amount" placeholder="المستوى الجديد" required min="1">
@@ -307,14 +308,14 @@
                     </div>
             </div>
 
-                       <div class="admin-section scan-section">
+            <div class="admin-section scan-section">
                 <h4>📷 مسح كود الحضور والمكافأة</h4>
                 <p style="font-size: 0.9em; color: #555;">
                     امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية.
                 </p>
                 <div id="admin-scan-controls">
                     <label for="reward-reason-select">نوع المكافأة:</label>
-                                       <select id="reward-reason-select">
+                    <select id="reward-reason-select">
                         <option value="300:القداس">القداس (300 نقطة)</option>
                         <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
                         <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
@@ -326,18 +327,18 @@
                         <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
                         <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
                         <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
-                                               <option value="500:الاعتراف">الاعتراف (500 نقطة)</option>
+                        <option value="500:الاعتراف">الاعتراف (500 نقطة)</option>
                         <option value="150:المسابقة">المسابقة (150 نقطة)</option>
                     </select>
                     <button id="start-scan-btn" style="background-color: #f472b6;">
                         تشغيل الكاميرا والمسح
                     </button>
-                                       <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
+                    <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
                 </div>
                 <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
             </div>
-                       
-                       <div class="admin-section">
+            
+            <div class="admin-section">
                 <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
                 <p style="font-size: 0.9em; color: #555;">
                     الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت. الخطوة 3: تحميل الكروت كصورة للطباعة.
@@ -346,22 +347,23 @@
                     <button id="admin-fetch-qr-list-btn">
                         الخطوة 1: جلب قائمة المستخدمين
                     </button>
-                                _        <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
+                    <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
                     
                     <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
                         الخطوة 2: توليد بطاقات الطباعة
                     </button>
                     
-                                       <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
+                    <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
                         الخطوة 3: تحميل الكروت كصورة (PNG)
                     </button>
                 </div>
                 <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
 
-                               <div id="admin-printable-cards-container">
+                <div id="admin-printable-cards-container">
                                    </div>
             </div>
-                       <div class="admin-section">
+
+            <div class="admin-section">
                 <h4>إضافة سؤال جديد (Quiz)</h4>
                 <p style="font-size: 0.9em; color: #555;">
                     ملحوظة: إضافة سؤال جديد سيقوم بإلغاء تنشيط السؤال القديم أوتوماتيكياً.
@@ -391,11 +393,10 @@
             <div class="admin-section">
                 <h4>نشر إعلان عام</h4>
                 <form id="admin-announcement-form">
-                    
-                                       <label for="admin-announcement-text" style="font-weight: bold;">رسالة الإعلان (الصندوق الأصفر):</label>
+                    <label for="admin-announcement-text" style="font-weight: bold;">رسالة الإعلان (الصندوق الأصفر):</label>
                     <textarea id="admin-announcement-text" placeholder="اكتب الإعلان هنا..."></textarea>
                     
-         _                             <label for="admin-ticker-text" style="font-weight: bold; margin-top: 15px;">رسالة الشريط المتحرك (اختياري):</label>
+                    <label for="admin-ticker-text" style="font-weight: bold; margin-top: 15px;">رسالة الشريط المتحرك (اختياري):</label>
                     <textarea id="admin-ticker-text" placeholder="اكتب نص الشريط المتحرك هنا... (مثل: اهلا بكم في مهرجان..)" style="min-height: 60px;"></textarea>
                     
                     <button type="submit">نشر أو تحديث الإعلان</button>
@@ -413,7 +414,7 @@
                     <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
                     <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
                     
-                                       <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
+                    <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
                     <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
 
                     <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (اختياري):</label>
@@ -428,7 +429,7 @@
                     <li>جاري تحميل العناصر...</li>
                 </ul>
             </div>
-            </div>
+        </div>
     </div>
     <div class="leaderboard-container" id="leaderboard-container">
         <h2>🏆 أبطال الأسر 🏆</h2>
@@ -481,7 +482,7 @@
                 <label for="edit-item-price">السعر (نقاط):</label>
                 <input type="number" id="edit-item-price" required min="1">
 
-                               <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
+                <label for="edit-item-required-level" style="margin-top: 15px;">المستوى المطلوب:</label>
                 <input type="number" id="edit-item-required-level" required min="1">
 
                 <label for="edit-item-new-file" style="margin-top: 15px;">تغيير الصورة (اختياري):</label>
@@ -493,7 +494,7 @@
             </form>
         </div>
     </div>
-       <div id="qr-modal-overlay">
+    <div id="qr-modal-overlay">
         <div id="qr-modal-content">
             <span class="close-qr-btn">&times;</span>
             <h3>كود الحضور الخاص بك</h3>
