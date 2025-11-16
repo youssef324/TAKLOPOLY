@@ -29,20 +29,20 @@ body {
 .header-part { flex: 1; text-align: center; }
 .header-part.right { text-align: right; }
 .header-part.left { text-align: left; }
-/* 🛑 تم التكبير والـ Bold 🛑 */
-.header-part h1 { font-size: 3.0em; margin: 5px 0; font-weight: bold; }
-.header-part h2 { font-size: 2.6em; margin: 0; color: #ffdd57; font-weight: bold; }
-.header-part h3 { font-size: 2.2em; margin: 0; font-weight: bold; }
+/* 🛑 تم التكبير والـ Bold (قيم أكبر هذه المرة) 🛑 */
+.header-part h1 { font-size: 2.2em; margin: 5px 0; font-weight: bold; }
+.header-part h2 { font-size: 1.8em; margin: 0; color: #ffdd57; font-weight: bold; }
+.header-part h3 { font-size: 1.4em; margin: 0; font-weight: bold; }
 
 @media (max-width: 768px) {
     .main-header { flex-direction: column; text-align: center; gap: 10px; }
     .header-part.right, .header-part.left { text-align: center; }
 }
 
-/* --- 🛑 شريط الإعلانات الأسود (المعدل) 🛑 --- */
+/* --- شريط الإعلانات الأسود --- */
 .ticker-wrap {
     width: 100%;
-    background-color: #222; /* لون أسود */
+    background-color: #222;
     overflow: hidden;
     height: 40px;
     display: flex;
@@ -54,9 +54,9 @@ body {
     display: inline-block;
     padding-left: 100%;
     animation: ticker-move 25s linear infinite;
-    color: #ffffff; /* لون أبيض */
-    font-weight: bold; /* خط عريض */
-    font-size: 1.2em; /* خط أكبر */
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.2em;
     white-space: nowrap;
 }
 @keyframes ticker-move {
@@ -124,35 +124,30 @@ body {
 }
 
 
-/* --- 🛑 لوحة الأدمن (مدمجة: شكل الأصلي + هيكل الأكورديون) 🛑 --- */
-#admin-modal-overlay {
-    /* ستايل عام للمودال موجود بالأسفل */
-}
+/* --- لوحة الأدمن (مدمجة: شكل الأصلي + هيكل الأكورديون) --- */
 #admin-modal-content {
-    max-width: 900px !important; /* عرض أكبر للمودال */
-    max-height: 90vh; /* طول أقصى */
-    overflow-y: auto; /* إضافة سكرول */
+    max-width: 900px !important;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-/* 🛑 تطبيق ستايل الملف الأصلي (الإطار المتقطع) 🛑 */
 #admin-panel {
     background-color: #f0f0f0;
     padding: 1.5rem;
     border-radius: 8px;
     margin-top: 1rem;
-    border: 2px dashed #007bff; /* 🛑 هذا هو الستايل الأصلي 🛑 */
+    border: 2px dashed #007bff;
     font-size: 1.1em; 
 }
 #admin-panel h2 { text-align: center; color: #333; margin-bottom: 20px; }
 
 .admin-section {
-    background: #fafafa; /* 🛑 ستايل الأصلي */
+    background: #fafafa;
     margin-bottom: 15px;
     border-radius: 4px;
     overflow: hidden;
 }
 
-/* 🛑 رأس القسم (تطبيق ستايل الأصلي) 🛑 */
 .accordion-header {
     padding: 15px;
     background-color: #fafafa;
@@ -160,7 +155,7 @@ body {
     display: flex; justify-content: space-between; align-items: center;
     font-weight: bold; color: #333;
     font-size: 1.15em;
-    border-bottom: 2px solid #007bff; /* 🛑 هذا هو الستايل الأصلي 🛑 */
+    border-bottom: 2px solid #007bff;
     transition: background 0.2s;
 }
 .accordion-header:hover { background-color: #f1f1f1; }
@@ -175,7 +170,7 @@ body {
     border-top: 1px solid #ddd;
 }
 
-/* --- 🛑 المتجر (بحواف دائرية) 🛑 --- */
+/* --- المتجر (بحواف دائرية) --- */
 .store-container {
     display: none; 
     max-width: 900px; margin: 2rem auto; padding: 20px;
@@ -191,7 +186,7 @@ body {
     margin-top: 1.5rem;
 }
 
-/* 🛑🛑 تعديل: زيادة استدارة الكروت 🛑🛑 */
+/* 🛑 زيادة استدارة الكروت 🛑 */
 .store-item-card {
     background-color: #f8f9fa;
     border: 1px solid #ddd;
@@ -246,7 +241,7 @@ body {
     cursor: not-allowed;
 }
 
-/* --- 🛑 لوحة الصدارة (بتنسيق هرمي 1-2) 🛑 --- */
+/* --- 🛑 لوحة الصدارة (صور أبطال مكبرة - مع الحفاظ على الترتيب الأصلي) 🛑 --- */
 .leaderboard-container {
     display: none; max-width: 1200px; margin: 2rem auto; padding: 20px;
     background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -256,66 +251,61 @@ body {
     border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
 }
 
-/* 🛑🛑 تعديل: تنسيق هرمي 1-2 🛑🛑 */
 .champions-container {
     display: flex; 
-    justify-content: center; /* توسيط البطل الثاني والثالث */
-    align-items: center;
+    justify-content: center; /* توسيط الكروت في المنتصف */
     text-align: center;
     margin: 2rem 0; 
-    flex-wrap: wrap; /* للسماح بالالتفاف */
-}
-.champion-card { 
-    flex-basis: 250px; /* حجم أكبر للكروت */
-    padding: 10px;
-}
-/* 🛑 الأول فوق 🛑 */
-.champion-card:first-child {
-    flex-basis: 100%; /* البطل الأول يأخذ سطر كامل */
-    margin-bottom: 20px; /* مسافة */
-}
-/* 🛑 تكبير البطل الأول بشكل إضافي 🛑 */
-.champion-card:first-child .rank {
-    font-size: 4.0em; 
-}
-.champion-card:first-child img {
-    width: 180px; 
-    height: 180px; 
-    border-width: 5px; /* بوردر ذهبي أسمك */
-}
-.champion-card:first-child .name {
-    font-size: 1.5em; 
+    flex-wrap: wrap; /* للسماح بالالتفاف في الشاشات الصغيرة */
+    gap: 30px; /* مسافة بين الكروت */
 }
 
-/* 🛑 حجم عام للأبطال 🛑 */
-.champion-card .rank {
-    font-size: 3.0em; /* تكبير الميداليات */
+.champion-card { 
+    flex-basis: 250px; /* حجم أساسي أكبر لكل كارت */
+    padding: 10px;
+    margin: 0; /* إزالة المارجن الزائد */
 }
+
+/* 🛑 تكبير صور الأبطال 🛑 */
 .champion-card img,
 .champion-card .card-img { 
-    width: 140px; 
-    height: 140px; 
+    width: 180px; /* 🛑 تم التكبير بشكل ملحوظ 🛑 */
+    height: 180px; /* 🛑 تم التكبير بشكل ملحوظ 🛑 */
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
-    border: 3px solid gold; 
+    border: 4px solid gold; /* بوردر ذهبي أسمك */
+}
+
+.champion-card .rank {
+    font-size: 3.5em; /* تكبير الميداليات */
+    margin: 0;
 }
 .champion-card .name {
-    font-size: 1.3em; /* تكبير الخط */
+    font-size: 1.4em; /* تكبير الخط */
     font-weight: bold; 
     color: #333; 
     display: block;
+    margin-top: 5px;
 }
 .champion-card small {
     display: block; color: #555;
+    font-size: 1em;
 }
-/* تمييز الثاني والثالث */
-.champion-card:nth-child(2) img {
-     border-color: #C0C0C0; /* فضي */
+
+/* تمييز الميداليات الفضي والبرونزي */
+.champion-card:nth-child(2) img { border-color: #C0C0C0; /* فضي */ }
+.champion-card:nth-child(3) img { border-color: #CD7F32; /* برونزي */ }
+
+/* لإجبار الأول أن يكون في سطر وحده، والثاني والثالث أسفله */
+.champion-card:first-child {
+    width: 100%; /* يأخذ عرض الشاشة بالكامل */
+    flex-basis: auto; /* يلغي الأساس المرن */
+    order: 1; /* يضمن أنه الأول في الترتيب المرئي */
 }
-.champion-card:nth-child(3) img {
-     border-color: #CD7F32; /* برونزي */
-}
+.champion-card:nth-child(2) { order: 2; }
+.champion-card:nth-child(3) { order: 3; }
+
 
 .leaderboard-columns {
     display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; 
@@ -332,7 +322,7 @@ body {
 }
 
 
-/* --- 🛑 واجهة الزائر (Guest) 🛑 --- */
+/* --- واجهة الزائر (Guest) --- */
 .guest-container {
     display: none; max-width: 800px; margin: 2rem auto; padding: 30px;
     background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -355,15 +345,19 @@ body {
     margin: 0;
 }
 
-/* --- 🛑 المودال العام (Modal) 🛑 --- */
+/* --- 🛑🛑 إصلاح: المودال العام والـ QR في المنتصف تماماً 🛑🛑 --- */
 .modal-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.8); display: none; 
-    justify-content: center; align-items: center; z-index: 2000; 
+    background: rgba(0,0,0,0.8); 
+    display: flex; /* 🛑 هنا يكمن السر: استخدام flexbox لتوسيط المحتوى */
+    justify-content: center; /* توسيط أفقي */
+    align-items: center;   /* توسيط عمودي */
+    z-index: 2000; 
 }
 .modal-content { 
     background: white; padding: 30px; border-radius: 8px; 
     width: 90%; max-width: 500px; position: relative; text-align: right; 
+    /* 🛑 تأكد من عدم وجود display: none; هنا مباشرة، فهو يتم التحكم به بالجافاسكريبت */
 }
 .close-btn { 
     position: absolute; top: 10px; left: 10px; 
@@ -371,31 +365,33 @@ body {
 }
 
 /* --- 🛑🛑 تعديل: ستايل كود الحضور (QR Modal) الأصلي 🛑🛑 --- */
-/* هذا الكود يعيد الشكل المضبوط الذي طلبته للـ QR */
-#qr-modal-overlay .modal-content, /* هذا السطر يطبق الستايل على المودال المفتوح */
-#qr-modal-content { /* وهذا السطر يضمن التطبيق لو الـ ID تغير */
+#qr-modal-overlay.modal-overlay {
+    display: flex; /* 🛑 تأكد من أن الـ overlay هو flexbox */
+}
+
+#qr-modal-content {
     background-color: white; padding: 25px; border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); text-align: center;
-    max-width: 300px !important; /* 🛑 فرض الحجم الأصلي الأفضل */
-    width: 90%; position: relative;
-    max-height: 90vh; /* منع أي طول زائد */
-    overflow-y: hidden; /* لا نحتاج سكرول هنا */
+    max-width: 300px !important; /* فرض الحجم الأصلي الأفضل */
+    width: 90%; 
+    position: relative;
+    max-height: 90vh; 
+    overflow-y: hidden; 
 }
 #qr-code-container {
     margin: 15px auto;
-    width: 250px; /* 🛑 الحجم الأصلي */
-    height: 250px; /* 🛑 الحجم الأصلي */
+    width: 250px; 
+    height: 250px; 
     border: 1px solid #ccc; padding: 5px;
 }
 .close-qr-btn {
     position: absolute; top: 10px; left: 10px; font-size: 24px;
     font-weight: bold; color: #aaa; cursor: pointer;
 }
-/* 🛑🛑 نهاية تعديل ستايل الـ QR 🛑🛑 */
+/* 🛑🛑 نهاية إصلاح ستايل الـ QR 🛑🛑 */
 
 
-/* --- 🛑 تعديل: نافذة تفاصيل الزائر (Grid) 🛑 --- */
-/* هذا الكود يعيد تصميم الشبكة الجميل الذي أعجبك */
+/* --- نافذة تفاصيل الزائر (Grid) --- */
 #guest-details-modal .modal-content {
     max-width: 450px;
 }
@@ -412,11 +408,10 @@ body {
 .detail-item strong, .att-val { 
     font-size: 1.3em; font-weight: bold; color: #007bff; display: block;
 }
-.att-label { /* هذا الستايل يضبط العنوان ليكون في المنتصف */
+.att-label { 
     font-size: 0.9em; color: #555; display: flex; 
     align-items: center; justify-content: center; height: 40px;
 }
-/* 🛑 نهاية تعديل تفاصيل الزائر 🛑 */
 
 
 /* 🛑🛑 ستايل قسم طباعة الـ QR (معدل) 🛑🛑 */
@@ -464,8 +459,8 @@ body {
 
 /* 🛑🛑 تعديل: تكبير حاوية الـ QR للطباعة 🛑🛑 */
 .print-card-qr {
-    width: 140px; /* 🛑 تم التكبير */
-    height: 140px; /* 🛑 تم التكبير */
+    width: 140px; 
+    height: 140px; 
     margin: 0 auto;
     padding: 5px;
     background: white;
@@ -497,8 +492,8 @@ body {
     
     /* 🛑🛑 تعديل: تكبير الـ QR أثناء الطباعة 🛑🛑 */
     .print-card-qr {
-        width: 140px; /* 🛑 تم التكبير */
-        height: 140px; /* 🛑 تم التكبير */
+        width: 140px; 
+        height: 140px; 
         margin: 5px auto;
     }
     .print-card-qr img,
@@ -510,7 +505,7 @@ body {
     }
 }
 
-/* --- 🛑 المسح الجماعي (Batch Scan) 🛑 --- */
+/* --- المسح الجماعي (Batch Scan) --- */
 .scan-section #admin-scan-controls {
     display: flex; flex-direction: column; gap: 10px;
 }
@@ -588,38 +583,4 @@ body {
 #admin-add-balance-btn { background-color: #28a745; }
 #admin-subtract-balance-btn { background-color: #ffc107; color: #333; }
 #admin-level-controls { display: flex; gap: 10px; margin-top: 0.5rem; }
-#admin-level-controls input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-#admin-update-level-btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #17a2b8; font-weight: bold; }
-#admin-delete-user-btn { background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 1rem; }
-#admin-show-user-qr-btn { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 1rem; font-weight: bold; font-size: 1em; }
-#admin-searched-user-card { display: none; background: #fff; padding: 1rem; margin-top: 1rem; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.family-buttons-container { display: flex; justify-content: space-around; gap: 10px; flex-wrap: wrap; }
-.family-btn { flex: 1; padding: 10px 15px; font-size: 0.9em; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; min-width: 150px; }
-#admin-family-results { margin-top: 1rem; background: #fff; padding: 0.5rem 1rem; border-radius: 4px; max-height: 300px; overflow-y: auto; }
-#admin-family-results .family-user-item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 0.5rem 0; }
-#admin-family-results .user-info { cursor: pointer; flex-grow: 1; padding: 5px; margin-right: 15px; }
-#admin-family-results .mass-update-checkbox { margin-right: 15px; transform: scale(1.3); }
-.mass-update-controls { margin-top: 15px; padding: 15px; border: 1px solid #ccc; border-radius: 4px; }
-.mass-update-buttons { display: flex; gap: 10px; margin-top: 10px; }
-.mass-update-buttons button { padding: 12px 20px; font-size: 1.1em; font-weight: bold; flex-grow: 1; border: none; border-radius: 4px; cursor: pointer; color: white; transition: background-color 0.2s; }
-#mass-update-add-btn { background-color: #28a745; }
-#mass-update-subtract-btn { background-color: #dc3545; }
-#back-to-store-btn { background-color: #007bff; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1em; font-weight: bold; display: block; width: fit-content; margin-right: auto; transition: background-color 0.2s; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-form#admin-add-item-form button[type="submit"] { background-color: #28a745; color: white; padding: 12px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px; transition: background-color 0.2s; }
-#admin-quiz-form { display: flex; flex-direction: column; gap: 10px; }
-#admin-quiz-form input, #admin-quiz-form select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
-#admin-quiz-form button { background-color: #17a2b8; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; }
-#admin-announcement-form textarea { width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; box-sizing: border-box; }
-#admin-announcement-form input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-#admin-announcement-form button { background-color: #ffc107; color: #212529; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; width: 100%; margin-top: 10px; }
-#admin-store-items-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.admin-item-card { background-color: #ffffff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-right: 5px solid #007bff; border-radius: 8px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; font-size: 1.1em; }
-.admin-item-info { flex-grow: 1; text-align: right; margin-left: 20px; }
-.admin-item-info strong { display: block; font-size: 1.4em; color: #333; margin-bottom: 5px; }
-.admin-item-info small { display: block; color: #6c757d; font-size: 1em; line-height: 1.5; }
-.admin-item-actions { display: flex; align-items: center; gap: 8px; min-width: 190px; }
-.edit-item-btn { background-color: #ffc107; color: #333; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; transition: background-color 0.2s; cursor: pointer; }
-.delete-store-item-btn { background-color: #dc3545; color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; min-width: 90px; transition: background-color 0.2s, transform 0.2s; }
-.modal-content label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.95em; }
-.modal-content input[type="text"], .modal-content input[type="number"], .modal-content input[type="file"] { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-.modal-content button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1.1em; }
+#admin-level-
