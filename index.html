@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 <header class="main-header">
@@ -162,7 +161,7 @@
 <button id="admin-fetch-qr-list-btn">خطوة 1: جلب القائمة</button>
 <textarea id="admin-qr-list-results" readonly style="display:none;"></textarea>
 <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">خطوة 2: توليد الكروت</button>
-<button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">خطوة 3: تحميل كصورة (PNG)</button>
+<button onclick="window.print()" style="background-color: #007bff; color: white; margin-top: 10px;">طباعة الكروت (Ctrl+P)</button>
 </div>
 <p id="admin-qr-list-message"></p>
 <div id="admin-printable-cards-container"></div>
