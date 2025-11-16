@@ -511,17 +511,39 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">خطأ في تحميل بيانات الكويز.</p></div>';
         }
     }
+  // 🛑🛑 فانكشن جلب الإعلانات (مُحدثة للشريط المتحرك) 🛑🛑
     async function loadAnnouncement() {
-        userAnnouncementBox.style.display = "none";
-        userAnnouncementText.textContent = "";
+        // العناصر القديمة (الصندوق الأصفر)
+        const userAnnouncementBox = document.getElementById("user-announcement-box");
+        const userAnnouncementText = document.getElementById("user-announcement-text");
+        // العنصر الجديد (الشريط المتحرك)
+        const tickerTextDisplay = document.getElementById("ticker-text-display");
+        const adminAnnouncementText = document.getElementById("admin-announcement-text"); // حقل الأدمن
+
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             if (!response.ok) throw new Error("فشل جلب الإعلان");
+
             const data = await response.json();
             if (data.message && data.message.trim()) {
-                userAnnouncementText.textContent = data.message;
-                userAnnouncementBox.style.display = "block";
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
+                // 1. تحديث الصندوق القديم (لو لسه موجود)
+                if (userAnnouncementText) userAnnouncementText.textContent = data.message;
+                if (userAnnouncementBox) userAnnouncementBox.style.display = "block";
+
+                // 2. 🛑 تحديث الشريط المتحرك (الجديد) 🛑
+                if (tickerTextDisplay) {
+                    tickerTextDisplay.textContent = data.message;
+                    // خدعة صغيرة لإعادة تشغيل الأنيميشن لما النص يتغير
+                    const tickerMove = document.querySelector('.ticker-move');
+                    if(tickerMove) {
+                        tickerMove.style.animation = 'none';
+                        tickerMove.offsetHeight; /* trigger reflow */
+                        tickerMove.style.animation = 'ticker-scroll 20s linear infinite';
+                    }
+                }
+
+                // 3. تحديث حقل الأدمن
+                if (loggedInUserProfile && loggedInUserProfile.role === 'admin' && adminAnnouncementText) {
                     adminAnnouncementText.value = data.message;
                 }
             }
