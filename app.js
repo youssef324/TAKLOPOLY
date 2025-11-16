@@ -202,7 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
         transactionList.innerHTML = "";
         if (userLevelP) userLevelP.textContent = "";
         if (editModalOverlay) editModalOverlay.style.display = "none";
-        if (qrModalOverlay) qrModalOverlay.style.display = "none"; // 🛑 إخفاء مودال الـ QR
+        
+        // 🏆🏆 الحل النهائي لعدم الظهور التلقائي 🏆🏆
+        if (qrModalOverlay) qrModalOverlay.style.cssText = "display: none !important;"; 
+        
         if (guestDetailsModal) guestDetailsModal.style.display = "none"; // 🛑 إخفاء مودال الزائر
 
         // 🛑 إيقاف الماسح إذا كان يعمل عند تسجيل الخروج
@@ -749,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
     async function loadStoreItems() {
-        if (loggedInUserProfile && loggedInUserProfile.role === 'admin') return;
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
 
         storeContainer.style.display = "block"; // 🛑 الإظهار أولاً
         storeLoadingMessage.style.display = 'block';
@@ -1324,6 +1327,7 @@ if(showQrBtn) {
         if (qrUserEmailDisplay) qrUserEmailDisplay.textContent = loggedInUserProfile.email;
 
         // 5. إظهار النافذة
+        // 🛑 نستخدم 'flex' لإظهار المودال (الذي تم إخفاؤه في resetUI)
         if (qrModalOverlay) qrModalOverlay.style.display = 'flex';
     });
 }
