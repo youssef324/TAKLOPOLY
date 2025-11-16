@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrCodeContainer = document.getElementById("qr-code-container");
     const closeQrBtn = document.querySelector(".close-qr-btn");
     const showQrBtn = document.getElementById("show-qr-btn");
-    const downloadCardsAsImageBtn = document.getElementById("admin-download-cards-as-image-btn");
 
     let loggedInUserProfile = null;
     let html5QrCode = null;
@@ -82,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         userAnnouncementBox.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
+        
         if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().catch(console.error); }
         html5QrCode = null;
         if (qrModalOverlay) qrModalOverlay.style.display = "none";
@@ -89,14 +89,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     resetUI();
 
+    // Accordion Logic (الأدمن)
     document.querySelectorAll('.accordion-header').forEach(header => {
         header.addEventListener('click', () => {
+            // إغلاق الكل أولاً
             document.querySelectorAll('.accordion-header').forEach(h => {
                 if (h !== header) {
                     h.classList.remove('active');
                     h.nextElementSibling.style.display = 'none';
                 }
             });
+            // تبديل الحالي
             header.classList.toggle('active');
             const content = header.nextElementSibling;
             content.style.display = content.style.display === 'block' ? 'none' : 'block';
@@ -154,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Login
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         messageDiv.textContent = "جاري الدخول...";
@@ -171,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok) {
                 messageDiv.textContent = "";
                 loggedInUserProfile = data.user;
+
                 if (loggedInUserProfile.role === 'admin') {
                     adminPanelDiv.style.display = "block";
                     logoutBtn.style.display = "block";
@@ -182,14 +187,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     logoutBtnGuest.style.display = "block";
                     formContainer.style.display = "none";
                 } else {
+                    // User
                     cardContainer.style.display = "flex";
                     formContainer.style.display = "none";
                     logoutBtn.style.display = "block";
                     refreshDataBtn.style.display = "block";
                     unlockedItemsBtn.style.display = "block";
                     if (showQrBtn) showQrBtn.style.display = "block";
+                    
                     updateUserProfileUI(loggedInUserProfile);
                     loadAnnouncements();
+                    // 🛑 تحميل اللوحة فوراً 🛑
                     loadMainDashboard(); 
                 }
             } else {
@@ -197,8 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 messageDiv.style.color = "red";
             }
         } catch (err) {
-            console.error(err);
-            messageDiv.textContent = "خطأ في الاتصال. تأكد من الإنترنت.";
+            messageDiv.textContent = "خطأ في الاتصال. حاول مرة أخرى.";
         }
     });
 
@@ -211,13 +218,15 @@ document.addEventListener("DOMContentLoaded", () => {
         loadTransactionHistory(user.email);
     }
 
+    // 🛑 إصلاح QR المستخدم 🛑
     if (showQrBtn) {
         showQrBtn.addEventListener('click', () => {
             if (!loggedInUserProfile) return;
-            qrModalOverlay.style.display = 'flex';
-            qrCodeContainer.innerHTML = '';
+            qrModalOverlay.style.display = 'flex'; // إظهار
+            qrCodeContainer.innerHTML = ''; // تنظيف
+            
+            // تأخير بسيط لضمان الرسم
             setTimeout(() => {
-                qrCodeContainer.innerHTML = '';
                 new QRCode(qrCodeContainer, { 
                     text: loggedInUserProfile.email, 
                     width: 200, 
@@ -226,11 +235,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
-            }, 100);
+            }, 50);
+            
             document.getElementById("qr-user-email-display").textContent = loggedInUserProfile.email;
         });
     }
-    if (closeQrBtn) { closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none'); }
+    if (closeQrBtn) closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none');
 
     function renderScannedList() {
         scannedUsersList.innerHTML = "";
@@ -301,8 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🛑🛑 إصلاح الأزرار المعطلة 🛑🛑
-    // يجب ربطها بحدث النقر
+    // إصلاح الأزرار
     if (logoutBtn) logoutBtn.addEventListener("click", () => { resetUI(); loginForm.reset(); });
     if (logoutBtnGuest) logoutBtnGuest.addEventListener("click", () => { resetUI(); loginForm.reset(); });
 
@@ -336,7 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (backToStoreBtn) backToStoreBtn.addEventListener('click', () => loadMainDashboard());
 
-    // Store items with dimming effect
     async function loadStoreItems() {
         storeItemsList.innerHTML = "<p>Loading...</p>";
         try {
@@ -347,10 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const div = document.createElement("div");
                 div.className = "store-item-card";
                 
-                // التحقق من الصلاحية
                 const canBuy = (loggedInUserProfile.balance >= item.price && loggedInUserProfile.level >= (item.required_level || 1));
-                
-                // 🛑 إضافة كلاس القفل إذا لم يمكن الشراء
                 if (!canBuy) div.classList.add('locked');
 
                 div.innerHTML = `
@@ -379,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { alert("Error"); }
     };
 
-    // Helper: resizeImage
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -403,7 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    // Signup
     signupForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const name = document.getElementById("name").value;
@@ -490,7 +493,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Admin Search
     if (document.getElementById("admin-search-form")) {
         document.getElementById("admin-search-form").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -522,7 +524,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("admin-update-level-btn")) { document.getElementById("admin-update-level-btn").onclick = async () => { const lvl = parseInt(document.getElementById("admin-level-amount").value); await fetch(`/admin-update-level`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targetEmail: currentSearchedUser.email, newLevel: lvl, adminEmail: loggedInUserProfile.email }) }); alert("تم"); }; }
     if (document.getElementById("admin-delete-user-btn")) { document.getElementById("admin-delete-user-btn").onclick = async () => { if (confirm("حذف؟")) { await fetch(`/admin-delete-user`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emailToDelete: currentSearchedUser.email, adminEmail: loggedInUserProfile.email }) }); alert("تم"); document.getElementById("admin-searched-user-card").style.display = "none"; } }; }
 
-    // Admin Family & QR List
     document.querySelectorAll(".family-btn").forEach(b => {
         b.addEventListener("click", async () => {
             const f = b.dataset.family;
@@ -561,7 +562,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
     
-    // Quiz
     async function loadMainDashboard() {
         loadStoreItems();
         loadLeaderboards();
