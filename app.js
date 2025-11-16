@@ -176,6 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeGuestDetails = document.getElementById("close-guest-details");
     const guestDetailsTitle = document.getElementById("guest-details-title");
 
+// 🛑🛑 عناصر مودال الأدمن الجديد 🛑🛑
+const adminModalOverlay = document.getElementById("admin-modal-overlay");
+const closeAdminModal = document.getElementById("close-admin-modal");
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
@@ -187,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshDataBtn.style.display = "none";
         unlockedItemsBtn.style.display = "none";
         if (showQrBtn) showQrBtn.style.display = "none";
-        adminPanelDiv.style.display = "none";
+        if (adminModalOverlay) adminModalOverlay.style.display = "none"; // 🛑 إخفاء مودال الأدمن
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
@@ -395,7 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.style.color = "blue";
 
         // إخفاء الأقسام
-        adminPanelDiv.style.display = "none";
+        if (adminModalOverlay) adminModalOverlay.style.display = "flex"; // 🛑 إظهار مودال الأدمن
         transactionList.innerHTML = "";
         hideUserSections();
         userAnnouncementBox.style.display = "none";
@@ -1171,6 +1174,13 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarUploadInput.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         if (!file || !loggedInUserProfile) return;
+        
+        // 🛑 إغلاق مودال الأدمن
+if (closeAdminModal) {
+    closeAdminModal.addEventListener('click', () => {
+        if (adminModalOverlay) adminModalOverlay.style.display = 'none';
+    });
+}
 
         // إظهار رسالة "جاري الرفع"
         const originalText = userNameP.textContent;
