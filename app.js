@@ -478,6 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
             messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
             messageDiv.style.color = "red";
         }
+    }
 // ... (بقية app.js كما أرسلتها في المراجعة الأخيرة) ...
 // (بقية الدوال مثل loadAdminStoreItems, loadLeaderboards, loadActiveQuiz, الخ)
 // (بقية logic الأدمن بما في ذلك وظيفة المسح الجماعي الجديدة)
