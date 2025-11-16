@@ -8,6 +8,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById("logout-btn");
     const refreshDataBtn = document.getElementById("refresh-data-btn");
 
+    // 🛑🛑 عناصر مسح الأدمن 🛑🛑
+const startScanBtn = document.getElementById("start-scan-btn");
+// ... (باقي العناصر كما هي) ...
+
+// 🛑🛑 العناصر الجديدة للقائمة المؤقتة 🛑🛑
+const scannedUsersList = document.getElementById("scanned-users-list"); // قائمة عرض النتائج
+const processScansBtn = document.getElementById("process-scans-btn"); // زر الإضافة الجماعية
+let html5QrCode = null;
+let scannedEmailsQueue = []; // 🛑 المصفوفة التي تخزن الإيميلات الممسوحة
+
     // --- 🛑🛑 عناصر واجهة الزائر (جديدة) 🛑🛑 ---
     const guestContainer = document.getElementById("guest-container");
     const guestFamilyButtons = document.querySelectorAll(".guest-family-btn");
@@ -1718,74 +1728,45 @@ document.addEventListener("DOMContentLoaded", () => {
         // 🛑🛑🛑 منطق مسح QR Code (للأدمن) - تم نقله إلى هنا 🛑🛑🛑
         // -----------------------------------------------------
 
-        // 🛑🛑 دالة معالجة المسح 🛑🛑
-        async function onScanSuccess(decodedText, decodedResult) {
-            scanStatusMessage.textContent = `تم مسح كود: ${decodedText}. جاري معالجة المكافأة...`;
-            scanStatusMessage.style.color = 'blue';
+       // 🛑🛑 دالة معالجة المسح (المعدلة للمسح المستمر) 🛑🛑
+function onScanSuccess(decodedText, decodedResult) {
+    const scannedEmail = decodedText.trim();
+    const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
 
-            // 1. إيقاف الكاميرا فوراً بعد المسح الأول
-            if (html5QrCode) {
-                try {
-                    await html5QrCode.stop();
-                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
-                    readerDiv.innerHTML = ''; // تفريغ الكاميرا
-                } catch(err) {
-                     console.error("Failed to stop scanner:", err)
-                }
-            }
+    // 1. تصفية الإيميل: منع الإيميلات المكررة
+    if (scannedEmailsQueue.includes(scannedEmail)) {
+        scanStatusMessage.textContent = `❌ ${scannedEmail} تم مسحه بالفعل.`;
+        scanStatusMessage.style.color = 'orange';
+        return;
+    }
 
-            // 2. تحليل بيانات المكافأة
-            const [amountStr, reason] = rewardReasonSelect.value.split(':');
-            const rewardAmount = parseInt(amountStr);
-            const scannedEmail = decodedText.trim();
-            const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
+    // 2. التحقق من وجود الإيميل (اختياري لكن جيد)
+    // (يمكننا ترك التحقق من الوجود للـ API الخلفي لتسريع عملية المسح)
 
-            if (!scannedEmail || isNaN(rewardAmount) || rewardAmount <= 0) {
-                 scanStatusMessage.textContent = 'خطأ: بيانات الكود أو المكافأة غير صالحة.';
-                 scanStatusMessage.style.color = 'red';
-                 return;
-            }
+    // 3. إضافة الإيميل إلى القائمة
+    scannedEmailsQueue.push(scannedEmail);
+    updateScannedUsersList();
 
-            // 3. إرسال إلى API المكافأة
-            try {
-                const response = await fetch(`/scan-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        scannedEmail, 
-                        rewardAmount, 
-                        reason: reason,
-                        adminEmail 
-                    })
-                });
+    scanStatusMessage.textContent = `✅ تم مسح: ${scannedEmail}. (الإجمالي: ${scannedEmailsQueue.length})`;
+    scanStatusMessage.style.color = 'green';
+}
 
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    scanStatusMessage.textContent = `✅ نجاح! تم إضافة ${rewardAmount} نقطة لـ ${scannedEmail}.`;
-                    scanStatusMessage.style.color = 'green';
-                    // تحديث بيانات الأدمن إذا كان المستخدم الذي تم مكافأته هو الأدمن نفسه
-                    if (scannedEmail === adminEmail) {
-                        refreshUserData();
-                    }
-                    // تحديث الكارت إذا كان المستخدم الممسوح هو المعروض حالياً
-                    if (currentSearchedUser && scannedEmail === currentSearchedUser.email) {
-                        currentSearchedUser.balance = data.new_balance;
-                        searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
-                    }
-                    
-                } else {
-                    scanStatusMessage.textContent = `❌ فشل: ${data.error || 'فشل في تحديث الرصيد.'}`;
-                    scanStatusMessage.style.color = 'red';
-                }
-
-            } catch (err) {
-                 scanStatusMessage.textContent = 'خطأ في الاتصال بالسيرفر أثناء معالجة المكافأة.';
-                 scanStatusMessage.style.color = 'red';
-                 console.error("Scan API Error:", err);
-            }
-        }
-        
+// 🛑🛑 دالة تحديث قائمة العرض (الجديدة) 🛑🛑
+function updateScannedUsersList() {
+    scannedUsersList.innerHTML = '';
+    scannedEmailsQueue.forEach(email => {
+        const li = document.createElement('li');
+        li.className = 'scanned-user-item';
+        li.dataset.email = email;
+        li.innerHTML = `
+            <span>${email}</span>
+            <button class="remove-scanned-user" data-email="${email}">❌</button>
+        `;
+        scannedUsersList.appendChild(li);
+    });
+    // تفعيل/إلغاء تفعيل زر الإضافة
+    processScansBtn.disabled = scannedEmailsQueue.length === 0;
+}
         // 🛑🛑 زر تشغيل الماسح 🛑🛑
         if (startScanBtn) {
             startScanBtn.addEventListener('click', () => {
@@ -2183,6 +2164,70 @@ document.addEventListener("DOMContentLoaded", () => {
         // 🛑 استدعاء وظائف الأدمن عند اللوجن 🛑
         // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
 
-    })(); // 🛑 نهاية أكواد الأدمن 🛑
+    })();
+    
+    // 🛑 نهاية أكواد الأدمن 🛑
+// 🛑🛑 معالج حذف مستخدم من القائمة المؤقتة 🛑🛑
+if (scannedUsersList) {
+    scannedUsersList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-scanned-user')) {
+            const emailToRemove = e.target.dataset.email;
+            scannedEmailsQueue = scannedEmailsQueue.filter(email => email !== emailToRemove);
+            updateScannedUsersList();
+            scanStatusMessage.textContent = `تم حذف ${emailToRemove} من القائمة.`;
+            scanStatusMessage.style.color = 'orange';
+        }
+    });
+}
 
+// 🛑🛑 معالج الإضافة الجماعية (لزر processScansBtn) 🛑🛑
+if (processScansBtn) {
+    processScansBtn.addEventListener('click', async () => {
+        if (scannedEmailsQueue.length === 0) return;
+
+        processScansBtn.disabled = true;
+        
+        // 1. جلب بيانات المكافأة
+        const [amountStr, reason] = rewardReasonSelect.value.split(':');
+        const rewardAmount = parseInt(amountStr);
+        const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
+        
+        scanStatusMessage.textContent = `جاري إضافة ${rewardAmount} نقطة لـ ${scannedEmailsQueue.length} مستخدم...`;
+        scanStatusMessage.style.color = 'blue';
+
+        try {
+            // 🛑🛑 نستخدم API التحديث الجماعي الموجود لديك 🛑🛑
+            const response = await fetch(`/admin-mass-update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    emails: scannedEmailsQueue,
+                    amount: rewardAmount, // 🛑 استخدمنا 'amount' ليتوافق مع API الخلفية
+                    reason: reason,
+                    adminEmail: adminEmail 
+                })
+            });
+
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                scanStatusMessage.textContent = `✅ نجاح! تم إضافة المكافأة لـ ${data.updated_count} مستخدم.`;
+                scanStatusMessage.style.color = 'green';
+                scannedEmailsQueue = []; // تفريغ القائمة بعد النجاح
+                updateScannedUsersList();
+                refreshUserData(); // تحديث بيانات الأدمن
+            } else {
+                scanStatusMessage.textContent = `❌ فشل العملية: ${data.error || 'خطأ غير محدد.'}`;
+                scanStatusMessage.style.color = 'red';
+            }
+
+        } catch (err) {
+            scanStatusMessage.textContent = 'خطأ في الاتصال بالسيرفر أثناء الإضافة الجماعية.';
+            scanStatusMessage.style.color = 'red';
+            console.error("Mass Scan Error:", err);
+        } finally {
+            processScansBtn.disabled = false;
+        }
+    });
+}
 }); // نهاية "DOMContentLoaded"
