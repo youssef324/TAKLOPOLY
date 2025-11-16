@@ -34,13 +34,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- عناصر لوحة الأدمن ---
     const adminPanelDiv = document.getElementById("admin-panel");
+    const adminSearchForm = document.getElementById("admin-search-form");
+    const adminSearchInput = document.getElementById("admin-search-name");
+    const adminSearchMessage = document.getElementById("admin-search-message");
+    const adminSelectUser = document.getElementById("admin-select-user");
+    const searchedUserCard = document.getElementById("admin-searched-user-card");
+    // ... (بقية عناصر الأدمن) ...
+    const massUpdateControls = document.getElementById("mass-update-controls");
     const adminAnnouncementText = document.getElementById("admin-announcement-text");
     const adminTickerText = document.getElementById("admin-ticker-text");
     const adminAnnouncementForm = document.getElementById("admin-announcement-form");
     const adminAnnouncementMessage = document.getElementById("admin-announcement-message");
 
     const storeContainer = document.getElementById("store-container");
-    const storeItemsList = document.getElementById("store-items-list");
     const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
     const unlockedItemsContainer = document.getElementById("unlocked-items-container");
     const backToStoreBtn = document.getElementById("back-to-store-btn"); 
@@ -56,17 +62,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🛑 عناصر الـ Modals والـ QR
     const editModalOverlay = document.getElementById("edit-modal-overlay");
     const qrModalOverlay = document.getElementById("qr-modal-overlay");
-    const inlineQrDisplayContainer = document.getElementById("inline-qr-display-container");
-    const inlineQrCodeArea = document.getElementById("inline-qr-code-area");
-    const inlineQrEmailDisplayArea = document.getElementById("inline-qr-email-display-area");
+    const closeQrBtn = document.querySelector(".close-qr-btn");
+    const qrCodeContainer = document.getElementById("qr-code-container");
+    const qrUserEmailDisplay = document.getElementById("qr-user-email-display");
     
-    // (بقية المتغيرات: adminSearchForm, adminViews, menuButtons, html5QrCode, etc.)
+    // (بقية المتغيرات: adminViews, menuButtons, html5QrCode, etc.)
     const adminViews = document.querySelectorAll('.admin-section-view'); 
     const menuButtons = document.querySelectorAll('.admin-menu-btn'); 
     const closeSectionButtons = document.querySelectorAll('.close-section-btn'); 
-    
+
     // -----------------------------------------------------
-    // 2. دوال إعادة الضبط (Reset UI) & الدوال المساعدة
+    // 2. الدوال المساعدة والوظيفية (تم رفع التعريفات هنا لتجنب ReferenceError)
     // -----------------------------------------------------
     
     // دالة لإخفاء أقسام اليوزر
@@ -77,45 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(unlockedItemsContainer) unlockedItemsContainer.style.display = "none";
     }
 
-    // 🛑 [FIX: MODAL VISIBILITY] دالة إعادة الضبط القسرية
-    const resetUI = () => {
-        // إخفاء الأقسام الرئيسية
-        if(cardContainer) cardContainer.style.display = "none";
-        if(formContainer) formContainer.style.display = "flex"; 
-        if(logoutBtn) logoutBtn.style.display = "none";
-        if(refreshDataBtn) refreshDataBtn.style.display = "none";
-        if(adminPanelDiv) adminPanelDiv.style.display = "none";
-        if(guestContainer) guestContainer.style.display = "none"; 
-        if(logoutBtnGuest) logoutBtnGuest.style.display = "none";
-
-        // إخفاء عناصر المستخدم
-        hideUserSections();
-        if(unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-        if(showQrBtn) showQrBtn.style.display = "none";
-        if(avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
-
-        // 🛑🛑 إخفاء النوافذ المنبثقة والـ Inline بشكل قسري 🛑🛑
-        if(editModalOverlay) editModalOverlay.style.display = "none";
-        if(guestDetailsModal) guestDetailsModal.style.display = "none";
-        if(inlineQrDisplayContainer) inlineQrDisplayContainer.style.display = "none";
-        if(qrModalOverlay) qrModalOverlay.style.display = "none"; 
-
-        // إخفاء نوافذ الأدمن الجديدة (يفترض تعريفها)
-        const adminMenu = document.getElementById('admin-main-menu');
-        const adminViews = document.querySelectorAll('.admin-section-view');
-
-        if(adminMenu) adminMenu.style.display = 'grid';
-        if(adminViews) adminViews.forEach(view => view.style.display = 'none');
-
-        // تصفير البيانات
-        loggedInUserProfile = null;
-        if(document.getElementById("transaction-list")) document.getElementById("transaction-list").innerHTML = "";
-        // ... (بقية منطق تصفير الماسح والبيانات) ...
-    };
-    
-    resetUI(); 
-    
-    // دالة لتحديث بيانات الكارت
+    // دالة تحديث الكارت (مُعرَّفة أولاً لتعمل في login/refresh)
     function updateUserCardUI(user) {
         if(userNameP) userNameP.textContent = `الاسم: ${user.name}`;
         if(userFamilyP) userFamilyP.textContent = `العائلة: ${user.family}`;
@@ -124,28 +92,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if(userAvatarImg) userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
         loadTransactionHistory(user.email);
     }
-
-    // 🛑🛑 الدوال التي تستخدم fetch (يجب أن تكون معرفة) 🛑🛑
+    
+    // 🛑 الدوال الوظيفية (يجب تعريفها هنا)
     async function loadLeaderboards() { /* ... existing logic ... */ }
     async function loadActiveQuiz(email) { /* ... existing logic ... */ }
     async function loadStoreItems() { /* ... existing logic ... */ }
     async function loadTransactionHistory(email) { /* ... existing logic ... */ }
     async function loadAdminStoreItems() { /* ... existing logic ... */ }
     async function loadAnnouncement() { /* ... existing logic ... */ }
-
-
-    // 🛑 دالة loadMainDashboard (لضمان تشغيل لوحات المستخدم)
     async function loadMainDashboard() {
         if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
         hideUserSections(); 
-
-        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
-        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
-        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
+        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); }
+        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); }
+        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); }
     }
-
-
-    // 🛑 [FIX: BUTTONS] تحديث البيانات (لضمان ظهور أزرار اليوزر)
+    
+    // 🛑 دالة تحديث البيانات (Refresh)
     async function refreshUserData() {
         if (!loggedInUserProfile) return;
         if(refreshDataBtn) refreshDataBtn.textContent = "جاري التحديث...";
@@ -162,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateUserCardUI(user);
 
-            // 🛑 ضمان ظهور الأزرار لليوزر العادي
             if (user.role !== 'admin') {
                 if(unlockedItemsBtn) unlockedItemsBtn.style.display = "block";
                 if(showQrBtn) showQrBtn.style.display = "block"; 
@@ -176,13 +138,50 @@ document.addEventListener("DOMContentLoaded", () => {
             if (user.role === 'admin') await loadAdminStoreItems();
 
         } catch(err) {
-            console.error("REFRESH ERROR (API FAILURE):", err); // 🛑 تسجيل تفصيلي للخطأ
+            console.error("REFRESH ERROR (API FAILURE):", err);
         }
         if(refreshDataBtn) refreshDataBtn.textContent = "تحديث البيانات";
     }
-    
+
+    // 🛑 [FINAL LOGOUT HANDLER] إلغاء دالة resetUI واستخدام منطقها مباشرة
+    function handleLogout() {
+        // 🛑 إعادة الحالة الأولية (بدون دالة resetUI)
+        if(cardContainer) cardContainer.style.display = "none";
+        if(formContainer) formContainer.style.display = "flex"; 
+        if(logoutBtn) logoutBtn.style.display = "none";
+        if(refreshDataBtn) refreshDataBtn.style.display = "none";
+        if(adminPanelDiv) adminPanelDiv.style.display = "none";
+        if(guestContainer) guestContainer.style.display = "none"; 
+        if(logoutBtnGuest) logoutBtnGuest.style.display = "none";
+
+        hideUserSections();
+        if(unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+        if(showQrBtn) showQrBtn.style.display = "none";
+        if(avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
+
+        // إخفاء النوافذ المنبثقة والـ Inline بشكل قسري
+        if(editModalOverlay) editModalOverlay.style.display = "none";
+        if(guestDetailsModal) guestDetailsModal.style.display = "none";
+        if(inlineQrDisplayContainer) inlineQrDisplayContainer.style.display = "none";
+        if(qrModalOverlay) qrModalOverlay.style.display = "none"; 
+
+        const adminMenu = document.getElementById('admin-main-menu');
+        const adminViews = document.querySelectorAll('.admin-section-view');
+
+        if(adminMenu) adminMenu.style.display = 'grid';
+        if(adminViews) adminViews.forEach(view => view.style.display = 'none');
+
+        loggedInUserProfile = null;
+        if(document.getElementById("transaction-list")) document.getElementById("transaction-list").innerHTML = "";
+
+        // تنفيذ التسجيل الخروج
+        if(loginForm) loginForm.reset();
+        if(messageDiv) messageDiv.textContent = "تم تسجيل الخروج.";
+        if(messageDiv) messageDiv.style.color = "blue";
+    }
+
     // -----------------------------------------------------
-    // 4. منطق تسجيل الدخول (Login Logic) - (تحصين catch block)
+    // 3. منطق تسجيل الدخول (Login Logic)
     // -----------------------------------------------------
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -192,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         adminPanelDiv.style.display = "none";
         hideUserSections();
-        userAnnouncementBox.style.display = "none";
+        if(userAnnouncementBox) userAnnouncementBox.style.display = "none";
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
@@ -205,7 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
             if (response.ok) {
-                // 🛑 تسجيل الدخول ناجح، نبدأ تحديث الواجهة
                 messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
                 messageDiv.style.color = "green";
                 const user = data.user;
@@ -216,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 formContainer.style.display = "none";
                 cardContainer.style.display = "flex";
                 logoutBtn.style.display = "block";
-                refreshDataBtn.style.display = "block";
+                if(refreshDataBtn) refreshDataBtn.style.display = "block";
 
                 if (user.role === 'admin') {
                     adminPanelDiv.style.display = "block";
@@ -224,11 +222,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     guestContainer.style.display = "block";
                     cardContainer.style.display = "none";
                     logoutBtn.style.display = "none";
-                    logoutBtnGuest.style.display = "block";
+                    if(logoutBtnGuest) logoutBtnGuest.style.display = "block";
                 } 
                 
                 // 🛑🛑 تحصين مرحلة التحميل بعد الدخول 🛑🛑
-                // إذا فشل هذا الجزء، لن يتم تسجيل الخروج، بل ستظهر رسالة خطأ التحميل
                 try {
                     await refreshUserData(); 
                 } catch(loadErr) {
@@ -242,12 +239,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 messageDiv.style.color = "red";
             }
         } catch (err) {
-            // 🛑 هذا الكاتش خاص بفشل اتصال API /login نفسه
             messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع. (فشل API /login)";
             messageDiv.style.color = "red";
             console.error("LOGIN FETCH API ERROR:", err);
         }
     });
 
-    // ... (بقية الملف كما تم إرساله مسبقاً) ...
+    // -----------------------------------------------------
+    // 4. ربط الأحداث العامة (لضمان عمل كل الأزرار)
+    // -----------------------------------------------------
+
+    if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+    if (logoutBtnGuest) logoutBtnGuest.addEventListener("click", handleLogout);
+    if (refreshDataBtn) refreshDataBtn.addEventListener('click', refreshUserData);
+    
+    // 🛑 [FIXED: MISSING LISTENERS] ربط الأزرار المفقودة
+    if (unlockedItemsBtn) unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
+    if (backToStoreBtn) backToStoreBtn.addEventListener('click', loadMainDashboard);
+    
+    if (showQrBtn) {
+        showQrBtn.addEventListener('click', () => {
+            if (!loggedInUserProfile || !loggedInUserProfile.email) return;
+
+            // 1. تفريغ الحاوية للتوليد الجديد
+            if (qrCodeContainer) qrCodeContainer.innerHTML = '';
+
+            // 2. المحتوى المشفر: نستخدم الإيميل كمعرّف
+            const qrData = loggedInUserProfile.email;
+
+            // 3. توليد كود QR
+            new QRCode(qrCodeContainer, {
+                text: qrData,
+                width: 250,
+                height: 250,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            // 4. عرض الإيميل تحت الكود
+            if (qrUserEmailDisplay) qrUserEmailDisplay.textContent = loggedInUserProfile.email;
+
+            // 5. إظهار النافذة
+            if (qrModalOverlay) qrModalOverlay.style.display = 'flex';
+        });
+    }
+
+    // 6. إغلاق نافذة QR
+    const closeQrBtn = document.querySelector(".close-qr-btn");
+    if(closeQrBtn) {
+        closeQrBtn.addEventListener('click', () => {
+            if (qrModalOverlay) qrModalOverlay.style.display = 'none';
+        });
+    }
+
+    // 🛑 [ADMIN/GUEST BUTTON LISTENERS]
+    if (menuButtons) { /* ... (Admin Menu Listeners) ... */ }
+    if (closeSectionButtons) { /* ... (Admin Close Listeners) ... */ }
+    if (document.querySelectorAll(".family-btn")) { /* ... (Guest Family Listeners) ... */ }
+    
+    // ... (بقية الدوال المتقدمة) ...
 });
