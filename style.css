@@ -380,7 +380,7 @@ body {
 
 /* --- 🛑🛑 إصلاح نهائي: ستايل كود الحضور (QR Modal) 🛑🛑 --- */
 #qr-modal-overlay { 
-    display: flex !important; 
+    display: flex !important; /* فرض flexbox لضمان التوسيط مهما كان الـ JS */
     justify-content: center !important; 
     align-items: center !important;   
 }
