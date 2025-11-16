@@ -1,4 +1,4 @@
-/* --- إعدادات الصفحة العامة --- */
+/* --- إعدادات الصفحة العامة (الأصلية) --- */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -10,7 +10,13 @@ body {
     text-align: right;
 }
 
-/* --- الهيدر --- */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+/* --- الهيدر الأصلي البسيط (الأزرق) --- */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -32,10 +38,10 @@ body {
     .header-part.right, .header-part.left { text-align: center; }
 }
 
-/* --- شريط الإعلانات --- */
+/* --- شريط الإعلانات (الأصفر الفاتح الأصلي) --- */
 .ticker-wrap {
     width: 100%;
-    background-color: #fff3cd; /* العودة للون الأصفر الفاتح المتناسق مع التنبيهات */
+    background-color: #fff3cd; 
     overflow: hidden;
     height: 40px;
     display: flex;
@@ -47,7 +53,7 @@ body {
     display: inline-block;
     padding-left: 100%;
     animation: ticker-move 25s linear infinite;
-    color: #856404; /* لون النص الأصلي للإعلانات */
+    color: #856404;
     font-weight: bold;
     font-size: 1.1em;
     white-space: nowrap;
@@ -57,9 +63,7 @@ body {
     100% { transform: translate3d(100%, 0, 0); }
 }
 
-/* --- الحاويات والكروت --- */
-.container { max-width: 1200px; margin: 20px auto; padding: 20px; }
-
+/* --- الكروت والحاويات (التصميم القديم) --- */
 .card-and-forms-wrapper {
     background-image: url('/hero2.jpg');
     background-size: cover;
@@ -87,14 +91,14 @@ body {
     height: 150px;
     margin: 0 auto 1rem;
     border-radius: 50%;
-    overflow: hidden; /* مهم لقص التراكب */
+    overflow: hidden;
 }
 .card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-/* التراكب المخفي */
+/* التراكب المخفي (يظهر فقط عند الهوفر) */
 .avatar-overlay {
     position: absolute;
     top: 0; left: 0;
@@ -109,7 +113,6 @@ body {
     transition: opacity 0.3s ease;
     cursor: pointer;
 }
-/* يظهر فقط عند الهوفر */
 .avatar-wrapper:hover .avatar-overlay {
     opacity: 1;
 }
@@ -117,7 +120,7 @@ body {
 
 .card p { font-size: 1.2em; font-weight: bold; color: #333; margin: 0.75rem 0; }
 
-/* --- النماذج والأزرار --- */
+/* --- النماذج والأزرار (التصميم القديم) --- */
 .form-container { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
 .form-container form {
     background-color: rgba(255, 255, 255, 0.9); padding: 20px;
