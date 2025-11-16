@@ -30,9 +30,9 @@ body {
 .header-part.right { text-align: right; }
 .header-part.left { text-align: left; }
 /* 🛑 تم التكبير والـ Bold 🛑 */
-.header-part h1 { font-size: 2.0em; margin: 5px 0; font-weight: bold; }
-.header-part h2 { font-size: 1.6em; margin: 0; color: #ffdd57; font-weight: bold; }
-.header-part h3 { font-size: 1.2em; margin: 0; font-weight: bold; }
+.header-part h1 { font-size: 3.0em; margin: 5px 0; font-weight: bold; }
+.header-part h2 { font-size: 2.6em; margin: 0; color: #ffdd57; font-weight: bold; }
+.header-part h3 { font-size: 2.2em; margin: 0; font-weight: bold; }
 
 @media (max-width: 768px) {
     .main-header { flex-direction: column; text-align: center; gap: 10px; }
