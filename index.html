@@ -8,13 +8,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #user-announcement-text { 
-            font-size: 1.3em;
-            color: #333; 
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
     <header class="site-header">
@@ -26,44 +19,46 @@
         <div class="header-side" style="text-align: left;">خدمة اعدادي بنين</div>
     </header>
 
-    <!-- 🛑 شريط الأخبار المتحرك 🛑 -->
-    <div class="news-ticker-container">
+    <!-- شريط الأخبار -->
+    <div class="news-ticker-container" style="display: none;">
         <div class="ticker-label">خبر هام</div>
         <div class="ticker-wrap">
             <div class="ticker-move">
-                <span id="ticker-text-display">...</span>
+                <span id="ticker-text-display"></span>
             </div>
         </div>
     </div>
 
     <div class="container">
         <div class="card-and-forms-wrapper">
-            <div class="card-container">
+            <!-- كارت المستخدم -->
+            <div class="card-container" style="display: none;">
                 <div class="card">
                     <div class="avatar-wrapper" style="position: relative; width: 150px; height: 150px; margin: 0 auto 1rem;">
                         <img src="/default-avatar.png" alt="Card Image" class="card-img" id="user-avatar">
-                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">
-                            تغيير الصورة
-                        </label>
+                        <label for="avatar-upload-input" class="avatar-overlay" id="avatar-overlay-label">تغيير الصورة</label>
                         <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg">
                     </div>
-                    <p id="user-name">Name: </p>
-                    <p id="user-family">Family: </p>
-                    <p id="user-balance">Balance: </p>
-                    <p id="user-level">المستوى: </p>
+                    <p id="user-name">Name</p>
+                    <p id="user-family">Family</p>
+                    <p id="user-balance">Balance</p>
+                    <p id="user-level">Level</p>
                     <div class="transaction-history">
                         <h4>سجل المعاملات</h4>
-                        <ul id="transaction-list">
-                        </ul>
+                        <ul id="transaction-list"></ul>
                     </div>
                 </div>
             </div>
+            
+            <!-- أزرار التحكم -->
             <div class="button-group">
                 <button id="refresh-data-btn" style="display: none;">تحديث البيانات</button>
                 <button id="show-qr-btn" style="display: none; background-color: #28a745; color: white;">إظهار كود الحضور (QR)</button>
                 <button id="unlocked-items-btn" style="display: none;">مشترياتي</button>
-                <button id="logout-btn">تسجيل الخروج</button>
+                <button id="logout-btn" style="display: none;">تسجيل الخروج</button>
             </div>
+
+            <!-- فورم الدخول والتسجيل -->
             <div class="form-container">
                 <form id="login-form">
                     <h3>Login</h3>
@@ -93,15 +88,16 @@
     
     <div id="message" style="text-align: center; margin-top: 1rem; font-size: 1.1em;"></div>
     
-    <!-- 🛑 صندوق الإعلان الهام (منفصل) 🛑 -->
-    <div class="announcement-container" id="user-announcement-box">
+    <!-- إعلان هام -->
+    <div class="announcement-container" id="user-announcement-box" style="display: none;">
         <h3>📢 إعلان هام</h3>
-        <p id="user-announcement-text">جاري تحميل الإعلانات...</p>
+        <p id="user-announcement-text"></p>
     </div>
 
+    <!-- واجهة الجيست -->
     <div class="guest-container" id="guest-container" style="display: none;">
         <h2>🏆 عرض نقاط الأسر 🏆</h2>
-        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة ثم اضغط على أي مستخدم لعرض تفاصيله.</p>
+        <p style="text-align: center; color: #555;">اضغط على اسم الأسرة لعرض كل المستخدمين ونقاطهم.</p>
         <div class="guest-family-buttons">
             <button class="guest-family-btn" data-family="اسرة الانبا موسي الاسود">اسرة الانبا موسي الاسود</button>
             <button class="guest-family-btn" data-family="اسرة مارجرس">اسرة مارجرس</button>
@@ -109,21 +105,21 @@
         </div>
         <p id="guest-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
         <div class="guest-results-container">
-            <ul class="leaderboard-list" id="guest-results-list">
-            </ul>
+            <ul class="leaderboard-list" id="guest-results-list"></ul>
         </div>
-        <div class="button-group" style="margin-top: 20px;">
-             <button id="logout-btn-guest">تسجيل الخروج</button>
+        <div class="button-group" style="margin-top: 20px; width: 100%;">
+             <button id="logout-btn-guest" style="width: 100%; background-color: #6c757d; color: white;">تسجيل الخروج</button>
         </div>
     </div>
 
-    <div class="quiz-container" id="quiz-container">
+    <!-- باقي العناصر (كويز، متجر، أدمن، مودالز) -->
+    <div class="quiz-container" id="quiz-container" style="display: none;">
         <h2>سؤال اليوم 🎁</h2>
-        <p id="quiz-question-text">جاري تحميل السؤال...</p>
+        <p id="quiz-question-text">جاري التحميل...</p>
         <div class="quiz-options">
-            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">الاختيار أ</button>
-            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">الاختيار ب</button>
-            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">الاختيار ج</button>
+            <button class="quiz-option-btn" id="quiz-btn-a" data-value="option_a">A</button>
+            <button class="quiz-option-btn" id="quiz-btn-b" data-value="option_b">B</button>
+            <button class="quiz-option-btn" id="quiz-btn-c" data-value="option_c">C</button>
         </div>
         <button id="quiz-submit-btn">إرسال الإجابة</button>
         <p id="quiz-message"></p>
@@ -133,7 +129,7 @@
         <h2>🛒 TAKLOPOLY STORE</h2> 
         <p style="text-align: center; color: #555;">استبدل نقاطك بعناصر مميزة.</p>
         <div class="store-items-grid" id="store-items-list">
-            <p style="text-align: center;" id="store-loading-message">جاري تحميل عناصر المتجر...</p>
+            <p style="text-align: center;" id="store-loading-message">جاري التحميل...</p>
         </div>
         <p id="store-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
     </div>
@@ -141,30 +137,27 @@
     <div class="unlocked-items-container" id="unlocked-items-container" style="display: none;">
         <button id="back-to-store-btn" style="margin-bottom: 20px;">▶️ العودة للقائمة الرئيسية</button>
         <h2>🛒 مشترياتي السابقة</h2>
-        <div class="store-items-grid" id="unlocked-items-list">
-        </div>
+        <div class="store-items-grid" id="unlocked-items-list"></div>
         <p id="unlocked-items-message" style="text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- 🛑🛑 لوحة الأدمن (نوافذ منبثقة) 🛑🛑 -->
+    <!-- لوحة الأدمن -->
     <div class="admin-panel-container">
         <div id="admin-panel" style="display: none;">
             <h2>🛠️ لوحة تحكم الأدمن</h2>
             
-            <!-- القائمة الرئيسية -->
             <div id="admin-main-menu" class="admin-grid-menu">
                 <button class="admin-menu-btn" data-target="section-search">🔍 البحث وتعديل المستخدمين</button>
-                <button class="admin-menu-btn" data-target="section-families">👥 إدارة الأسر والرصيد الجماعي</button>
-                <button class="admin-menu-btn" data-target="section-scan">📱 مسح كود الحضور (Scan)</button>
-                <button class="admin-menu-btn" data-target="section-print">🖨️ طباعة أكواد QR</button>
-                <button class="admin-menu-btn" data-target="section-quiz">❓ إدارة الكويز اليومي</button>
-                <button class="admin-menu-btn" data-target="section-announcements">📢 إدارة الإعلانات</button>
-                <button class="admin-menu-btn" data-target="section-store">🛒 إدارة المتجر</button>
+                <button class="admin-menu-btn" data-target="section-families">👥 الأسر والرصيد الجماعي</button>
+                <button class="admin-menu-btn" data-target="section-scan">📱 مسح الحضور (Scan)</button>
+                <button class="admin-menu-btn" data-target="section-print">🖨️ طباعة QR</button>
+                <button class="admin-menu-btn" data-target="section-quiz">❓ إدارة الكويز</button>
+                <button class="admin-menu-btn" data-target="section-announcements">📢 الإعلانات</button>
+                <button class="admin-menu-btn" data-target="section-store">🛒 المتجر</button>
             </div>
 
-            <!-- قسم 1: البحث -->
-            <div id="section-search" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <!-- أقسام الأدمن -->
+            <div id="section-search" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🔍 البحث عن مستخدم</h3>
                 <form id="admin-search-form">
@@ -205,9 +198,7 @@
                 </div>
             </div>
             
-            <!-- قسم 2: الأسر -->
-            <div id="section-families" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-families" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>👥 الأسر والرصيد الجماعي</h3>
                 <div class="family-buttons-container">
@@ -228,9 +219,7 @@
                 <div id="admin-family-results" style="margin-top: 1rem;"></div>
             </div>
 
-            <!-- قسم 3: مسح الحضور -->
-            <div id="section-scan" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-scan" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>📱 مسح كود الحضور (Scan)</h3>
                 <div id="admin-scan-controls">
@@ -260,9 +249,7 @@
                 </div>
             </div>
             
-            <!-- قسم 4: الطباعة -->
-            <div id="section-print" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-print" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🖨️ طباعة أكواد الحضور</h3>
                 <div id="admin-qr-list-controls">
@@ -275,9 +262,7 @@
                 <div id="admin-printable-cards-container"></div>
             </div>
 
-            <!-- قسم 5: الكويز -->
-            <div id="section-quiz" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-quiz" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>❓ إضافة كويز جديد</h3>
                 <form id="admin-quiz-form">
@@ -299,26 +284,20 @@
                 <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
             </div>
 
-            <!-- قسم 6: الإعلانات -->
-            <div id="section-announcements" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-announcements" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>📢 إدارة الإعلانات</h3>
                 <form id="admin-announcement-form">
-                    <label>1. الإعلان الهام (الصندوق الأصفر):</label>
+                    <label>الإعلان الهام (الصندوق الأصفر):</label>
                     <textarea id="admin-announcement-text" placeholder="اكتب الإعلان الثابت هنا..."></textarea>
-                    
-                    <label style="margin-top:15px; display:block;">2. شريط الأخبار المتحرك (أعلى الشاشة):</label>
+                    <label style="margin-top:15px; display:block;">شريط الأخبار (المتحرك):</label>
                     <input type="text" id="admin-ticker-text" placeholder="اكتب الأخبار هنا... (افصل بينها بـ | )" style="width:100%; padding:10px;">
-                    
                     <button type="submit" style="margin-top: 15px;">نشر التحديثات</button>
                 </form>
                 <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
             </div>
             
-            <!-- قسم 7: المتجر -->
-            <div id="section-store" class="admin-section-view" style="display: none;">
-                <!-- 🛑 زر الإغلاق الجديد -->
+            <div id="section-store" class="admin-section-view">
                 <span class="close-section-btn" title="إغلاق">&times;</span>
                 <h3>🛒 إدارة المتجر</h3>
                 <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
@@ -337,27 +316,23 @@
         </div>
     </div>
 
-    <div class="leaderboard-container" id="leaderboard-container">
+    <div class="leaderboard-container" id="leaderboard-container" style="display: none;">
         <h2>🏆 أبطال الأسر 🏆</h2>
-        <div class="champions-container" id="top-champions-list">
-        </div>
+        <div class="champions-container" id="top-champions-list"></div>
         <hr style="margin: 2rem 0;">
-        <h2>لوحة الصدارة التفصيلية (أعلى 10)</h2>
+        <h2>لوحة الصدارة التفصيلية</h2>
         <div class="leaderboard-columns">
             <div class="leaderboard-column">
                 <h3>اسرة الانبا موسي الاسود</h3>
-                <ul class="leaderboard-list" id="family-anba-moussa-list">
-                </ul>
+                <ul class="leaderboard-list" id="family-anba-moussa-list"></ul>
             </div>
             <div class="leaderboard-column">
                 <h3>اسرة مارجرس</h3>
-                <ul class="leaderboard-list" id="family-margerges-list">
-                </ul>
+                <ul class="leaderboard-list" id="family-margerges-list"></ul>
             </div>
             <div class="leaderboard-column">
                 <h3>اسرة الانبا كاراس</h3>
-                <ul class="leaderboard-list" id="family-anba-karas-list">
-                </ul>
+                <ul class="leaderboard-list" id="family-anba-karas-list"></ul>
             </div>
         </div>
     </div>
@@ -386,20 +361,21 @@
             </form>
         </div>
     </div>
+    
     <div id="qr-modal-overlay" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="text-align: center;">
             <span class="close-btn close-qr-btn">&times;</span>
             <h3>كود الحضور الخاص بك</h3>
             <p style="font-size: 0.9em; color: #555;">اظهر هذا الكود للأدمن ليقوم بمسحه:</p>
-            <div id="qr-code-container" style="width: 250px; height: 250px; margin: 20px auto; padding: 10px; background: white; border: 1px solid #ddd;">
-            </div>
+            <div id="qr-code-container" style="width: 250px; height: 250px; margin: 20px auto; padding: 10px; background: white; border: 1px solid #ddd;"></div>
             <p id="qr-user-email-display" style="font-weight: bold; color: #333;"></p>
         </div>
     </div>
-    <!-- 🛑🛑 نافذة إحصائيات المستخدم للجيست 🛑🛑 -->
+
+    <!-- 🛑🛑 نافذة إحصائيات المستخدم للجيست (مُصححة) 🛑🛑 -->
     <div id="guest-stats-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
-            <span class="close-btn" id="close-guest-stats">&times;</span>
+            <span class="close-btn" id="close-guest-stats" style="cursor: pointer; font-size: 30px; line-height: 20px;">&times;</span>
             <h3 id="guest-stats-name" style="color: #004a99; margin-bottom:5px;">اسم المستخدم</h3>
             <p style="font-size:0.9em; color:#666; text-align:center; margin-top:0;">تفاصيل المشاركة والحضور</p>
             <hr style="margin: 10px 0;">
@@ -408,6 +384,7 @@
             </div>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
