@@ -1037,29 +1037,40 @@ document.addEventListener("DOMContentLoaded", () => {
             guestStatsModal.style.display = "none";
         }
     });
-    (function setupAdminPanel() {
-        let currentSearchedUser = null;
-        let scannedUsersBatch = [];
-        // Accordion Logic for Admin Sections
-        const sectionHeaders = document.querySelectorAll('.admin-section-header');
-        sectionHeaders.forEach(header => {
-            header.addEventListener('click', () => {
-                const section = header.parentElement;
-                const content = section.querySelector('.admin-section-content');
-                const isActive = section.classList.contains('active');
-                // Close all other sections
-                document.querySelectorAll('.admin-section').forEach(sec => {
-                    sec.classList.remove('active');
-                    const con = sec.querySelector('.admin-section-content');
-                    if(con) con.style.display = 'none';
-                });
-                // Toggle current section
-                if (!isActive) {
-                    section.classList.add('active');
-                    content.style.display = 'block';
+ // 🛑🛑 منطق القائمة الرئيسية (Dashboard Navigation) - بديل الـ Accordion 🛑🛑
+        const menuButtons = document.querySelectorAll('.admin-menu-btn');
+        const backButtons = document.querySelectorAll('.back-to-admin-menu');
+        const adminMenu = document.getElementById('admin-main-menu');
+        const adminViews = document.querySelectorAll('.admin-section-view');
+
+        // 1. عند الضغط على زر في القائمة الرئيسية
+        if (menuButtons) {
+            menuButtons.forEach(btn => {
+                btn.onclick = () => {
+                    const targetId = btn.dataset.target;
+                    // إخفاء القائمة
+                    if(adminMenu) adminMenu.style.display = 'none';
+                    // إخفاء أي قسم مفتوح
+                    if(adminViews) adminViews.forEach(view => view.style.display = 'none');
+                    // إظهار القسم المطلوب
+                    const targetSection = document.getElementById(targetId);
+                    if(targetSection) targetSection.style.display = 'block';
                 }
             });
-        });
+        }
+
+        // 2. عند الضغط على زر "رجوع للقائمة"
+        if (backButtons) {
+            backButtons.forEach(btn => {
+                btn.onclick = () => {
+                    // إخفاء القسم الحالي
+                    const parentSection = btn.closest('.admin-section-view');
+                    if(parentSection) parentSection.style.display = 'none';
+                    // إظهار القائمة الرئيسية
+                    if(adminMenu) adminMenu.style.display = 'grid';
+                }
+            });
+        }
 
         if(adminSearchForm) {
             adminSearchForm.addEventListener("submit", async (event) => {
