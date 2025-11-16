@@ -513,36 +513,40 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">خطأ في تحميل بيانات الكويز.</p></div>';
         }
     }
+    // 🛑🛑 فانكشن جلب الإعلانات (مُحدثة للشريط المتحرك) 🛑🛑
     async function loadAnnouncement() {
-        userAnnouncementBox.style.display = "none";
-        userAnnouncementText.textContent = "";
+        // العناصر القديمة (الصندوق الأصفر)
+        const userAnnouncementBox = document.getElementById("user-announcement-box");
+        const userAnnouncementText = document.getElementById("user-announcement-text");
+        // العنصر الجديد (الشريط المتحرك)
+        const tickerTextDisplay = document.getElementById("ticker-text-display");
+        const adminAnnouncementText = document.getElementById("admin-announcement-text"); // حقل الأدمن
+
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             if (!response.ok) throw new Error("فشل جلب الإعلان");
+
             const data = await response.json();
             if (data.message && data.message.trim()) {
+                // 1. تحديث الصندوق القديم (لو لسه موجود)
                 if (userAnnouncementText) userAnnouncementText.textContent = data.message;
                 if (userAnnouncementBox) userAnnouncementBox.style.display = "block";
-                // 🛑🛑 تحديث شريط الأخبار 🛑🛑
+
+                // 2. 🛑 تحديث الشريط المتحرك (الجديد) 🛑
                 if (tickerTextDisplay) {
-                    const rawText = data.ticker_message || data.message;
-                    // استبدال الرمز | بفاصل شيك
-                    const formattedText = rawText.replace(/\|/g, '<span style="margin: 0 20px; color: #ffc107;">✦</span>');
-                    tickerTextDisplay.innerHTML = formattedText;
-                    
+                    tickerTextDisplay.textContent = data.message;
+                    // خدعة صغيرة لإعادة تشغيل الأنيميشن لما النص يتغير
                     const tickerMove = document.querySelector('.ticker-move');
                     if(tickerMove) {
-                        // حساب سرعة الحركة بناءً على طول النص
-                        const duration = Math.max(10, rawText.length / 5);
-                        
                         tickerMove.style.animation = 'none';
-                        tickerMove.offsetHeight; 
-                        tickerMove.style.animation = `ticker-scroll ${duration}s linear infinite`;
+                        tickerMove.offsetHeight; /* trigger reflow */
+                        tickerMove.style.animation = 'ticker-scroll 20s linear infinite';
                     }
                 }
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
-                    if (adminAnnouncementText) adminAnnouncementText.value = data.message;
-                    if (adminTickerText) adminTickerText.value = data.ticker_message || "";
+
+                // 3. تحديث حقل الأدمن
+                if (loggedInUserProfile && loggedInUserProfile.role === 'admin' && adminAnnouncementText) {
+                    adminAnnouncementText.value = data.message;
                 }
             }
         } catch (err) {
@@ -1043,17 +1047,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 const section = header.parentElement;
                 const content = section.querySelector('.admin-section-content');
                 const isActive = section.classList.contains('active');
+                // Close all other sections
                 document.querySelectorAll('.admin-section').forEach(sec => {
                     sec.classList.remove('active');
                     const con = sec.querySelector('.admin-section-content');
                     if(con) con.style.display = 'none';
                 });
+                // Toggle current section
                 if (!isActive) {
                     section.classList.add('active');
                     content.style.display = 'block';
                 }
             });
         });
+
         if(adminSearchForm) {
             adminSearchForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
