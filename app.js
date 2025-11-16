@@ -123,11 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             const data = await response.json();
 
-            // 🛑 إصلاح مشكلة ظهور JSON: نتحقق مما إذا كانت البيانات تأتي كـ String
             let cleanMessage = data.message || "";
             let cleanTicker = data.ticker_message || "";
 
-            // إذا كان السيرفر يعيد JSON string في حقل message
             if (cleanMessage.startsWith('{') && cleanMessage.includes('ticker_message')) {
                 try {
                     const parsed = JSON.parse(cleanMessage);
@@ -226,7 +224,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     updateUserProfileUI(loggedInUserProfile);
                     loadAnnouncements();
-                    // 🛑 إصلاح هام: التأكد من إظهار لوحة القيادة للمستخدم
                     loadMainDashboard(); 
                 }
             } else {
@@ -245,6 +242,32 @@ document.addEventListener("DOMContentLoaded", () => {
         userLevelP.textContent = `المستوى: ${user.level || 1}`;
         userAvatarImg.src = user.profile_image_url || DEFAULT_AVATAR_URL;
         loadTransactionHistory(user.email);
+    }
+
+    // 🛑🛑 إصلاح زر QR المستخدم 🛑🛑
+    if (showQrBtn) {
+        showQrBtn.addEventListener('click', () => {
+            if (!loggedInUserProfile) return;
+            
+            // 1. إظهار النافذة أولاً (مهم لعمل المكتبة)
+            qrModalOverlay.style.display = 'flex';
+            
+            // 2. تفريغ المحتوى القديم
+            qrCodeContainer.innerHTML = '';
+            
+            // 3. توليد الكود
+            new QRCode(qrCodeContainer, { 
+                text: loggedInUserProfile.email, 
+                width: 250, 
+                height: 250 
+            });
+            document.getElementById("qr-user-email-display").textContent = loggedInUserProfile.email;
+        });
+    }
+    // 🛑🛑 نهاية إصلاح زر QR 🛑🛑
+
+    if (closeQrBtn) {
+        closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none');
     }
 
     function renderScannedList() {
