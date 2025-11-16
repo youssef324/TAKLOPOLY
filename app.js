@@ -59,7 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const userAnnouncementText = document.getElementById("user-announcement-text");
     const adminAnnouncementForm = document.getElementById("admin-announcement-form");
     const adminAnnouncementText = document.getElementById("admin-announcement-text");
+    const adminTickerText = document.getElementById("admin-ticker-text");
     const adminAnnouncementMessage = document.getElementById("admin-announcement-message");
+    const tickerTextDisplay = document.getElementById("ticker-text-display");
     const massUpdateControls = document.getElementById("mass-update-controls");
     const selectedUsersCount = document.getElementById("selected-users-count");
     const massUpdateAmount = document.getElementById("mass-update-amount");
@@ -511,40 +513,36 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">خطأ في تحميل بيانات الكويز.</p></div>';
         }
     }
-  // 🛑🛑 فانكشن جلب الإعلانات (مُحدثة للشريط المتحرك) 🛑🛑
     async function loadAnnouncement() {
-        // العناصر القديمة (الصندوق الأصفر)
-        const userAnnouncementBox = document.getElementById("user-announcement-box");
-        const userAnnouncementText = document.getElementById("user-announcement-text");
-        // العنصر الجديد (الشريط المتحرك)
-        const tickerTextDisplay = document.getElementById("ticker-text-display");
-        const adminAnnouncementText = document.getElementById("admin-announcement-text"); // حقل الأدمن
-
+        userAnnouncementBox.style.display = "none";
+        userAnnouncementText.textContent = "";
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             if (!response.ok) throw new Error("فشل جلب الإعلان");
-
             const data = await response.json();
             if (data.message && data.message.trim()) {
-                // 1. تحديث الصندوق القديم (لو لسه موجود)
                 if (userAnnouncementText) userAnnouncementText.textContent = data.message;
                 if (userAnnouncementBox) userAnnouncementBox.style.display = "block";
-
-                // 2. 🛑 تحديث الشريط المتحرك (الجديد) 🛑
+                // 🛑🛑 تحديث شريط الأخبار 🛑🛑
                 if (tickerTextDisplay) {
-                    tickerTextDisplay.textContent = data.message;
-                    // خدعة صغيرة لإعادة تشغيل الأنيميشن لما النص يتغير
+                    const rawText = data.ticker_message || data.message;
+                    // استبدال الرمز | بفاصل شيك
+                    const formattedText = rawText.replace(/\|/g, '<span style="margin: 0 20px; color: #ffc107;">✦</span>');
+                    tickerTextDisplay.innerHTML = formattedText;
+                    
                     const tickerMove = document.querySelector('.ticker-move');
                     if(tickerMove) {
+                        // حساب سرعة الحركة بناءً على طول النص
+                        const duration = Math.max(10, rawText.length / 5);
+                        
                         tickerMove.style.animation = 'none';
-                        tickerMove.offsetHeight; /* trigger reflow */
-                        tickerMove.style.animation = 'ticker-scroll 20s linear infinite';
+                        tickerMove.offsetHeight; 
+                        tickerMove.style.animation = `ticker-scroll ${duration}s linear infinite`;
                     }
                 }
-
-                // 3. تحديث حقل الأدمن
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin' && adminAnnouncementText) {
-                    adminAnnouncementText.value = data.message;
+                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
+                    if (adminAnnouncementText) adminAnnouncementText.value = data.message;
+                    if (adminTickerText) adminTickerText.value = data.ticker_message || "";
                 }
             }
         } catch (err) {
@@ -1038,6 +1036,24 @@ document.addEventListener("DOMContentLoaded", () => {
     (function setupAdminPanel() {
         let currentSearchedUser = null;
         let scannedUsersBatch = [];
+        // Accordion Logic for Admin Sections
+        const sectionHeaders = document.querySelectorAll('.admin-section-header');
+        sectionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const section = header.parentElement;
+                const content = section.querySelector('.admin-section-content');
+                const isActive = section.classList.contains('active');
+                document.querySelectorAll('.admin-section').forEach(sec => {
+                    sec.classList.remove('active');
+                    const con = sec.querySelector('.admin-section-content');
+                    if(con) con.style.display = 'none';
+                });
+                if (!isActive) {
+                    section.classList.add('active');
+                    content.style.display = 'block';
+                }
+            });
+        });
         if(adminSearchForm) {
             adminSearchForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
@@ -1775,8 +1791,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 event.preventDefault();
                 event.stopPropagation();
                 const announcementTextValue = document.getElementById("admin-announcement-text").value.trim();
-                if (!announcementTextValue) {
-                    adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان أولاً.";
+                const tickerTextValue = document.getElementById("admin-ticker-text").value.trim();
+                if (!announcementTextValue && !tickerTextValue) {
+                    adminAnnouncementMessage.textContent = "الرجاء كتابة نص واحد على الأقل.";
                     adminAnnouncementMessage.style.color = "red";
                     return;
                 }
@@ -1786,13 +1803,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const response = await fetch(`/admin-set-announcement`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message: announcementTextValue }),
+                        body: JSON.stringify({ 
+                            message: announcementTextValue,
+                            ticker_message: tickerTextValue 
+                        }),
                     });
                     const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
                     if (response.ok) {
-                        adminAnnouncementMessage.textContent = "تم نشر الإعلان بنجاح!";
+                        adminAnnouncementMessage.textContent = "تم نشر الإعلانات بنجاح!";
                         adminAnnouncementMessage.style.color = "green";
-                        document.getElementById("admin-announcement-text").value = "";
                         loadAnnouncement();
                     } else {
                         adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
