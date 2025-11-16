@@ -222,10 +222,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (showQrBtn) {
         showQrBtn.addEventListener('click', () => {
             if (!loggedInUserProfile) return;
-            qrModalOverlay.style.display = 'flex'; // إظهار
-            qrCodeContainer.innerHTML = ''; // تنظيف
             
-            // تأخير بسيط لضمان الرسم
+            // 1. إظهار النافذة أولاً
+            qrModalOverlay.style.display = 'flex';
+            qrCodeContainer.innerHTML = '';
+            
+            // 2. تأخير بسيط لضمان الرسم
             setTimeout(() => {
                 new QRCode(qrCodeContainer, { 
                     text: loggedInUserProfile.email, 
@@ -240,7 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("qr-user-email-display").textContent = loggedInUserProfile.email;
         });
     }
-    if (closeQrBtn) closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none');
+    if (closeQrBtn) {
+        closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none');
+    }
 
     function renderScannedList() {
         scannedUsersList.innerHTML = "";
