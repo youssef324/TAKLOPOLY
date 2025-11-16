@@ -16,7 +16,7 @@ body {
     padding: 20px;
 }
 
-/* --- 🛑 الهيدر الأزرق (بخط كبير و Bold - قيم أكبر) 🛑 --- */
+/* --- الهيدر الأزرق (بخط كبير و Bold) --- */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -123,6 +123,31 @@ body {
     color: white !important;
 }
 
+/* 🛑🛑 زر العودة للقائمة الرئيسية (معدل لليسار) 🛑🛑 */
+#back-to-store-btn {
+    background-color: #007bff; /* Primary Blue */
+    color: white;
+    padding: 10px 20px; 
+    border: none;
+    border-radius: 20px; /* جعل الحواف أكثر دائرية لتمييزه كزر */
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+    
+    /* 🛑 تحديد الموضع على اليسار (في وضع RTL) 🛑 */
+    display: block; 
+    width: fit-content;
+    margin-right: 0;
+    margin-left: auto; /* هذا يدفعه لليسار */
+    text-align: left;
+}
+#back-to-store-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+}
+
 
 /* --- لوحة الأدمن --- */
 #admin-modal-content {
@@ -189,7 +214,7 @@ body {
 .store-item-card {
     background-color: #f8f9fa;
     border: 1px solid #ddd;
-    border-radius: 16px; /* 🛑 تم التعديل 🛑 */
+    border-radius: 16px; /* تم التعديل */
     padding: 15px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -252,17 +277,17 @@ body {
 
 .champions-container {
     display: flex; 
-    justify-content: center; /* توسيط الكروت في المنتصف */
-    flex-wrap: wrap; /* للسماح بالالتفاف في الشاشات الصغيرة */
-    gap: 30px; /* مسافة بين الكروت */
+    justify-content: center; 
+    flex-wrap: wrap; 
+    gap: 30px; 
     margin: 2rem 0; 
 }
 
 .champion-card { 
-    flex-basis: auto; /* 🛑 إزالة `flex-basis: 250px` للحفاظ على الترتيب الطبيعي */
+    width: 250px; /* تحديد عرض ثابت للكارت لضمان شكل موحد */
     padding: 10px;
     margin: 0; 
-    width: 250px; /* 🛑 تحديد عرض ثابت للكارت لضمان شكل موحد */
+    flex-basis: auto; /* الحفاظ على الترتيب الطبيعي */
 }
 
 /* 🛑 تكبير صور الأبطال 🛑 */
@@ -273,15 +298,15 @@ body {
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
-    border: 4px solid gold; /* بوردر ذهبي أسمك */
+    border: 4px solid gold; 
 }
 
 .champion-card .rank {
-    font-size: 3.5em; /* تكبير الميداليات */
+    font-size: 3.5em; 
     margin: 0;
 }
 .champion-card .name {
-    font-size: 1.4em; /* تكبير الخط */
+    font-size: 1.4em; 
     font-weight: bold; 
     color: #333; 
     display: block;
@@ -293,11 +318,8 @@ body {
 }
 
 /* تمييز الميداليات الفضي والبرونزي */
-.champion-card:nth-child(2) img { border-color: #C0C0C0; /* فضي */ }
-.champion-card:nth-child(3) img { border-color: #CD7F32; /* برونزي */ }
-
-/* 🛑 إزالة أي كود يغير ترتيب الكروت (مثل order: 1) 🛑 */
-/* هذا يضمن أنهم سيظهرون بالترتيب الطبيعي: الأول، الثاني، الثالث، ثم يلتفون */
+.champion-card:nth-child(2) img { border-color: #C0C0C0; }
+.champion-card:nth-child(3) img { border-color: #CD7F32; }
 
 
 .leaderboard-columns {
@@ -338,58 +360,36 @@ body {
     margin: 0;
 }
 
-/* --- 🛑🛑 إصلاح نهائي ومؤكد: المودال العام والـ QR في المنتصف تماماً 🛑🛑 --- */
+/* --- 🛑 المودال العام (Modal) --- */
 .modal-overlay { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.8); 
-    display: flex; /* 🛑 هذا هو الأهم: لضمان التوسيط */
-    justify-content: center; /* توسيط أفقي */
-    align-items: center;   /* توسيط عمودي */
+    display: flex; /* 🛑 لضمان التوسيط الأفقي والعمودي */
+    justify-content: center; 
+    align-items: center;   
     z-index: 2000; 
-    /* 🛑 يتم التحكم في display: none/flex; بواسطة الـ JavaScript */
 }
 .modal-content { 
-    background: white; 
-    padding: 30px; 
-    border-radius: 8px; 
-    width: 90%; 
-    max-width: 500px; 
-    position: relative; 
-    text-align: right; 
+    background: white; padding: 30px; border-radius: 8px; 
+    width: 90%; max-width: 500px; position: relative; text-align: right; 
 }
 .close-btn { 
-    position: absolute; 
-    top: 10px; 
-    left: 10px; 
-    cursor: pointer; 
-    font-size: 24px; 
-    color: #333; 
+    position: absolute; top: 10px; left: 10px; 
+    cursor: pointer; font-size: 24px; color: #333; 
 }
 
-/* 🛑🛑 تحديد ستايل الـ QR Modal بشكل مباشر ومؤكد 🛑🛑 */
-#qr-modal-overlay { /* 🛑 هذا هو الـ ID الصحيح للـ overlay الخاص بالـ QR 🛑 */
-    position: fixed !important; /* فرض absolute positioning */
-    top: 0 !important; 
-    left: 0 !important; 
-    width: 100% !important; 
-    height: 100% !important; 
-    background: rgba(0,0,0,0.8) !important; 
-    display: flex !important; /* 🛑 فرض flexbox لتوسيط المحتوى */
-    justify-content: center !important; /* توسيط أفقي */
-    align-items: center !important;   /* توسيط عمودي */
-    z-index: 2000 !important; 
+/* --- 🛑🛑 إصلاح نهائي: ستايل كود الحضور (QR Modal) 🛑🛑 --- */
+#qr-modal-overlay { 
+    display: flex !important; /* فرض flexbox لضمان التوسيط مهما كان الـ JS */
+    justify-content: center !important; 
+    align-items: center !important;   
 }
+
 #qr-modal-content {
-    background-color: white; 
-    padding: 25px; 
-    border-radius: 10px;
+    background-color: white; padding: 25px; border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
     text-align: center;
-    max-width: 300px !important; /* فرض الحجم الأصلي الأفضل */
+    max-width: 300px !important; /* الحجم المضغوط المطلوب */
     width: 90%; 
     position: relative;
     max-height: 90vh; 
@@ -399,19 +399,14 @@ body {
     margin: 15px auto;
     width: 250px; 
     height: 250px; 
-    border: 1px solid #ccc; 
-    padding: 5px;
+    border: 1px solid #ccc; padding: 5px;
 }
 .close-qr-btn {
-    position: absolute; 
-    top: 10px; 
-    left: 10px; 
+    position: absolute; top: 10px; left: 10px; 
     font-size: 24px;
-    font-weight: bold; 
-    color: #aaa; 
-    cursor: pointer;
+    font-weight: bold; color: #aaa; cursor: pointer;
 }
-/* 🛑🛑 نهاية الإصلاح المؤكد لستايل الـ QR 🛑🛑 */
+/* 🛑🛑 نهاية إصلاح الـ QR 🛑🛑 */
 
 
 /* --- نافذة تفاصيل الزائر (Grid) --- */
@@ -565,38 +560,3 @@ body {
     width: 100%; padding: 12px; font-size: 1.1em; font-weight: bold;
     border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;
 }
-
-
-/* --- باقي العناصر (الإعلان، الكويز) --- */
-.announcement-container { display: none; max-width: 900px; margin: 2rem auto; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; text-align: center; }
-#user-announcement-text { font-size: 1.2em; font-weight: bold; }
-
-.quiz-container { 
-    display: none; max-width: 900px; margin: 2rem auto; padding: 20px; 
-    background-color: #fff; border-radius: 8px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 2px solid #007bff;
-}
-.quiz-container h2 { text-align: center; color: #007bff; margin-top: 0; }
-#quiz-question-text {
-    font-size: 1.3em; font-weight: bold;
-    margin-bottom: 1.5rem; text-align: center;
-}
-.quiz-options { display: flex; flex-direction: column; gap: 10px; }
-.quiz-option-btn {
-    padding: 15px; font-size: 1.1em; background-color: #f0f2f5;
-    border: 2px solid #ddd; border-radius: 8px; cursor: pointer;
-    text-align: right; transition: background-color 0.2s, border-color 0.2s;
-}
-.quiz-option-btn:hover { background-color: #e9ecef; border-color: #007bff; }
-.quiz-option-btn.selected {
-    background-color: #cce5ff; border-color: #007bff; font-weight: bold;
-}
-#quiz-submit-btn {
-    background-color: #28a745; color: white; padding: 12px;
-    border: none; border-radius: 4px; cursor: pointer;
-    font-size: 1.2em; width: 100%; margin-top: 1.5rem;
-}
-
-/* (تنسيقات داخلية للوحة الأدمن - من الملف الأصلي) */
-#admin-search-form input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-#admin-search-form button { padding: 10px 15
