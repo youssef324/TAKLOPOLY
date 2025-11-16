@@ -16,7 +16,7 @@ body {
     padding: 20px;
 }
 
-/* --- 🛑 الهيدر الأزرق (بخط كبير و Bold) 🛑 --- */
+/* --- 🛑 الهيدر الأزرق (بخط كبير و Bold - قيم أكبر) 🛑 --- */
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -29,10 +29,10 @@ body {
 .header-part { flex: 1; text-align: center; }
 .header-part.right { text-align: right; }
 .header-part.left { text-align: left; }
-/* 🛑 تم التكبير والـ Bold (قيم أكبر هذه المرة) 🛑 */
-.header-part h1 { font-size: 2.2em; margin: 5px 0; font-weight: bold; }
-.header-part h2 { font-size: 1.8em; margin: 0; color: #ffdd57; font-weight: bold; }
-.header-part h3 { font-size: 1.4em; margin: 0; font-weight: bold; }
+/* 🛑 تم التكبير والـ Bold بقيم أكبر 🛑 */
+.header-part h1 { font-size: 2.5em; margin: 5px 0; font-weight: bold; }
+.header-part h2 { font-size: 2.0em; margin: 0; color: #ffdd57; font-weight: bold; }
+.header-part h3 { font-size: 1.6em; margin: 0; font-weight: bold; }
 
 @media (max-width: 768px) {
     .main-header { flex-direction: column; text-align: center; gap: 10px; }
@@ -124,7 +124,7 @@ body {
 }
 
 
-/* --- لوحة الأدمن (مدمجة: شكل الأصلي + هيكل الأكورديون) --- */
+/* --- لوحة الأدمن --- */
 #admin-modal-content {
     max-width: 900px !important;
     max-height: 90vh;
@@ -186,7 +186,6 @@ body {
     margin-top: 1.5rem;
 }
 
-/* 🛑 زيادة استدارة الكروت 🛑 */
 .store-item-card {
     background-color: #f8f9fa;
     border: 1px solid #ddd;
@@ -254,16 +253,16 @@ body {
 .champions-container {
     display: flex; 
     justify-content: center; /* توسيط الكروت في المنتصف */
-    text-align: center;
-    margin: 2rem 0; 
     flex-wrap: wrap; /* للسماح بالالتفاف في الشاشات الصغيرة */
     gap: 30px; /* مسافة بين الكروت */
+    margin: 2rem 0; 
 }
 
 .champion-card { 
-    flex-basis: 250px; /* حجم أساسي أكبر لكل كارت */
+    flex-basis: auto; /* 🛑 إزالة `flex-basis: 250px` للحفاظ على الترتيب الطبيعي */
     padding: 10px;
-    margin: 0; /* إزالة المارجن الزائد */
+    margin: 0; 
+    width: 250px; /* 🛑 تحديد عرض ثابت للكارت لضمان شكل موحد */
 }
 
 /* 🛑 تكبير صور الأبطال 🛑 */
@@ -297,14 +296,8 @@ body {
 .champion-card:nth-child(2) img { border-color: #C0C0C0; /* فضي */ }
 .champion-card:nth-child(3) img { border-color: #CD7F32; /* برونزي */ }
 
-/* لإجبار الأول أن يكون في سطر وحده، والثاني والثالث أسفله */
-.champion-card:first-child {
-    width: 100%; /* يأخذ عرض الشاشة بالكامل */
-    flex-basis: auto; /* يلغي الأساس المرن */
-    order: 1; /* يضمن أنه الأول في الترتيب المرئي */
-}
-.champion-card:nth-child(2) { order: 2; }
-.champion-card:nth-child(3) { order: 3; }
+/* 🛑 إزالة أي كود يغير ترتيب الكروت (مثل order: 1) 🛑 */
+/* هذا يضمن أنهم سيظهرون بالترتيب الطبيعي: الأول، الثاني، الثالث، ثم يلتفون */
 
 
 .leaderboard-columns {
@@ -345,33 +338,57 @@ body {
     margin: 0;
 }
 
-/* --- 🛑🛑 إصلاح: المودال العام والـ QR في المنتصف تماماً 🛑🛑 --- */
+/* --- 🛑🛑 إصلاح نهائي ومؤكد: المودال العام والـ QR في المنتصف تماماً 🛑🛑 --- */
 .modal-overlay { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
     background: rgba(0,0,0,0.8); 
-    display: flex; /* 🛑 هنا يكمن السر: استخدام flexbox لتوسيط المحتوى */
+    display: flex; /* 🛑 هذا هو الأهم: لضمان التوسيط */
     justify-content: center; /* توسيط أفقي */
     align-items: center;   /* توسيط عمودي */
     z-index: 2000; 
+    /* 🛑 يتم التحكم في display: none/flex; بواسطة الـ JavaScript */
 }
 .modal-content { 
-    background: white; padding: 30px; border-radius: 8px; 
-    width: 90%; max-width: 500px; position: relative; text-align: right; 
-    /* 🛑 تأكد من عدم وجود display: none; هنا مباشرة، فهو يتم التحكم به بالجافاسكريبت */
+    background: white; 
+    padding: 30px; 
+    border-radius: 8px; 
+    width: 90%; 
+    max-width: 500px; 
+    position: relative; 
+    text-align: right; 
 }
 .close-btn { 
-    position: absolute; top: 10px; left: 10px; 
-    cursor: pointer; font-size: 24px; color: #333; 
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    cursor: pointer; 
+    font-size: 24px; 
+    color: #333; 
 }
 
-/* --- 🛑🛑 تعديل: ستايل كود الحضور (QR Modal) الأصلي 🛑🛑 --- */
-#qr-modal-overlay.modal-overlay {
-    display: flex; /* 🛑 تأكد من أن الـ overlay هو flexbox */
+/* 🛑🛑 تحديد ستايل الـ QR Modal بشكل مباشر ومؤكد 🛑🛑 */
+#qr-modal-overlay { /* 🛑 هذا هو الـ ID الصحيح للـ overlay الخاص بالـ QR 🛑 */
+    position: fixed !important; /* فرض absolute positioning */
+    top: 0 !important; 
+    left: 0 !important; 
+    width: 100% !important; 
+    height: 100% !important; 
+    background: rgba(0,0,0,0.8) !important; 
+    display: flex !important; /* 🛑 فرض flexbox لتوسيط المحتوى */
+    justify-content: center !important; /* توسيط أفقي */
+    align-items: center !important;   /* توسيط عمودي */
+    z-index: 2000 !important; 
 }
-
 #qr-modal-content {
-    background-color: white; padding: 25px; border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); text-align: center;
+    background-color: white; 
+    padding: 25px; 
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); 
+    text-align: center;
     max-width: 300px !important; /* فرض الحجم الأصلي الأفضل */
     width: 90%; 
     position: relative;
@@ -382,13 +399,19 @@ body {
     margin: 15px auto;
     width: 250px; 
     height: 250px; 
-    border: 1px solid #ccc; padding: 5px;
+    border: 1px solid #ccc; 
+    padding: 5px;
 }
 .close-qr-btn {
-    position: absolute; top: 10px; left: 10px; font-size: 24px;
-    font-weight: bold; color: #aaa; cursor: pointer;
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    font-size: 24px;
+    font-weight: bold; 
+    color: #aaa; 
+    cursor: pointer;
 }
-/* 🛑🛑 نهاية إصلاح ستايل الـ QR 🛑🛑 */
+/* 🛑🛑 نهاية الإصلاح المؤكد لستايل الـ QR 🛑🛑 */
 
 
 /* --- نافذة تفاصيل الزائر (Grid) --- */
@@ -576,11 +599,4 @@ body {
 
 /* (تنسيقات داخلية للوحة الأدمن - من الملف الأصلي) */
 #admin-search-form input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-#admin-search-form button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; background-color: #007bff; }
-#admin-balance-controls { display: flex; gap: 10px; margin-top: 0.5rem; }
-#admin-balance-controls input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-#admin-add-balance-btn, #admin-subtract-balance-btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: bold; }
-#admin-add-balance-btn { background-color: #28a745; }
-#admin-subtract-balance-btn { background-color: #ffc107; color: #333; }
-#admin-level-controls { display: flex; gap: 10px; margin-top: 0.5rem; }
-#admin-level-
+#admin-search-form button { padding: 10px 15
