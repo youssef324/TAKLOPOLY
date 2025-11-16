@@ -1,28 +1,29 @@
 /*
  * API Endpoint: /get-announcement
- * (نسخة KV المُحدثة - تدعم الشريط المتحرك)
+ * (نسخة KV - لقراءة الرسالتين)
  */
 export async function onRequestPost(context) {
   try {
     // جلب القيمة من KV
     const value = await context.env.KIROPAY_KV.get('current_announcement');
     
+    // القيم الافتراضية
     let data = { message: "", ticker_message: "" };
 
     if (value) {
       try {
-        // 🛑 محاولة قراءة البيانات كـ JSON (للنسخة الجديدة)
+        // 🛑 محاولة قراءة البيانات كـ JSON
         const parsed = JSON.parse(value);
         
-        // لو نجح التحليل وكان كائن، ناخده كما هو
+        // لو نجح التحليل، نستخدم البيانات المحفوظة
         if (typeof parsed === 'object' && parsed !== null) {
            data = parsed;
         } else {
-           // 🛑 دعم قديم: لو القيمة كانت نص عادي (من النظام القديم) نعتبرها الرسالة الثابتة
+           // دعم قديم: لو كان نص عادي محفوظ من زمان
            data.message = value;
         }
       } catch (e) {
-        // لو فشل التحليل كـ JSON، نعتبره نص عادي
+        // لو فشل التحليل (يعني كان نص عادي مش JSON)، نعرضه في الرسالة الثابتة
         data.message = value;
       }
     }
