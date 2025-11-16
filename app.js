@@ -1289,46 +1289,50 @@ if (closeAdminModal) {
 
     // 🛑 ربط زرار الريفرش 🛑
     refreshDataBtn.addEventListener('click', refreshUserData);
+// -----------------------------------------------------
+// 🛑🛑🛑 منطق توليد وعرض QR Code (لليوزر) 🛑🛑🛑
+// -----------------------------------------------------
 
-    // 
-    // -----------------------------------------------------
-    // 🛑🛑🛑 منطق توليد وعرض QR Code (لليوزر) 🛑🛑🛑
-    // -----------------------------------------------------
+if(showQrBtn) {
+    showQrBtn.addEventListener('click', () => {
+        if (!loggedInUserProfile || !loggedInUserProfile.email) return;
 
-    if (showQrBtn) {
-        showQrBtn.addEventListener('click', () => {
-            if (!loggedInUserProfile || !loggedInUserProfile.email) return;
+        // 1. تفريغ الحاوية للتوليد الجديد (مهم)
+        qrCodeContainer.innerHTML = ''; 
 
-            // 1. تفريغ الحاوية للتوليد الجديد
-            qrCodeContainer.innerHTML = '';
+        // 2. المحتوى المشفر
+        const qrData = loggedInUserProfile.email;
 
-            // 2. المحتوى المشفر: نستخدم الإيميل كمعرّف
-            const qrData = loggedInUserProfile.email;
-
-            // 3. توليد كود QR
+        // 3. توليد كود QR (ضمان وجود مكتبة QRCode.js)
+        // نستخدم setTimeout لضمان أن الـ DOM قد تم عرضه قبل التوليد (حل شائع للمشاكل)
+        setTimeout(() => {
             new QRCode(qrCodeContainer, {
                 text: qrData,
                 width: 250,
                 height: 250,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
+        }, 50); // تأخير بسيط جداً
 
-            // 4. عرض الإيميل تحت الكود (للتأكد)
-            qrUserEmailDisplay.textContent = loggedInUserProfile.email;
+        // 4. عرض الإيميل تحت الكود
+        qrUserEmailDisplay.textContent = loggedInUserProfile.email;
 
-            // 5. إظهار النافذة
-            qrModalOverlay.style.display = 'flex';
-        });
-    }
+        // 5. إظهار النافذة
+        qrModalOverlay.style.display = 'flex';
+    });
+}
 
-    // 6. إغلاق النافذة
-    if (closeQrBtn) {
-        closeQrBtn.addEventListener('click', () => {
-            qrModalOverlay.style.display = 'none';
-        });
-    }
+// 6. إصلاح زر الإغلاق (X)
+if(closeQrBtn) {
+    closeQrBtn.addEventListener('click', () => {
+        qrModalOverlay.style.display = 'none';
+        qrCodeContainer.innerHTML = ''; // تنظيف المحتوى
+    });
+}
+
+// ... (باقي أكواد app.js)
 
     // -----------------------------------------------------
     // 🛑🛑🛑 منطق واجهة الزائر (مُعدل ليشمل فتح التفاصيل) 🛑🛑🛑
