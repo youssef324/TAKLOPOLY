@@ -9,16 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshDataBtn = document.getElementById("refresh-data-btn");
     const guestContainer = document.getElementById("guest-container");
     const adminPanelDiv = document.getElementById("admin-panel");
-
-    // User Elements
     const userNameP = document.getElementById("user-name");
     const userFamilyP = document.getElementById("user-family");
     const userBalanceP = document.getElementById("user-balance");
     const userLevelP = document.getElementById("user-level");
     const userAvatarImg = document.getElementById("user-avatar");
     const transactionList = document.getElementById("transaction-list");
-
-    // Announcement Elements
     const newsTicker = document.getElementById("news-ticker");
     const userAnnouncementBox = document.getElementById("user-announcement-box");
     const userAnnouncementText = document.getElementById("user-announcement-text");
@@ -26,8 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminTickerText = document.getElementById("admin-ticker-text");
     const adminAnnouncementText = document.getElementById("admin-announcement-text");
     const adminAnnouncementMessage = document.getElementById("admin-announcement-message");
-
-    // Store & Leaderboard
     const storeContainer = document.getElementById("store-container");
     const storeItemsList = document.getElementById("store-items-list");
     const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
@@ -36,10 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const backToStoreBtn = document.getElementById("back-to-store-btn");
     const adminAddItemForm = document.getElementById("admin-add-item-form");
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
-    const leaderboardContainer = document.getElementById("leaderboard-container"); // 🛑 تم التأكد من وجوده
-    const quizContainer = document.getElementById("quiz-container"); // 🛑 تم التأكد من وجوده
-
-    // Admin Scan Elements
+    const leaderboardContainer = document.getElementById("leaderboard-container");
+    const quizContainer = document.getElementById("quiz-container");
     const startScanBtn = document.getElementById("start-scan-btn");
     const readerDiv = document.getElementById("reader");
     const rewardReasonSelect = document.getElementById("reward-reason-select");
@@ -47,8 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const scannedListContainer = document.getElementById("scanned-list-container");
     const scannedUsersList = document.getElementById("scanned-users-list");
     const batchAddPointsBtn = document.getElementById("batch-add-points-btn");
-    
-    // Print & Guest Modal Elements
     const fetchQrListBtn = document.getElementById("admin-fetch-qr-list-btn");
     const qrListResults = document.getElementById("admin-qr-list-results");
     const generatePrintCardsBtn = document.getElementById("admin-generate-print-cards-btn");
@@ -57,8 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const guestDetailsModal = document.getElementById("guest-details-modal");
     const closeGuestDetails = document.getElementById("close-guest-details");
     const guestDetailsTitle = document.getElementById("guest-details-title");
-
-    // Edit & QR Modals
     const editModalOverlay = document.getElementById("edit-modal-overlay");
     const closeEditModal = document.getElementById("close-edit-modal");
     const editItemForm = document.getElementById("edit-item-form");
@@ -66,8 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const qrCodeContainer = document.getElementById("qr-code-container");
     const closeQrBtn = document.querySelector(".close-qr-btn");
     const showQrBtn = document.getElementById("show-qr-btn");
+    const downloadCardsAsImageBtn = document.getElementById("admin-download-cards-as-image-btn");
 
-    // Global Vars
     let loggedInUserProfile = null;
     let html5QrCode = null;
     let scannedBatch = [];
@@ -94,17 +82,13 @@ document.addEventListener("DOMContentLoaded", () => {
         userAnnouncementBox.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
-        
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop().catch(console.error);
-        }
+        if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().catch(console.error); }
         html5QrCode = null;
         if (qrModalOverlay) qrModalOverlay.style.display = "none";
         if (editModalOverlay) editModalOverlay.style.display = "none";
     };
     resetUI();
 
-    // Accordion Logic
     document.querySelectorAll('.accordion-header').forEach(header => {
         header.addEventListener('click', () => {
             document.querySelectorAll('.accordion-header').forEach(h => {
@@ -119,12 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Load Announcements
     async function loadAnnouncements() {
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             const data = await response.json();
-
             let cleanMessage = data.message || "";
             let cleanTicker = data.ticker_message || "";
 
@@ -135,31 +117,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     cleanTicker = parsed.ticker_message;
                 } catch (e) {}
             }
-
             if (cleanTicker) {
                 newsTicker.textContent = cleanTicker;
-                // Force animation restart
                 newsTicker.style.animation = 'none';
                 newsTicker.offsetHeight;
                 newsTicker.style.animation = null; 
-            } else {
-                newsTicker.textContent = "أهلاً بكم في TAKLOPOLY! - مسابقة صوم الميلاد";
-            }
+            } else { newsTicker.textContent = "أهلاً بكم في TAKLOPOLY! - مسابقة صوم الميلاد"; }
 
             if (cleanMessage) {
                 userAnnouncementText.textContent = cleanMessage;
                 userAnnouncementBox.style.display = "block";
-            } else {
-                userAnnouncementBox.style.display = "none";
-            }
+            } else { userAnnouncementBox.style.display = "none"; }
 
             if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
                 adminTickerText.value = cleanTicker;
                 adminAnnouncementText.value = cleanMessage;
             }
-        } catch (e) {
-            console.error("Announcement Load Error", e);
-        }
+        } catch (e) { console.error("Announcement Load Error", e); }
     }
 
     if (adminAnnouncementForm) {
@@ -170,22 +144,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 const response = await fetch(`/admin-set-announcement`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        message: adminAnnouncementText.value.trim(),
-                        ticker_message: adminTickerText.value.trim()
-                    })
+                    body: JSON.stringify({ message: adminAnnouncementText.value.trim(), ticker_message: adminTickerText.value.trim() })
                 });
                 if (response.ok) {
-                    adminAnnouncementMessage.textContent = "تم تحديث الإعلانات بنجاح!";
+                    adminAnnouncementMessage.textContent = "تم التحديث!";
                     loadAnnouncements();
-                } else {
-                    adminAnnouncementMessage.textContent = "فشل النشر.";
-                }
+                } else { adminAnnouncementMessage.textContent = "فشل النشر."; }
             } catch (err) { adminAnnouncementMessage.textContent = "خطأ في الاتصال."; }
         });
     }
 
-    // Login Logic (إصلاح خطأ الاتصال)
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         messageDiv.textContent = "جاري الدخول...";
@@ -203,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok) {
                 messageDiv.textContent = "";
                 loggedInUserProfile = data.user;
-
                 if (loggedInUserProfile.role === 'admin') {
                     adminPanelDiv.style.display = "block";
                     logoutBtn.style.display = "block";
@@ -221,12 +188,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     refreshDataBtn.style.display = "block";
                     unlockedItemsBtn.style.display = "block";
                     if (showQrBtn) showQrBtn.style.display = "block";
-                    
                     updateUserProfileUI(loggedInUserProfile);
                     loadAnnouncements();
-                    
-                    // 🛑 استدعاء لوحة القيادة بوضوح 🛑
-                    await loadMainDashboard(); 
+                    loadMainDashboard(); 
                 }
             } else {
                 messageDiv.textContent = data.error || "فشل الدخول";
@@ -247,18 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
         loadTransactionHistory(user.email);
     }
 
-    // 🛑🛑 إصلاح زر QR (تأخير الرسم + زيادة حجم العرض) 🛑🛑
     if (showQrBtn) {
         showQrBtn.addEventListener('click', () => {
             if (!loggedInUserProfile) return;
-            
-            // 1. إظهار النافذة أولاً
             qrModalOverlay.style.display = 'flex';
             qrCodeContainer.innerHTML = '';
-            
-            // 2. تأخير بسيط لضمان جاهزية العنصر في الـ DOM
             setTimeout(() => {
-                // التأكد من أن الحاوية فارغة
                 qrCodeContainer.innerHTML = '';
                 new QRCode(qrCodeContainer, { 
                     text: loggedInUserProfile.email, 
@@ -269,13 +227,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     correctLevel : QRCode.CorrectLevel.H
                 });
             }, 100);
-            
             document.getElementById("qr-user-email-display").textContent = loggedInUserProfile.email;
         });
     }
-    if (closeQrBtn) {
-        closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none');
-    }
+    if (closeQrBtn) { closeQrBtn.addEventListener('click', () => qrModalOverlay.style.display = 'none'); }
 
     function renderScannedList() {
         scannedUsersList.innerHTML = "";
@@ -340,148 +295,48 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ emails: scannedBatch, rewardAmount: amount, reason, adminEmail: loggedInUserProfile.email })
                 });
                 const data = await response.json();
-                if (response.ok) {
-                    alert(data.message);
-                    scannedBatch = []; renderScannedList();
-                    scanStatusMessage.textContent = "تمت الإضافة بنجاح!";
-                } else { alert(data.error); }
+                if (response.ok) { alert(data.message); scannedBatch = []; renderScannedList(); scanStatusMessage.textContent = "تمت الإضافة بنجاح!"; } 
+                else { alert(data.error); }
             } catch (err) { alert("خطأ في الاتصال."); } finally { batchAddPointsBtn.disabled = false; }
         });
     }
 
-    // Guest View Logic
-    async function openGuestDetails(user) {
-        guestDetailsModal.style.display = "flex";
-        guestDetailsTitle.textContent = user.name;
-        const ids = ["val-mass", "val-sunday", "val-deacon", "val-vespers", "val-book", "val-praise", "val-psalm", "val-extra-mass", "val-extra-mass-nt", "val-mass-nt", "val-extra-vespers", "val-confession", "val-competition", "val-other"];
-        ids.forEach(id => document.getElementById(id).textContent = "0");
+    // 🛑🛑 إصلاح الأزرار المعطلة 🛑🛑
+    // يجب ربطها بحدث النقر
+    if (logoutBtn) logoutBtn.addEventListener("click", () => { resetUI(); loginForm.reset(); });
+    if (logoutBtnGuest) logoutBtnGuest.addEventListener("click", () => { resetUI(); loginForm.reset(); });
+
+    async function refreshUserData() {
+        if (!loggedInUserProfile) return;
+        refreshDataBtn.textContent = "...";
         try {
-            const response = await fetch(`/get-transactions`, {
+            const res = await fetch(`/get-user-profile`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: user.email })
+                body: JSON.stringify({ email: loggedInUserProfile.email })
             });
-            const data = await response.json();
-            if (data.transactions) {
-                const counts = {
-                    "القداس": "val-mass", "مدارس الاحد": "val-sunday", "مدرسة شمامسة": "val-deacon", "عشية": "val-vespers", "درس كتاب": "val-book",
-                    "تسبحة": "val-praise", "تسميع مزمور": "val-psalm", "قداس اضافي": "val-extra-mass", "قداس اضافي بدون تونية": "val-extra-mass-nt",
-                    "قداس بدون تونية": "val-mass-nt", "عشية او تسبحة(زيادة)": "val-extra-vespers", "اعتراف": "val-confession", "مسابقة": "val-competition"
-                };
-                let otherCount = 0;
-                data.transactions.forEach(t => {
-                    let matched = false;
-                    for (const key in counts) {
-                        if (t.reason && t.reason.includes(key) && t.amount > 0) {
-                            let el = document.getElementById(counts[key]);
-                            el.textContent = parseInt(el.textContent) + 1;
-                            matched = true; break;
-                        }
-                    }
-                    if (!matched && t.amount > 0) otherCount++;
-                });
-                document.getElementById("val-other").textContent = otherCount;
-            }
-        } catch (e) {}
-    }
-
-    if (closeGuestDetails) closeGuestDetails.onclick = () => guestDetailsModal.style.display = "none";
-    document.querySelectorAll(".guest-family-btn").forEach(btn => {
-        btn.addEventListener("click", async () => {
-            const list = document.getElementById("guest-results-list");
-            const msg = document.getElementById("guest-message");
-            list.innerHTML = "<li>جاري التحميل...</li>";
-            try {
-                const res = await fetch('/guest-get-family', {
-                    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: btn.dataset.family })
-                });
-                const data = await res.json();
-                list.innerHTML = ""; msg.textContent = `عرض ${data.users.length} مستخدم`;
-                data.users.forEach(u => {
-                    const li = document.createElement("li");
-                    li.style.cursor = "pointer";
-                    li.innerHTML = `<span>${u.name}</span> <strong>${u.balance} نقطة</strong>`;
-                    li.onclick = () => openGuestDetails(u);
-                    list.appendChild(li);
-                });
-            } catch (e) { list.innerHTML = "<li>خطأ</li>"; }
-        });
-    });
-
-    if (fetchQrListBtn) {
-        fetchQrListBtn.onclick = async () => {
-            const res = await fetch(`/admin-get-qr-list`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminEmail: loggedInUserProfile.email }) });
             const data = await res.json();
-            qrListResults.value = JSON.stringify(data.users);
-            qrListMessage.textContent = "تم الجلب";
-        };
+            loggedInUserProfile = data.user;
+            if (loggedInUserProfile.role !== 'admin') {
+                updateUserProfileUI(loggedInUserProfile);
+                loadMainDashboard();
+            } else { loadAdminStoreItems(); }
+            refreshDataBtn.textContent = "تحديث";
+        } catch (e) { refreshDataBtn.textContent = "فشل"; }
     }
-    if (generatePrintCardsBtn) {
-        generatePrintCardsBtn.onclick = () => {
-            const users = JSON.parse(qrListResults.value);
-            printableCardsContainer.innerHTML = "";
-            users.forEach(u => {
-                const d = document.createElement("div"); d.className = "print-card";
-                d.innerHTML = `<div class="print-card-name">${u.name}</div><div class="print-card-family">${u.family}</div><div class="print-card-qr"></div>`;
-                printableCardsContainer.appendChild(d);
-                new QRCode(d.querySelector(".print-card-qr"), { text: u.email, width: 180, height: 180 }); // تكبير الحجم هنا أيضاً
-            });
-        };
-    }
+    if (refreshDataBtn) refreshDataBtn.addEventListener('click', refreshUserData);
 
-    async function loadLeaderboards() {
-        const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
+    if (unlockedItemsBtn) unlockedItemsBtn.addEventListener('click', async () => {
+        unlockedItemsContainer.style.display = "block"; leaderboardContainer.style.display = "none"; quizContainer.style.display = "none"; storeContainer.style.display = "none";
         try {
-            const [champRes, moussaRes, margRes, karasRes] = await Promise.allSettled([fetch('/get-top-champions', { method: "POST" }), fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }), fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة مارجرس" }) }), fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) })]);
-            if (champRes.status === 'fulfilled') {
-                const data = await champRes.value.json(); const list = document.getElementById("top-champions-list"); list.innerHTML = "";
-                data.champions.forEach((u, i) => { list.innerHTML += `<div class="champion-card"><div class="rank">${rankEmojis[i + 1] || i + 1}</div><img src="${u.profile_image_url || DEFAULT_AVATAR_URL}" class="card-img"><span class="name">${u.name}</span><small>${u.balance} نقطة</small></div>`; });
-            }
-            const renderList = (res, elId) => {
-                if (res.status === 'fulfilled') {
-                    res.value.json().then(d => { const l = document.getElementById(elId); l.innerHTML = ""; d.users.forEach((u, i) => { l.innerHTML += `<li><span>${i + 1}. ${u.name}</span> <strong>${u.balance} نقطة</strong></li>`; }); });
-                }
-            };
-            renderList(moussaRes, "family-anba-moussa-list"); renderList(margRes, "family-margerges-list"); renderList(karasRes, "family-anba-karas-list");
+            const res = await fetch(`/get-unlocked-items`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: loggedInUserProfile.email }) });
+            const data = await res.json(); unlockedItemsList.innerHTML = "";
+            if (data.items) data.items.forEach(i => { unlockedItemsList.innerHTML += `<div class="store-item-card"><img src="${i.image_url}"><h5>${i.name}</h5><small>${new Date(i.purchased_at).toLocaleDateString()}</small></div>`; });
         } catch (e) {}
-    }
+    });
+    if (backToStoreBtn) backToStoreBtn.addEventListener('click', () => loadMainDashboard());
 
-    async function loadActiveQuiz(email) {
-        try {
-            const res = await fetch(`/get-active-quiz`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
-            if (res.ok) {
-                const data = await res.json(); const q = data.quiz; currentQuizId = q.id;
-                document.getElementById("quiz-question-text").textContent = `${q.question_text} (+${q.points})`;
-                document.getElementById("quiz-btn-a").textContent = q.option_a; document.getElementById("quiz-btn-b").textContent = q.option_b; document.getElementById("quiz-btn-c").textContent = q.option_c;
-                document.querySelectorAll(".quiz-option-btn").forEach(b => b.classList.remove('selected')); selectedOption = null; document.getElementById("quiz-submit-btn").disabled = false;
-            } else { quizContainer.innerHTML = '<p>لا يوجد سؤال.</p>'; }
-        } catch (e) { quizContainer.innerHTML = '<p>Error</p>'; }
-    }
-
-    document.querySelectorAll(".quiz-option-btn").forEach(b => { b.addEventListener("click", () => { document.querySelectorAll(".quiz-option-btn").forEach(x => x.classList.remove('selected')); b.classList.add('selected'); selectedOption = b.dataset.value; }); });
-    if (document.getElementById("quiz-submit-btn")) {
-        document.getElementById("quiz-submit-btn").addEventListener("click", async () => {
-            if (!selectedOption) return;
-            try {
-                const res = await fetch(`/submit-quiz-answer`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: loggedInUserProfile.email, quizId: currentQuizId, selectedOption }) });
-                const data = await res.json(); document.getElementById("quiz-message").textContent = data.message;
-                if (data.success) refreshUserData();
-            } catch (e) {}
-        });
-    }
-
-    // 🛑🛑 دالة استدعاء كل مكونات الواجهة الرئيسية 🛑🛑
-    async function loadMainDashboard() {
-        loadStoreItems();
-        loadLeaderboards();
-        loadActiveQuiz(loggedInUserProfile.email);
-        
-        // إظهار الأقسام
-        leaderboardContainer.style.display = "block";
-        quizContainer.style.display = "block";
-        storeContainer.style.display = "block";
-    }
-
+    // Store items with dimming effect
     async function loadStoreItems() {
         storeItemsList.innerHTML = "<p>Loading...</p>";
         try {
@@ -491,9 +346,13 @@ document.addEventListener("DOMContentLoaded", () => {
             data.items.forEach(item => {
                 const div = document.createElement("div");
                 div.className = "store-item-card";
+                
+                // التحقق من الصلاحية
                 const canBuy = (loggedInUserProfile.balance >= item.price && loggedInUserProfile.level >= (item.required_level || 1));
                 
-                // 🛑 إضافة كلاسات المتجر الجديدة 🛑
+                // 🛑 إضافة كلاس القفل إذا لم يمكن الشراء
+                if (!canBuy) div.classList.add('locked');
+
                 div.innerHTML = `
                     <img src="${item.image_url || '/default-item.png'}">
                     <h5>${item.name}</h5>
@@ -506,8 +365,21 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { storeItemsList.innerHTML = "Error"; }
     }
     
-    // Helper functions...
-    // ... (تم الاحتفاظ بباقي الدوال المساعدة مثل resizeImage, signup submit etc. كما هي) ...
+    window.buyItem = async (id) => {
+        if (!confirm("شراء؟")) return;
+        try {
+            const res = await fetch(`/buy-store-item`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loggedInUserProfile.email, itemId: id })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+            if (data.success || res.ok) refreshUserData();
+        } catch (e) { alert("Error"); }
+    };
+
+    // Helper: resizeImage
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -530,7 +402,8 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.onerror = (e) => reject(e);
         });
     }
-
+    
+    // Signup
     signupForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const name = document.getElementById("name").value;
@@ -568,11 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) { transactionList.innerHTML = "<li>خطأ</li>"; }
     }
     
-    // ... باقي دوال الأدمن التي كانت في الكود السابق ...
-    // (تم حذفها هنا للاختصار ولكن يجب أن تكون موجودة في الملف النهائي كما أرسلتها سابقاً)
-    // تأكد من نسخ الكود السابق بالكامل أو أخبرني إذا كنت تريدني أن أعيد إرسال دوال الأدمن مرة أخرى.
-    // **تحديث:** سأعيد كتابة دوال الأدمن المهمة هنا لضمان عدم ضياعها.
-
+    // Admin Functions
     async function loadAdminStoreItems() {
         adminStoreItemsList.innerHTML = "Loading...";
         try {
@@ -620,5 +489,85 @@ document.addEventListener("DOMContentLoaded", () => {
             editModalOverlay.style.display = 'none'; loadAdminStoreItems();
         };
     }
-    // ... (نهاية دوال الأدمن الأساسية)
+
+    // Admin Search
+    if (document.getElementById("admin-search-form")) {
+        document.getElementById("admin-search-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = document.getElementById("admin-search-name").value;
+            const res = await fetch(`/admin-search`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
+            const data = await res.json();
+            currentSearchResults = data.users;
+            const list = document.getElementById("admin-results-list");
+            const sel = document.getElementById("admin-select-user");
+            if (data.users.length > 0) {
+                if (data.users.length === 1) { populateAdminCard(data.users[0]); list.style.display = "none"; }
+                else { list.style.display = "block"; sel.innerHTML = ""; data.users.forEach(u => { sel.innerHTML += `<option value="${u.email}">${u.name}</option>`; }); populateAdminCard(data.users[0]); }
+            }
+        });
+    }
+    if (document.getElementById("admin-select-user")) { document.getElementById("admin-select-user").addEventListener("change", () => { populateAdminCard(currentSearchResults.find(u => u.email === document.getElementById("admin-select-user").value)); }); }
+    function populateAdminCard(user) {
+        currentSearchedUser = user;
+        document.getElementById("searched-user-name").textContent = user.name;
+        document.getElementById("searched-user-family").textContent = user.family;
+        document.getElementById("searched-user-balance").textContent = user.balance;
+        document.getElementById("searched-user-level").textContent = user.level;
+        document.getElementById("admin-searched-user-card").style.display = "block";
+        document.getElementById("admin-show-user-qr-btn").onclick = () => { qrCodeContainer.innerHTML = ''; setTimeout(() => new QRCode(qrCodeContainer, { text: user.email, width: 200, height: 200 }), 50); document.getElementById("qr-user-email-display").textContent = user.email; qrModalOverlay.style.display = 'flex'; };
+    }
+    const updateBal = async (amt) => { if (!currentSearchedUser) return; await fetch(`/admin-update-balance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: currentSearchedUser.email, amount: amt, reason: "Admin" }) }); alert("تم"); };
+    if (document.getElementById("admin-add-balance-btn")) document.getElementById("admin-add-balance-btn").onclick = () => updateBal(parseInt(document.getElementById("admin-balance-amount").value));
+    if (document.getElementById("admin-subtract-balance-btn")) document.getElementById("admin-subtract-balance-btn").onclick = () => updateBal(-parseInt(document.getElementById("admin-balance-amount").value));
+    if (document.getElementById("admin-update-level-btn")) { document.getElementById("admin-update-level-btn").onclick = async () => { const lvl = parseInt(document.getElementById("admin-level-amount").value); await fetch(`/admin-update-level`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ targetEmail: currentSearchedUser.email, newLevel: lvl, adminEmail: loggedInUserProfile.email }) }); alert("تم"); }; }
+    if (document.getElementById("admin-delete-user-btn")) { document.getElementById("admin-delete-user-btn").onclick = async () => { if (confirm("حذف؟")) { await fetch(`/admin-delete-user`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emailToDelete: currentSearchedUser.email, adminEmail: loggedInUserProfile.email }) }); alert("تم"); document.getElementById("admin-searched-user-card").style.display = "none"; } }; }
+
+    // Admin Family & QR List
+    document.querySelectorAll(".family-btn").forEach(b => {
+        b.addEventListener("click", async () => {
+            const f = b.dataset.family;
+            const res = await fetch(`/admin-get-family`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: f }) });
+            const data = await res.json();
+            const d = document.getElementById("admin-family-results"); d.innerHTML = "";
+            if (data.users) {
+                document.getElementById("mass-update-controls").style.display = "block"; document.getElementById("selected-users-count").textContent = "0"; selectedUsersForMassUpdate = [];
+                data.users.forEach(u => { const div = document.createElement("div"); div.innerHTML = `<input type="checkbox" class="mass-cb" data-email="${u.email}"> ${u.name} (${u.balance})`; d.appendChild(div); });
+                d.querySelectorAll(".mass-cb").forEach(cb => cb.addEventListener("change", (e) => { if (e.target.checked) selectedUsersForMassUpdate.push(e.target.dataset.email); else selectedUsersForMassUpdate = selectedUsersForMassUpdate.filter(x => x !== e.target.dataset.email); document.getElementById("selected-users-count").textContent = selectedUsersForMassUpdate.length; }));
+            }
+        });
+    });
+    const massUp = async (amt) => { if (selectedUsersForMassUpdate.length && confirm("تأكيد؟")) { await fetch(`/admin-mass-update`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emails: selectedUsersForMassUpdate, amount: amt, reason: "Mass", adminEmail: loggedInUserProfile.email }) }); alert("تم"); } };
+    if (document.getElementById("mass-update-add-btn")) document.getElementById("mass-update-add-btn").onclick = () => massUp(parseInt(document.getElementById("mass-update-amount").value));
+    if (document.getElementById("mass-update-subtract-btn")) document.getElementById("mass-update-subtract-btn").onclick = () => massUp(-parseInt(document.getElementById("mass-update-amount").value));
+
+    if (fetchQrListBtn) {
+        fetchQrListBtn.onclick = async () => {
+            const res = await fetch(`/admin-get-qr-list`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminEmail: loggedInUserProfile.email }) });
+            const data = await res.json();
+            qrListResults.value = JSON.stringify(data.users);
+            qrListMessage.textContent = "تم الجلب";
+        };
+    }
+    if (generatePrintCardsBtn) {
+        generatePrintCardsBtn.onclick = () => {
+            const users = JSON.parse(qrListResults.value);
+            printableCardsContainer.innerHTML = "";
+            users.forEach(u => {
+                const d = document.createElement("div"); d.className = "print-card";
+                d.innerHTML = `<div class="print-card-name">${u.name}</div><div class="print-card-family">${u.family}</div><div class="print-card-qr"></div>`;
+                printableCardsContainer.appendChild(d);
+                new QRCode(d.querySelector(".print-card-qr"), { text: u.email, width: 180, height: 180 });
+            });
+        };
+    }
+    
+    // Quiz
+    async function loadMainDashboard() {
+        loadStoreItems();
+        loadLeaderboards();
+        loadActiveQuiz(loggedInUserProfile.email);
+        leaderboardContainer.style.display = "block";
+        quizContainer.style.display = "block";
+        storeContainer.style.display = "block";
+    }
 });
