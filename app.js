@@ -1915,5 +1915,5 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
-    })();
+    });
 });
