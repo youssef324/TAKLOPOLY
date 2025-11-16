@@ -513,40 +513,35 @@ document.addEventListener("DOMContentLoaded", () => {
             quizContainer.innerHTML = '<div class="quiz-options"><p style="color: red;">خطأ في تحميل بيانات الكويز.</p></div>';
         }
     }
-    // 🛑🛑 فانكشن جلب الإعلانات (مُحدثة للشريط المتحرك) 🛑🛑
     async function loadAnnouncement() {
-        // العناصر القديمة (الصندوق الأصفر)
-        const userAnnouncementBox = document.getElementById("user-announcement-box");
-        const userAnnouncementText = document.getElementById("user-announcement-text");
-        // العنصر الجديد (الشريط المتحرك)
-        const tickerTextDisplay = document.getElementById("ticker-text-display");
-        const adminAnnouncementText = document.getElementById("admin-announcement-text"); // حقل الأدمن
-
+        userAnnouncementBox.style.display = "none";
+        userAnnouncementText.textContent = "";
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             if (!response.ok) throw new Error("فشل جلب الإعلان");
-
             const data = await response.json();
             if (data.message && data.message.trim()) {
-                // 1. تحديث الصندوق القديم (لو لسه موجود)
                 if (userAnnouncementText) userAnnouncementText.textContent = data.message;
                 if (userAnnouncementBox) userAnnouncementBox.style.display = "block";
-
-                // 2. 🛑 تحديث الشريط المتحرك (الجديد) 🛑
                 if (tickerTextDisplay) {
-                    tickerTextDisplay.textContent = data.message;
-                    // خدعة صغيرة لإعادة تشغيل الأنيميشن لما النص يتغير
+                    const rawText = data.ticker_message || data.message;
+                    const formattedText = rawText.replace(/\|/g, '<span style="margin: 0 20px; color: #ffc107;">✦</span>');
+                    tickerTextDisplay.innerHTML = formattedText;
                     const tickerMove = document.querySelector('.ticker-move');
                     if(tickerMove) {
+                        const duration = Math.max(10, rawText.length / 5);
                         tickerMove.style.animation = 'none';
-                        tickerMove.offsetHeight; /* trigger reflow */
-                        tickerMove.style.animation = 'ticker-scroll 20s linear infinite';
+                        tickerMove.offsetHeight; 
+                        tickerMove.style.animation = `ticker-scroll ${duration}s linear infinite`;
+                    }
+                    const tickerContainer = document.querySelector('.news-ticker-container');
+                    if (tickerContainer) {
+                        tickerContainer.style.display = rawText ? 'flex' : 'none';
                     }
                 }
-
-                // 3. تحديث حقل الأدمن
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin' && adminAnnouncementText) {
-                    adminAnnouncementText.value = data.message;
+                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
+                    if (adminAnnouncementText) adminAnnouncementText.value = data.message;
+                    if (adminTickerText) adminTickerText.value = data.ticker_message || "";
                 }
             }
         } catch (err) {
@@ -1037,41 +1032,32 @@ document.addEventListener("DOMContentLoaded", () => {
             guestStatsModal.style.display = "none";
         }
     });
- // 🛑🛑 منطق القائمة الرئيسية (Dashboard Navigation) - بديل الـ Accordion 🛑🛑
+    (function setupAdminPanel() {
+        let currentSearchedUser = null;
         const menuButtons = document.querySelectorAll('.admin-menu-btn');
         const backButtons = document.querySelectorAll('.back-to-admin-menu');
         const adminMenu = document.getElementById('admin-main-menu');
         const adminViews = document.querySelectorAll('.admin-section-view');
-
-        // 1. عند الضغط على زر في القائمة الرئيسية
         if (menuButtons) {
             menuButtons.forEach(btn => {
                 btn.onclick = () => {
                     const targetId = btn.dataset.target;
-                    // إخفاء القائمة
                     if(adminMenu) adminMenu.style.display = 'none';
-                    // إخفاء أي قسم مفتوح
                     if(adminViews) adminViews.forEach(view => view.style.display = 'none');
-                    // إظهار القسم المطلوب
                     const targetSection = document.getElementById(targetId);
                     if(targetSection) targetSection.style.display = 'block';
                 }
             });
         }
-
-        // 2. عند الضغط على زر "رجوع للقائمة"
         if (backButtons) {
             backButtons.forEach(btn => {
                 btn.onclick = () => {
-                    // إخفاء القسم الحالي
                     const parentSection = btn.closest('.admin-section-view');
                     if(parentSection) parentSection.style.display = 'none';
-                    // إظهار القائمة الرئيسية
                     if(adminMenu) adminMenu.style.display = 'grid';
                 }
             });
         }
-
         if(adminSearchForm) {
             adminSearchForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
