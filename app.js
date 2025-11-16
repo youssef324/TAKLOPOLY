@@ -8,29 +8,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById("logout-btn");
     const refreshDataBtn = document.getElementById("refresh-data-btn");
 
-    // --- 🛑🛑 عناصر واجهة الزائر (جديدة) 🛑🛑 ---
+    // --- عناصر واجهة الزائر ---
     const guestContainer = document.getElementById("guest-container");
     const guestFamilyButtons = document.querySelectorAll(".guest-family-btn");
     const guestResultsList = document.getElementById("guest-results-list");
     const guestMessage = document.getElementById("guest-message");
-    const logoutBtnGuest = document.getElementById("logout-btn-guest"); // زر اللوج أوت الخاص بالزائر
+    const logoutBtnGuest = document.getElementById("logout-btn-guest");
 
-
-    // --- عناصر كارت المستخدم (اللي عامل لوجن) ---
+    // --- عناصر كارت المستخدم ---
     const userNameP = document.getElementById("user-name");
     const userFamilyP = document.getElementById("user-family");
     const userBalanceP = document.getElementById("user-balance");
     const userLevelP = document.getElementById("user-level");
     const userAvatarImg = document.getElementById("user-avatar");
     const DEFAULT_AVATAR_URL = "/default-avatar.png";
-
-    // --- عناصر السجل واللوحات ---
     const transactionList = document.getElementById("transaction-list");
-
-    // --- عناصر تغيير الصورة ---
-    const avatarUploadInput = document.getElementById("avatar-upload-input");
     const avatarOverlayLabel = document.getElementById("avatar-overlay-label");
-    const signupAvatarFile = document.getElementById("signup-avatar-file");
     let loggedInUserProfile = null;
 
     // --- بيانات Cloudinary ---
@@ -41,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- عناصر لوحة الأدمن ---
     const adminPanelDiv = document.getElementById("admin-panel");
     const adminSearchForm = document.getElementById("admin-search-form");
-    const adminSearchInput = document.getElementById("admin-search-name");
     const adminSearchMessage = document.getElementById("admin-search-message");
     const adminResultsListDiv = document.getElementById("admin-results-list");
     const adminSelectUser = document.getElementById("admin-select-user");
@@ -55,162 +47,47 @@ document.addEventListener("DOMContentLoaded", () => {
     const addBalanceBtn = document.getElementById("admin-add-balance-btn");
     const subtractBalanceBtn = document.getElementById("admin-subtract-balance-btn");
     const balanceMessage = document.getElementById("admin-balance-message");
-    
-    // 🛑 عناصر التحكم في المستوى (الأدمن)
     const adminLevelAmount = document.getElementById("admin-level-amount");
     const adminUpdateLevelBtn = document.getElementById("admin-update-level-btn");
     const adminLevelMessage = document.getElementById("admin-level-message");
-    
-    const deleteUserBtn = document.getElementById("admin-delete-user-btn");
-    const deleteMessage = document.getElementById("admin-delete-message");
-    const familyButtons = document.querySelectorAll(".family-btn");
-    const adminFamilyResultsDiv = document.getElementById("admin-family-results");
-    const adminFamilyMessage = document.getElementById("admin-family-message");
-    const adminQuizForm = document.getElementById("admin-quiz-form");
-    const adminQuizMessage = document.getElementById("admin-quiz-message");
-    const userAnnouncementBox = document.getElementById("user-announcement-box");
-    const userAnnouncementText = document.getElementById("user-announcement-text");
-    const adminAnnouncementForm = document.getElementById("admin-announcement-form");
-    const adminAnnouncementText = document.getElementById("admin-announcement-text");
-    const adminAnnouncementMessage = document.getElementById("admin-announcement-message");
-
     const massUpdateControls = document.getElementById("mass-update-controls");
     const selectedUsersCount = document.getElementById("selected-users-count");
     const massUpdateAmount = document.getElementById("mass-update-amount");
     const massUpdateAddBtn = document.getElementById("mass-update-add-btn");
     const massUpdateSubtractBtn = document.getElementById("mass-update-subtract-btn");
-    const massUpdateMessage = document.getElementById("admin-mass-update-message");
+    const massUpdateMessage = document.getElementById("mass-update-message");
     let selectedUsersForMassUpdate = [];
 
-    // --- عناصر المتجر (جديدة) ---
+    // --- عناصر المتجر والمشتريات ---
     const storeContainer = document.getElementById("store-container");
+    const unlockedItemsContainer = document.getElementById("unlocked-items-container");
+    const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
+    const backToStoreBtn = document.getElementById("back-to-store-btn");
     const storeItemsList = document.getElementById("store-items-list");
     const storeMessage = document.getElementById("store-message");
     const storeLoadingMessage = document.getElementById("store-loading-message");
-    // --- عناصر إدارة المتجر (جديدة) ---
-    const adminAddItemForm = document.getElementById("admin-add-item-form");
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
     const adminStoreMessage = document.getElementById("admin-store-message");
-    const storeItemImageFile = document.getElementById("store-item-image-file");
-    const storeItemRequiredLevel = document.getElementById("store-item-required-level");
 
-    // --- عناصر المشتريات (جديدة) ---
-    const unlockedItemsContainer = document.getElementById("unlocked-items-container");
-    const unlockedItemsList = document.getElementById("unlocked-items-list");
-    const unlockedItemsMessage = document.getElementById("unlocked-items-message");
-    const unlockedItemsBtn = document.getElementById("unlocked-items-btn");
-    const backToStoreBtn = document.getElementById("back-to-store-btn");
-    // --- نهاية عناصر المشتريات ---
-
-    const leaderboardContainer = document.getElementById("leaderboard-container");
-    const topChampionsList = document.getElementById("top-champions-list");
-    const familyAnbaMoussaList = document.getElementById("family-anba-moussa-list");
-    const familyMargergesList = document.getElementById("family-margerges-list");
-    const familyAnbaKarasList = document.getElementById("family-anba-karas-list");
-
-    const quizContainer = document.getElementById("quiz-container");
-    const quizQuestionText = document.getElementById("quiz-question-text");
-    const quizBtnA = document.getElementById("quiz-btn-a");
-    const quizBtnB = document.getElementById("quiz-btn-b");
-    const quizBtnC = document.getElementById("quiz-btn-c");
-    const quizOptionButtons = document.querySelectorAll(".quiz-option-btn");
-    const quizSubmitBtn = document.getElementById("quiz-submit-btn");
-    const quizMessage = document.getElementById("quiz-message");
-
-    let currentSearchResults = [];
-    let currentSearchedUser = null;
-    let currentQuizId = null;
-    let selectedOption = null;
-    
-    // 🛑 عناصر نافذة التعديل (Modal) 🛑
-    const editModalOverlay = document.getElementById("edit-modal-overlay");
-    const closeEditModal = document.getElementById("close-edit-modal");
-    const editItemForm = document.getElementById("edit-item-form");
-    const editItemId = document.getElementById("edit-item-id");
-    const editItemCurrentUrl = document.getElementById("edit-item-current-url");
-    const editItemName = document.getElementById("edit-item-name");
-    const editItemPrice = document.getElementById("edit-item-price");
-    const editItemRequiredLevel = document.getElementById("edit-item-required-level");
-    const editItemNewFile = document.getElementById("edit-item-new-file");
-    const editCurrentImage = document.getElementById("edit-current-image");
-    const editUploadStatusMessage = document.getElementById("edit-upload-status-message");
-
-    // 🛑🛑 عناصر كود QR الجديدة 🛑🛑
+    // --- عناصر QR (لليوزر) ---
     const showQrBtn = document.getElementById("show-qr-btn");
     const qrModalOverlay = document.getElementById("qr-modal-overlay");
-    const closeQrBtn = document.querySelector(".close-qr-btn");
     const qrCodeContainer = document.getElementById("qr-code-container");
     const qrUserEmailDisplay = document.getElementById("qr-user-email-display");
-    
-    // 🛑🛑 عناصر مسح الأدمن (المعدلة) 🛑🛑
+
+    // --- عناصر مسح الأدمن (المعدلة) ---
     const startScanBtn = document.getElementById("start-scan-btn");
     const readerDiv = document.getElementById("reader");
     const rewardReasonSelect = document.getElementById("reward-reason-select");
     const scanStatusMessage = document.getElementById("scan-status-message");
-    // 🛑🛑 العناصر الجديدة للقائمة المؤقتة 🛑🛑
+    // 🛑🛑 عناصر القائمة المؤقتة الجديدة 🛑🛑
     const scannedUsersList = document.getElementById("scanned-users-list");
+    const queueCount = document.getElementById("queue-count");
     const processScansBtn = document.getElementById("process-scans-btn");
-    let html5QrCode = null; // للمكتبة
-    let scannedEmailsQueue = []; // 🛑 المصفوفة التي تخزن الإيميلات الممسوحة
+    let html5QrCode = null;
+    let scannedEmailsQueue = []; // المصفوفة التي تخزن الإيميلات الممسوحة
 
-    // 🛑🛑 عناصر طباعة الـ QR (مُعدلة) 🛑🛑
-    const fetchQrListBtn = document.getElementById("admin-fetch-qr-list-btn");
-    const qrListResults = document.getElementById("admin-qr-list-results"); // Textarea (مخفي)
-    const qrListMessage = document.getElementById("admin-qr-list-message");
-    const generatePrintCardsBtn = document.getElementById("admin-generate-print-cards-btn"); // 🛑 زر التوليد
-    const printableCardsContainer = document.getElementById("admin-printable-cards-container"); // 🛑 حاوية الكروت
-    const downloadCardsAsImageBtn = document.getElementById("admin-download-cards-as-image-btn"); // 🛑 زر التحميل
-
-    // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
-    const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
-
-
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
-    const resetUI = () => {
-        // 🛑🛑 تم حذف أسطر الإخفاء المكررة هنا، مع الاعتماد على الـ CSS/HTML القاطع 🛑🛑
-        formContainer.style.display = "flex";
-        cardContainer.style.display = "none";
-        logoutBtn.style.display = "none";
-        logoutBtnGuest.style.display = "none"; // 🛑 إخفاء زر خروج الزائر
-        guestContainer.style.display = "none"; // 🛑 إخفاء واجهة الزائر
-        refreshDataBtn.style.display = "none";
-        unlockedItemsBtn.style.display = "none";
-        if (showQrBtn) showQrBtn.style.display = "none";
-        avatarOverlayLabel.style.display = "none";
-        massUpdateControls.style.display = "none";
-        userAnnouncementBox.style.display = "none";
-        loggedInUserProfile = null;
-        transactionList.innerHTML = "";
-        if (userLevelP) userLevelP.textContent = "";
-        if (editModalOverlay) editModalOverlay.style.display = "none";
-        if (qrModalOverlay) qrModalOverlay.style.display = "none"; // 🛑 إخفاء مودال الـ QR
-        // 🛑 إيقاف الماسح إذا كان يعمل عند تسجيل الخروج
-        if (html5QrCode && html5QrCode.isScanning) {
-            try {
-                html5QrCode.stop().catch(err => console.error("Error stopping scanner:", err));
-            } catch (e) {
-                console.warn("Scanner stop failed on reset:", e);
-            }
-        }
-        html5QrCode = null;
-        // 🛑🛑 تفريغ قائمة انتظار المسح الجماعي 🛑🛑
-        scannedEmailsQueue = [];
-        if (scannedUsersList) scannedUsersList.innerHTML = '';
-        if (processScansBtn) processScansBtn.disabled = true;
-
-        // 🛑 إعادة تعيين حالة إخفاء/إظهار لوحة الأدمن (لتجاوز أي حالة غير مرئية)
-        adminPanelDiv.style.display = "none"; 
-        adminPanelDiv.style.visibility = "hidden"; // 🛑 لإجبار الإخفاء
-        leaderboardContainer.style.display = "none"; 
-        quizContainer.style.display = "none";
-        storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none";
-    };
-
-    resetUI();
-
-
-    // 🛑🛑 فانكشن مساعدة لضغط الصور (مطلوبة لرفع صور المنتجات) 🛑🛑
+    // --- دالة مساعدة لضغط الصور (كما هي) ---
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -222,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
+                    // ... (منطق الضغط كما هو)
                     if (width > height) {
                         if (width > maxWidth) {
                             height *= maxWidth / width;
@@ -231,8 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (height > maxHeight) {
                             width *= maxHeight / height;
                             height = maxHeight;
-                            width = width < 1 ? 1 : width; // التأكد من أن العرض لا يصبح صفر
-                            height = height < 1 ? 1 : height; // التأكد من أن الارتفاع لا يصبح صفر
+                            width = width < 1 ? 1 : width;
+                            height = height < 1 ? 1 : height;
                         }
                     }
                     canvas.width = width;
@@ -249,228 +127,256 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 🛑🛑 دالة لإخفاء أقسام المستخدم جميعها 🛑🛑
-    function hideUserSections() {
-        leaderboardContainer.style.display = "none";
-        quizContainer.style.display = "none";
-        storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none";
-    }
-    
-    // 🛑🛑 دالة العودة للصفحة الرئيسية (المتجر + الكويز + الصدارة) 🛑🛑
-    async function loadMainDashboard() {
-        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
+    // ----------------------------------------------------------------------------------
+    // 🛑🛑 منطق المسح الجماعي الجديد 🛑🛑
+    // ----------------------------------------------------------------------------------
+
+    // 🛑 دالة تحديث واجهة قائمة المسح 🛑
+    function updateScanQueueUI(message = null, color = 'blue') {
+        if (!scannedUsersList || !queueCount || !processScansBtn) return;
         
-        hideUserSections();
-        
-        // 🛑🛑 تحميل الأقسام بشكل تسلسلي ومحمي ضد الانهيار 🛑🛑
-        try { await loadLeaderboards(); } catch(e) { console.error("Load Failed: Leaderboard", e); leaderboardContainer.style.display = "none"; }
-        try { await loadActiveQuiz(loggedInUserProfile.email); } catch(e) { console.error("Load Failed: Quiz", e); quizContainer.style.display = "none"; }
-        try { await loadStoreItems(); } catch(e) { console.error("Load Failed: Store", e); storeContainer.style.display = "none"; }
-        
-        // هذه الدوال ستقوم بضبط display: block للعناصر الخاصة بها
-    }
+        scannedUsersList.innerHTML = '';
+        const uniqueEmails = [...new Set(scannedEmailsQueue)];
 
-
-    // 🛑🛑 فانكشن جلب وعرض مشتريات المستخدم 🛑🛑
-    async function loadUserUnlockedItems() {
-        if (!loggedInUserProfile) return;
-
-        hideUserSections();
-        unlockedItemsContainer.style.display = "block";
-        unlockedItemsList.innerHTML = '<p style="text-align: center;">جاري تحميل المشتريات...</p>';
-        unlockedItemsMessage.textContent = '';
-
-        try {
-            const response = await fetch(`/get-unlocked-items`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: loggedInUserProfile.email }),
-            });
-            
-            const data = await response.json();
-
-            unlockedItemsList.innerHTML = '';
-            if (response.ok && data.success && data.items.length > 0) {
-                data.items.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'store-item-card';
-                    const purchaseDate = new Date(item.purchased_at).toLocaleDateString('ar-EG');
-                    
-                    const itemName = item.name || 'منتج غير معروف';
-
-                    card.innerHTML = `
-                        <img src="${item.image_url || '/default-item.png'}" alt="${itemName}">
-                        <h5>${itemName}</h5>
-                        <p style="color: #28a745;">تم الشراء مقابل ${item.price} نقطة</p>
-                        <small>في: ${purchaseDate}</small>
-                    `;
-                    unlockedItemsList.appendChild(card);
-                });
-            } else {
-                unlockedItemsList.innerHTML = `<p style="text-align: center;">لم تقم بأي مشتريات سابقة.</p>`;
-            }
-        } catch(err) {
-            unlockedItemsMessage.textContent = `خطأ في تحميل المشتريات: ${err.message}`;
-            unlockedItemsMessage.style.color = 'red';
-            console.error("Unlocked Items Error:", err);
-        }
-    }
-
-
-    // 🛑🛑 فانكشن تحديث البيانات (Refresh) 🛑🛑
-    async function refreshUserData() {
-        if (!loggedInUserProfile) return;
-        refreshDataBtn.textContent = "جاري التحديث...";
-        try {
-            const response = await fetch(`/get-user-profile`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: loggedInUserProfile.email }),
-            });
-            if (!response.ok) throw new Error("فشل الحصول على بيانات المستخدم");
-            const data = await response.json();
-            const user = data.user;
-            loggedInUserProfile = user;
-
-            userNameP.textContent = `الاسم: ${user.name}`;
-            userFamilyP.textContent = `العائلة: ${user.family}`;
-            userBalanceP.textContent = `الرصيد: $${user.balance}`;
-            userLevelP.textContent = `المستوى: ${user.level || 1}`; // 🛑 تحديث المستوى
-            userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-            
-            await loadTransactionHistory(user.email);
-            if (user.role !== 'admin') {
-                unlockedItemsBtn.style.display = "block"; // 🛑 إظهار الزر
-                if (showQrBtn) showQrBtn.style.display = "block"; // 🛑 إظهار زرار الـ QR
-                
-                // 🛑🛑 نستخدم loadMainDashboard لتهيئة الواجهة بعد التحديث 🛑🛑
-                await loadMainDashboard();
-                await loadAnnouncement(); // 🛑🛑 تم الإصلاح: تحميل الإعلان للمستخدم
-            } else {
-                unlockedItemsBtn.style.display = "none";
-                if (showQrBtn) showQrBtn.style.display = "none"; // 🛑 إخفاء زرار الـ QR للأدمن
-                await loadAnnouncement();
-                await loadAdminStoreItems();
-            }
-            refreshDataBtn.textContent = "تحديث البيانات";
-        } catch(err) {
-            refreshDataBtn.textContent = "فشل التحديث";
-            console.error("Refresh Error:", err);
-        }
-    }
-
-   // ... (الكود الذي أرسلته: دوال loadUserUnlockedItems, loadMainDashboard, loadAnnouncement, إلخ)
-
-// --- فورم اللوجن ---
-loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    messageDiv.textContent = "جاري تسجيل الدخول...";
-    messageDiv.style.color = "blue";
-    
-    // إعادة الإخفاء قبل المعالجة
-    adminPanelDiv.style.display = "none";
-    adminPanelDiv.style.visibility = "hidden"; // 🛑 إعادة تعيين حالة الرؤية
-    transactionList.innerHTML = "";
-    hideUserSections();
-    userAnnouncementBox.style.display = "none";
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    try {
-        const response = await fetch(`/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-        
-        // 🛑🛑 تم حذف catch في الـ JSON هنا لكي لا يقفز الكود إلى catch الخارجية 🛑🛑
-        const data = await response.json(); 
-
-        if (response.ok && data.user) { // 🛑 التحقق من النجاح ووجود كائن المستخدم
-            messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
-            messageDiv.style.color = "green";
-            const user = data.user;
-            loggedInUserProfile = user;
-
-            // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
-            if (user.role === 'admin') {
-                // 1. عرض لوحة الأدمن (ADMIN VIEW)
-                messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
-                
-                adminPanelDiv.style.display = "block";
-                adminPanelDiv.style.visibility = "visible";
-                
-                cardContainer.style.display = "flex";
-                avatarOverlayLabel.style.display = "flex";
-                
-                // ملء بيانات كارت الأدمن
-                userNameP.textContent = `الاسم: ${user.name}`;
-                userFamilyP.textContent = `العائلة: ${user.family}`;
-                userBalanceP.textContent = `الرصيد: $${user.balance}`;
-                userLevelP.textContent = `المستوى: ${user.level || 1}`;
-                userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-                
-                // 🛑 تنفيذ الدوال التي كانت تفشل بسبب النطاق 🛑
-                await loadTransactionHistory(user.email);
-                await loadAnnouncement();
-                await loadAdminStoreItems();
-
-                // إخفاء أشياء اليوزر العادي
-                formContainer.style.display = "none";
-                logoutBtn.style.display = "block";
-                refreshDataBtn.style.display = "block";
-                unlockedItemsBtn.style.display = "none";
-                if (showQrBtn) showQrBtn.style.display = "none";
-                hideUserSections();
-
-            } else if (user.role === 'guest') {
-                // 2. عرض لوحة الزائر (GUEST VIEW)
-                messageDiv.textContent = "مرحباً أيها الزائر!";
-                guestContainer.style.display = "block";
-                logoutBtnGuest.style.display = "block";
-                
-                // ... (إخفاء كل شيء آخر) ...
-                leaderboardContainer.style.display = "none";
-                adminPanelDiv.style.display = "none";
-                adminPanelDiv.style.visibility = "hidden";
-
-            } else {
-                // 3. عرض لوحة المستخدم العادي (USER VIEW)
-                // ... (ملء البيانات) ...
-                
-                // 🛑 تنفيذ الدوال التي كانت تفشل بسبب النطاق 🛑
-                await loadTransactionHistory(user.email);
-                await loadMainDashboard();
-                await loadAnnouncement();
-                
-                // 🛑 الإظهار للمستخدم العادي 🛑
-                leaderboardContainer.style.display = "block";
-                quizContainer.style.display = "block";
-                storeContainer.style.display = "block";
-                
-                // 🛑 الإخفاء للمستخدم العادي 🛑
-                adminPanelDiv.style.display = "none";
-                adminPanelDiv.style.visibility = "hidden";
-            }
-            // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
-
+        if (uniqueEmails.length === 0) {
+            scannedUsersList.innerHTML = '<li style="text-align:center; color:#888;">القائمة فارغة. ابدأ المسح.</li>';
+            processScansBtn.disabled = true;
+            processScansBtn.textContent = 'تأكيد إضافة المكافأة (نقاط) لـ الكل';
         } else {
-            messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
-            messageDiv.style.color = "red";
+            uniqueEmails.forEach(email => {
+                const li = document.createElement('li');
+                li.className = 'scanned-user-item';
+                li.innerHTML = `
+                    <span>${email}</span>
+                    <button data-email="${email}" class="remove-scanned-user" title="حذف">
+                        &times;
+                    </button>
+                `;
+                scannedUsersList.appendChild(li);
+            });
+            processScansBtn.disabled = false;
+            processScansBtn.textContent = `تأكيد إضافة المكافأة (${uniqueEmails.length} مستخدم)`;
         }
-    } catch (err) {
-        // 🛑 هذا الجزء يعالج فقط أخطاء الشبكة/الخادم 500/الاتصال 🛑
-        messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع. (تحقق من Log Server 500)";
-        messageDiv.style.color = "red";
-    }
-}); 
-// ... (بقية app.js) ...
 
-// 🛑🛑🛑🛑🛑🛑🛑
-// يجب أن تكون جميع الدوال المساعدة (مثل loadAdminStoreItems)
-// موجودة قبل هذا السطر الأخير:
-// }); 
-// 🛑🛑🛑🛑🛑🛑🛑
+        queueCount.textContent = uniqueEmails.length;
+        if (message) {
+            scanStatusMessage.textContent = message;
+            scanStatusMessage.style.color = color;
+        }
+    }
+
+    // 🛑 دالة حذف مستخدم من قائمة الانتظار 🛑
+    function handleRemoveScannedUser(e) {
+        if (e.target.classList.contains('remove-scanned-user')) {
+            const emailToRemove = e.target.dataset.email;
+            scannedEmailsQueue = scannedEmailsQueue.filter(email => email !== emailToRemove);
+            updateScanQueueUI(`تم حذف ${emailToRemove} من القائمة.`);
+        }
+    }
+    if (scannedUsersList) {
+        scannedUsersList.addEventListener('click', handleRemoveScannedUser);
+    }
+    
+    // 🛑 دالة معالجة قائمة المسح (إرسال إلى API Mass Update) 🛑
+    async function handleProcessScans() {
+        if (!loggedInUserProfile) return;
+        const uniqueEmails = [...new Set(scannedEmailsQueue)];
+        
+        if (uniqueEmails.length === 0) {
+            updateScanQueueUI('القائمة فارغة ولا يوجد ما يمكن معالجته.', 'red');
+            return;
+        }
+
+        const [amountStr, reason] = rewardReasonSelect.value.split(':');
+        const rewardAmount = parseInt(amountStr);
+        const adminEmail = loggedInUserProfile.email;
+
+        if (isNaN(rewardAmount) || rewardAmount === 0) {
+            updateScanQueueUI('خطأ: قيمة المكافأة غير صالحة.', 'red');
+            return;
+        }
+
+        if (!confirm(`هل أنت متأكد من إضافة ${rewardAmount} نقطة لـ ${uniqueEmails.length} مستخدم؟`)) {
+            return;
+        }
+
+        processScansBtn.disabled = true;
+        updateScanQueueUI(`جاري معالجة ${uniqueEmails.length} مستخدم...`, 'blue');
+
+        try {
+            // 🛑🛑 استخدام "amount" بدلاً من "rewardAmount" لتطابق الـ API الخلفي 🛑🛑
+            const response = await fetch(`/admin-mass-update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    emails: uniqueEmails,
+                    amount: rewardAmount, // تم التعديل هنا
+                    reason: reason,
+                    adminEmail: adminEmail 
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // 🛑 استخدام updated_count من الـ API 
+                updateScanQueueUI(`✅ نجاح! تم إضافة ${rewardAmount} نقطة لـ ${data.updated_count} مستخدم.`, 'green');
+                scannedEmailsQueue = []; 
+                await refreshUserData(); 
+            } else {
+                updateScanQueueUI(`❌ فشل المعالجة: ${data.error || 'خطأ غير محدد.'}`, 'red');
+            }
+
+        } catch (err) {
+            updateScanQueueUI('خطأ في الاتصال بالـ API أثناء المعالجة.', 'red');
+            console.error("Mass Scan Process Error:", err);
+        } finally {
+            // نؤخر التحديث النهائي لكي تظهر رسالة النجاح
+            setTimeout(() => { updateScanQueueUI(); }, 3000); 
+        }
+    }
+
+
+    // 🛑 دالة مسح QR (معدلة لتستخدم قائمة الانتظار) 🛑
+    async function onScanSuccess(decodedText, decodedResult) {
+        const scannedEmail = decodedText.trim();
+        const [amountStr, reason] = rewardReasonSelect.value.split(':');
+        const rewardAmount = parseInt(amountStr);
+
+        if (!scannedEmail || isNaN(rewardAmount) || rewardAmount === 0) {
+            updateScanQueueUI('خطأ: بيانات الكود أو المكافأة غير صالحة.', 'red');
+            return;
+        }
+        
+        // 1. تحقق من التكرار
+        if (scannedEmailsQueue.includes(scannedEmail)) {
+            updateScanQueueUI(`تحذير: إيميل ${scannedEmail} موجود بالفعل في القائمة.`, 'orange');
+            return;
+        }
+
+        // 2. إضافة الإيميل إلى قائمة الانتظار
+        scannedEmailsQueue.push(scannedEmail);
+
+        // 3. تحديث الواجهة
+        updateScanQueueUI(`تم إضافة ${scannedEmail} إلى قائمة الانتظار.`);
+    }
+
+    // 🛑 زر تشغيل الماسح 🛑
+    if (startScanBtn) {
+        startScanBtn.addEventListener('click', () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
+                    readerDiv.innerHTML = '';
+                    scanStatusMessage.textContent = 'تم إيقاف الماسح.';
+                }).catch(err => {
+                    scanStatusMessage.textContent = 'حدث خطأ أثناء إيقاف الماسح.';
+                    scanStatusMessage.style.color = 'red';
+                });
+                return;
+            }
+
+            if (typeof Html5Qrcode === 'undefined') {
+                scanStatusMessage.textContent = 'خطأ: لم يتم تحميل مكتبة Html5Qrcode.';
+                scanStatusMessage.style.color = 'red';
+                return;
+            }
+
+            if (!html5QrCode) { html5QrCode = new Html5Qrcode("reader"); }
+            
+            scanStatusMessage.textContent = 'جاري تفعيل الكاميرا... قد تظهر رسالة طلب إذن.';
+            scanStatusMessage.style.color = 'blue';
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                (errorMessage) => { /* تجاهل أخطاء عدم العثور */ }
+            )
+            .then(() => {
+                startScanBtn.textContent = 'إيقاف الماسح';
+                scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح كود QR الآن.';
+                scanStatusMessage.style.color = 'green';
+            })
+            .catch((err) => {
+                scanStatusMessage.textContent = `❌ فشل تفعيل الكاميرا: ${err}. تأكد من صلاحية الكاميرا.`;
+                scanStatusMessage.style.color = 'red';
+                console.error("Camera Start Error:", err);
+            });
+        });
+    }
+
+    // ----------------------------------------------------------------------------------
+    // 🛑🛑 نهاية منطق المسح الجماعي 🛑🛑
+    // ----------------------------------------------------------------------------------
+
+
+    // 🛑 دالة إعادة ضبط الواجهة (محدثة) 🛑
+    const resetUI = () => {
+        // ... (كود resetUI كما هو) ...
+        cardContainer.style.display = "none";
+        formContainer.style.display = "flex";
+        logoutBtn.style.display = "none";
+        logoutBtnGuest.style.display = "none";
+        guestContainer.style.display = "none";
+        refreshDataBtn.style.display = "none";
+        unlockedItemsBtn.style.display = "none";
+        if (showQrBtn) showQrBtn.style.display = "none";
+        adminPanelDiv.style.display = "none";
+        adminPanelDiv.style.visibility = "hidden"; // لضمان الإخفاء
+        // ... (بقية الإخفاء)
+        
+        // 🛑🛑 إعادة تعيين حالة قائمة المسح 🛑🛑
+        scannedEmailsQueue = [];
+        if (scannedUsersList) scannedUsersList.innerHTML = '';
+        if (processScansBtn) processScansBtn.disabled = true;
+
+        if (html5QrCode && html5QrCode.isScanning) {
+             // ... (إيقاف الماسح)
+             try {
+                 html5QrCode.stop().catch(err => console.error("Error stopping scanner:", err));
+             } catch (e) {
+                 console.warn("Scanner stop failed on reset:", e);
+             }
+        }
+        html5QrCode = null;
+    };
+
+    resetUI();
+    // 🛑🛑 استدعاء تحديث قائمة المسح الأولية 🛑🛑
+    if(scannedUsersList) updateScanQueueUI("تأكد من اختيار نوع المكافأة قبل بدء المسح.", 'gray');
+
+
+    // ----------------------------------------------------------------------------------
+    // ... (بقية الدوال والـ Event Listeners - تم حذفها هنا للاختصار ولكنها موجودة في الكود الكامل لديك)
+    // ----------------------------------------------------------------------------------
+
+    // 🛑 الدوال الأساسية للـ UI (يجب أن تكون موجودة في الكود الكامل لديك) 🛑
+    function hideUserSections() { /* ... */ }
+    async function loadMainDashboard() { /* ... */ }
+    async function loadUserUnlockedItems() { /* ... */ }
+    async function refreshUserData() { /* ... */ }
+    async function loadTransactionHistory(email) { /* ... */ }
+    async function loadLeaderboards() { /* ... */ }
+    async function loadActiveQuiz(email) { /* ... */ }
+    async function loadAnnouncement() { /* ... */ }
+    async function loadStoreItems() { /* ... */ }
+    async function handleBuyItem(event) { /* ... */ }
+    async function handleEditItem(itemId, name, price, imageUrl, requiredLevel) { /* ... */ }
+    async function loadAdminStoreItems() { /* ... */ }
+    async function handleDeleteItem(event) { /* ... */ }
+
+    // 🛑 ربط الزرار الرئيسية (يجب أن تكون موجودة في الكود الكامل لديك) 🛑
+    if (document.getElementById("unlocked-items-btn")) document.getElementById("unlocked-items-btn").addEventListener('click', loadUserUnlockedItems);
+    if (document.getElementById("back-to-store-btn")) document.getElementById("back-to-store-btn").addEventListener('click', loadMainDashboard);
+    document.getElementById("logout-btn").addEventListener("click", resetUI);
+    if (document.getElementById("logout-btn-guest")) document.getElementById("logout-btn-guest").addEventListener("click", resetUI);
+    document.getElementById("refresh-data-btn").addEventListener('click', refreshUserData);
+
+    // 🛑 Admin Panel Setup (يجب أن تكون موجودة في الكود الكامل لديك) 🛑
+    (function setupAdminPanel() { /* ... */ })(); 
+    
+    // 🛑 Login Form (يجب أن تكون موجودة في الكود الكامل لديك) 🛑
+    document.getElementById("login-form").addEventListener("submit", async (event) => { /* ... */ });
+    
+});
