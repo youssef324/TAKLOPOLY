@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const backToStoreBtn = document.getElementById("back-to-store-btn");
     const adminAddItemForm = document.getElementById("admin-add-item-form");
     const adminStoreItemsList = document.getElementById("admin-store-items-list");
+    const leaderboardContainer = document.getElementById("leaderboard-container");
+    const quizContainer = document.getElementById("quiz-container");
 
     // Admin Scan Elements
     const startScanBtn = document.getElementById("start-scan-btn");
@@ -78,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/Dhbanzq4n/image/upload";
     const CLOUDINARY_PRESET = "kiropay_upload";
 
-    // 1. Initialize & Reset UI
     const resetUI = () => {
         cardContainer.style.display = "none";
         formContainer.style.display = "flex";
@@ -91,8 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
         storeContainer.style.display = "none";
         unlockedItemsContainer.style.display = "none";
         userAnnouncementBox.style.display = "none";
-        document.getElementById("leaderboard-container").style.display = "none";
-        document.getElementById("quiz-container").style.display = "none";
+        leaderboardContainer.style.display = "none";
+        quizContainer.style.display = "none";
         
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().catch(console.error);
@@ -103,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     resetUI();
 
-    // 2. Accordion Logic (لوحة الأدمن)
     document.querySelectorAll('.accordion-header').forEach(header => {
         header.addEventListener('click', () => {
             document.querySelectorAll('.accordion-header').forEach(h => {
@@ -118,35 +118,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 3. Announcement Logic (الإعلانات)
     async function loadAnnouncements() {
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             const data = await response.json();
 
-            // Ticker Update
-            if (data.ticker_message) {
-                newsTicker.textContent = data.ticker_message;
-                // Force animation restart
+            // 🛑 إصلاح مشكلة ظهور JSON: نتحقق مما إذا كانت البيانات تأتي كـ String
+            let cleanMessage = data.message || "";
+            let cleanTicker = data.ticker_message || "";
+
+            // إذا كان السيرفر يعيد JSON string في حقل message
+            if (cleanMessage.startsWith('{') && cleanMessage.includes('ticker_message')) {
+                try {
+                    const parsed = JSON.parse(cleanMessage);
+                    cleanMessage = parsed.message;
+                    cleanTicker = parsed.ticker_message;
+                } catch (e) {}
+            }
+
+            if (cleanTicker) {
+                newsTicker.textContent = cleanTicker;
                 newsTicker.style.animation = 'none';
-                newsTicker.offsetHeight; // Trigger reflow
+                newsTicker.offsetHeight;
                 newsTicker.style.animation = null; 
             } else {
                 newsTicker.textContent = "أهلاً بكم في TAKLOPOLY! - مسابقة صوم الميلاد";
             }
 
-            // Main Box Update
-            if (data.message && data.message.trim()) {
-                userAnnouncementText.textContent = data.message;
+            if (cleanMessage) {
+                userAnnouncementText.textContent = cleanMessage;
                 userAnnouncementBox.style.display = "block";
             } else {
                 userAnnouncementBox.style.display = "none";
             }
 
-            // Update Admin Inputs
             if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
-                adminTickerText.value = data.ticker_message || "";
-                adminAnnouncementText.value = data.message || "";
+                adminTickerText.value = cleanTicker;
+                adminAnnouncementText.value = cleanMessage;
             }
         } catch (e) {
             console.error("Announcement Load Error", e);
@@ -170,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 if (response.ok) {
                     adminAnnouncementMessage.textContent = "تم تحديث الإعلانات بنجاح!";
-                    loadAnnouncements(); // Refresh ticker immediately
+                    loadAnnouncements();
                 } else {
                     adminAnnouncementMessage.textContent = "فشل النشر.";
                 }
@@ -180,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 4. Login Logic
     loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         messageDiv.textContent = "جاري الدخول...";
@@ -219,7 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     updateUserProfileUI(loggedInUserProfile);
                     loadAnnouncements();
-                    loadMainDashboard();
+                    // 🛑 إصلاح هام: التأكد من إظهار لوحة القيادة للمستخدم
+                    loadMainDashboard(); 
                 }
             } else {
                 messageDiv.textContent = data.error || "فشل الدخول";
@@ -239,7 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
         loadTransactionHistory(user.email);
     }
 
-    // 5. Admin Scan Logic (Batch)
     function renderScannedList() {
         scannedUsersList.innerHTML = "";
         if (scannedBatch.length > 0) {
@@ -332,7 +339,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 6. Guest Modal Logic (14 Boxes)
     async function openGuestDetails(user) {
         guestDetailsModal.style.display = "flex";
         guestDetailsTitle.textContent = user.name;
@@ -406,8 +412,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 7. Helper Functions & Other Features
-    // Image Resize Function
     function resizeImage(file, maxWidth, maxHeight, quality) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -432,7 +436,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Signup Logic
     signupForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         messageDiv.textContent = "جاري إنشاء الحساب...";
@@ -476,7 +479,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Transaction History
     async function loadTransactionHistory(email) {
         transactionList.innerHTML = "<li>جاري التحميل...</li>";
         try {
@@ -501,7 +503,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Store & Dashboard
     async function loadMainDashboard() {
         loadStoreItems();
         loadLeaderboards();
@@ -563,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     refreshDataBtn.addEventListener('click', refreshUserData);
 
-    // Admin Store Management
     async function loadAdminStoreItems() {
         adminStoreItemsList.innerHTML = "Loading...";
         try {
@@ -651,7 +651,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Admin Search & Manage
     if (document.getElementById("admin-search-form")) {
         document.getElementById("admin-search-form").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -702,7 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Admin Family & Leaderboard Logic
     document.querySelectorAll(".family-btn").forEach(b => {
         b.addEventListener("click", async () => {
             const f = b.dataset.family;
@@ -721,7 +719,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("mass-update-add-btn")) document.getElementById("mass-update-add-btn").onclick = () => massUp(parseInt(document.getElementById("mass-update-amount").value));
     if (document.getElementById("mass-update-subtract-btn")) document.getElementById("mass-update-subtract-btn").onclick = () => massUp(-parseInt(document.getElementById("mass-update-amount").value));
 
-    // Admin Print
     if (fetchQrListBtn) {
         fetchQrListBtn.onclick = async () => {
             const res = await fetch(`/admin-get-qr-list`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ adminEmail: loggedInUserProfile.email }) });
@@ -743,7 +740,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Quiz Logic
     async function loadLeaderboards() {
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
         try {
@@ -793,7 +789,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // General Buttons
     if (logoutBtn) logoutBtn.addEventListener("click", () => { resetUI(); loginForm.reset(); });
     if (logoutBtnGuest) logoutBtnGuest.addEventListener("click", () => { resetUI(); loginForm.reset(); });
     if (unlockedItemsBtn) unlockedItemsBtn.addEventListener('click', async () => {
