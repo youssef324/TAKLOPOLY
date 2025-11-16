@@ -128,7 +128,49 @@ document.addEventListener("DOMContentLoaded", () => {
     const rewardReasonSelect = document.getElementById("reward-reason-select");
     const scanStatusMessage = document.getElementById("scan-status-message");
     let html5QrCode = null; 
+    // ... (في بداية ملف app.js بعد تعريف كل العناصر)
+
+// 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
+const resetUI = () => {
+    cardContainer.style.display = "none";
+    formContainer.style.display = "flex";
+    logoutBtn.style.display = "none";
+    logoutBtnGuest.style.display = "none"; // 🛑 إخفاء زر خروج الزائر
+    guestContainer.style.display = "none"; // 🛑 إخفاء واجهة الزائر
+    refreshDataBtn.style.display = "none";
+    unlockedItemsBtn.style.display = "none"; 
+    if (showQrBtn) showQrBtn.style.display = "none";
+    adminPanelDiv.style.display = "none";
+    leaderboardContainer.style.display = "none";
+    quizContainer.style.display = "none";
+    storeContainer.style.display = "none";
+    unlockedItemsContainer.style.display = "none"; 
+    avatarOverlayLabel.style.display = "none";
+    massUpdateControls.style.display = "none";
+    userAnnouncementBox.style.display = "none";
+    loggedInUserProfile = null; 
+    transactionList.innerHTML = "";
+    if (userLevelP) userLevelP.textContent = ""; 
+    if (editModalOverlay) editModalOverlay.style.display = "none"; 
     
+    // 🛑🛑🛑 الحل القسري لمشكلة الظهور 🛑🛑🛑
+    if (qrModalOverlay) qrModalOverlay.style.display = "none"; 
+    if (guestDetailsModal) guestDetailsModal.style.display = "none"; 
+    // 🛑🛑🛑 نهاية الحل القسري 🛑🛑🛑
+
+    // 🛑 إيقاف الماسح إذا كان يعمل عند تسجيل الخروج
+    if (html5QrCode && html5QrCode.isScanning) {
+        try {
+            html5QrCode.stop().catch(err => console.error("Error stopping scanner:", err));
+        } catch (e) {
+            console.warn("Scanner stop failed on reset:", e);
+        }
+    }
+    html5QrCode = null;
+};
+
+resetUI(); // 🛑 تنفيذ الإخفاء فوراً
+// ... (بقية ملف app.js)
     const fetchQrListBtn = document.getElementById("admin-fetch-qr-list-btn");
     const qrListResults = document.getElementById("admin-qr-list-results"); 
     const qrListMessage = document.getElementById("admin-qr-list-message");
