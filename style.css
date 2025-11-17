@@ -1350,3 +1350,36 @@ form#admin-add-item-form button[type="submit"]:hover {
 .collapsible-container h4:hover {
     background-color: #e9ecef;
 }
+
+/* 🛑🛑 تنسيق شريط السوشيال ميديا (Footer) 🛑🛑 */
+.social-footer {
+    text-align: center;
+    padding: 30px 0 40px;
+    background-color: #222; /* خلفية سوداء تتماشى مع شريط الأخبار */
+    color: white;
+    margin-top: 50px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.social-icons-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-icon {
+    font-size: 3em; /* حجم الأيقونة */
+    margin: 0 20px;
+    color: white; /* لون الأيقونة الأبيض */
+    transition: color 0.3s, transform 0.2s;
+}
+
+/* الألوان عند الوقوف بالماوس (Hover) */
+.social-icon.facebook:hover {
+    color: #3b5998; /* أزرق الفيسبوك */
+    transform: translateY(-5px);
+}
+.social-icon.whatsapp:hover {
+    color: #25d366; /* أخضر الواتساب */
+    transform: translateY(-5px);
+}
