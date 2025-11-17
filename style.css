@@ -1337,3 +1337,16 @@ form#admin-add-item-form button[type="submit"]:hover {
     .champion-card:nth-child(2) { order: 2; }
     .champion-card:nth-child(3) { order: 3; }
 }
+/* 🛑 تنسيق السجل القابل للطي 🛑 */
+.collapsible-container h4 {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-bottom: 0;
+    user-select: none; /* يمنع تحديد النص عند الضغط */
+}
+
+.collapsible-container h4:hover {
+    background-color: #e9ecef;
+}
