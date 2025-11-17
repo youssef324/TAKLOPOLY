@@ -19,6 +19,8 @@ export async function onRequestPost(context) {
                 "عشية": 0,
                 "درس كتاب": 0,
                 "تسبحة": 0,
+                "اعتراف": 0,
+                "مسابقة": 0,
                 "تسميع مزمور": 0,
                 "قداس اضافي": 0,
                 "قداس بدون تونية": 0,
@@ -35,6 +37,8 @@ export async function onRequestPost(context) {
                 else if (r.includes("عشية") && !r.includes("زيادة")) stats["عشية"]++;
                 else if (r.includes("درس كتاب")) stats["درس كتاب"]++;
                 else if (r.includes("تسبحة") && !r.includes("زيادة")) stats["تسبحة"]++;
+                 else if (r.includes("اعتراف")) stats["اعتراف"]++;
+                else if (r.includes("مسابقة")) stats["مسابقة"]++;
                 else if (r.includes("تسميع مزمور") || r.includes("مزمور")) stats["تسميع مزمور"]++;
                 else if (r.includes("قداس اضافي")) stats["قداس اضافي"]++;
                 else if (r.includes("قداس بدون تونية")) stats["قداس بدون تونية"]++;
