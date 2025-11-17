@@ -1185,7 +1185,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* الجزء اليمين (اسم الكنيسة) */
 .banner-right {
-    font-size: 1.1em;
+    font-size: 1.5em;
     font-weight: bold;
     width: 25%; /* مساحة محجوزة */
     text-align: right;
@@ -1198,13 +1198,13 @@ form#admin-add-item-form button[type="submit"]:hover {
 }
 
 .banner-title-ar {
-    font-size: 1.6em;
+    font-size: 2em;
     font-weight: bold;
     margin-bottom: 2px;
 }
 
 .banner-title-en {
-    font-size: 1.4em;
+    font-size: 1.8em;
     font-weight: bold;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -1212,7 +1212,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* الجزء اليسار (اسم الخدمة) */
 .banner-left {
-    font-size: 1.1em;
+    font-size: 1.5em;
     font-weight: bold;
     width: 25%; /* مساحة محجوزة */
     text-align: left;
