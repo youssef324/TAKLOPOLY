@@ -611,43 +611,45 @@ loadAnnouncement();
         }
     }
 
-   // 🛑🛑 دالة جلب وعرض الإعلانات (المعدلة للداتا بيز والشريط) 🛑🛑
+  // 🛑🛑 دالة جلب الإعلانات (الشريط للكل - المربع للمسجلين فقط) 🛑🛑
     async function loadAnnouncement() {
-        // 1. تعريف عناصر العرض (لليوزر)
         const boxContainer = document.getElementById("user-announcement-box");
         const boxText = document.getElementById("user-announcement-text");
         const tickerBar = document.getElementById("news-ticker-bar");
         const tickerText = document.getElementById("ticker-text-display");
         
-        // 2. تعريف عناصر الإدخال (للأدمن - عشان يشوف الكلام المكتوب)
         const adminBoxInput = document.getElementById("admin-box-text");
         const adminTickerInput = document.getElementById("admin-ticker-text");
 
-        // 3. إخفاء مبدئي للعناصر عشان ميبقاش شكلها وحش وهي فاضية
-        if(boxContainer) boxContainer.style.display = "none";
+        // إخفاء مبدئي
         if(tickerBar) tickerBar.style.display = "none";
+        // المربع الأصفر نضمن إنه مخفي في البداية
+        if(boxContainer) boxContainer.style.display = "none";
 
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
             if (!response.ok) return;
 
             const data = await response.json();
-            // البيانات جاية كده: { message: "...", ticker_message: "..." }
             
-            // 4. منطق المربع الأصفر (message)
-            if (data.message && data.message.trim() !== "") {
-                if(boxText) boxText.textContent = data.message;
-                if(boxContainer) boxContainer.style.display = "block";
-                // لو الأدمن فاتح، نملأ الخانة بتاعته
-                if(adminBoxInput) adminBoxInput.value = data.message;
-            }
-
-            // 5. منطق الشريط المتحرك (ticker_message)
+            // 1. عرض الشريط المتحرك (عام - يظهر للكل)
             if (data.ticker_message && data.ticker_message.trim() !== "") {
                 if(tickerText) tickerText.textContent = data.ticker_message;
                 if(tickerBar) tickerBar.style.display = "flex";
-                // لو الأدمن فاتح، نملأ الخانة بتاعته
                 if(adminTickerInput) adminTickerInput.value = data.ticker_message;
+            }
+
+            // 2. عرض المربع الأصفر (للمسجلين فقط)
+            // 🛑 الشرط الجديد: (loggedInUserProfile)
+            if (loggedInUserProfile && data.message && data.message.trim() !== "") {
+                if(boxText) boxText.textContent = data.message;
+                if(boxContainer) boxContainer.style.display = "block";
+                if(adminBoxInput) adminBoxInput.value = data.message;
+            }
+            
+            // ملء خانات الأدمن (حتى لو المربع مخفي، عشان يقدر يعدل)
+            if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
+                 if(adminBoxInput) adminBoxInput.value = data.message || "";
             }
 
         } catch (err) {
