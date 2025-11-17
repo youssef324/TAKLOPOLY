@@ -1220,3 +1220,71 @@ form#admin-add-item-form button[type="submit"]:hover {
 .stat-box span.count { font-size: 2.2em; font-weight: 900; color: #333; }
 .stat-box.highlight { border-bottom: 4px solid #007bff; }
 .stat-box.highlight span.count { color: #007bff; }
+
+/* 🛑🛑 ستايلات شريط الأخبار المتحرك (Ticker) 🛑🛑 */
+.news-ticker-bar {
+    background-color: #111; /* لون الخلفية أسود */
+    color: white;
+    height: 40px;
+    display: flex; /* مهم عشان يظهر جنب بعض */
+    align-items: center;
+    overflow: hidden;
+    border-bottom: 3px solid #b30000; /* خط أحمر تحت */
+    direction: rtl;
+    position: relative;
+    margin-bottom: 0; /* عشان يلزق في اللي تحته */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.ticker-label {
+    background-color: #dc3545; /* المربع الأحمر "خبر هام" */
+    color: white;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    z-index: 10; /* عشان يفضل فوق الكلام */
+    position: relative;
+    white-space: nowrap;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+}
+
+.ticker-wrapper {
+    flex-grow: 1; /* ياخد باقي المساحة */
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #222;
+}
+
+.ticker-content {
+    position: absolute;
+    top: 50%;
+    white-space: nowrap;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #fff;
+    line-height: 0;
+    /* كود الحركة */
+    animation: ticker-scroll 20s linear infinite;
+}
+
+/* تعريف الحركة من الشمال لليمين */
+@keyframes ticker-scroll {
+    0% {
+        right: 100%; 
+        transform: translate(0, -50%);
+    }
+    100% {
+        right: -100%; 
+        transform: translate(100%, -50%);
+    }
+}
+
+/* تظبيط للموبايل */
+@media (max-width: 768px) {
+    .ticker-label { padding: 0 10px; font-size: 0.8em; }
+    .ticker-content { font-size: 0.9em; animation-duration: 12s; }
+}
