@@ -1226,76 +1226,133 @@ form#admin-add-item-form button[type="submit"]:hover {
 .stat-box.highlight span.count { color: #007bff; }
 
 /* =========================================
-   ⬇️⬇️⬇️ تنسيق أبطال الأسر (شكل هرمي) ⬇️⬇️⬇️
+   ⬇️⬇️⬇️ تنسيق أبطال الأسر (شكل هرمي + بادجات أفضل) ⬇️⬇️⬇️
    ========================================= */
 
 /* 1. الحاوية الأب: نستخدم Flexbox مع السماح بالنزول لسطر جديد */
 .champions-container {
     display: flex;
-    flex-wrap: wrap; /* 🛑 ده السر: بيسمح للعناصر تنزل تحت بعض */
-    justify-content: center; /* توسيط العناصر */
-    align-items: flex-end; /* محاذاة من الأسفل عشان الشكل يبان متناسق */
-    gap: 30px; /* مسافة بين الكروت */
-    margin-bottom: 40px;
+    flex-wrap: wrap; /* يسمح للعناصر تنزل لسطر جديد */
+    justify-content: center; /* توسيط العناصر أفقياً */
+    align-items: flex-end; /* محاذاة من الأسفل لإعطاء الشكل الهرمي */
+    gap: 50px; /* مسافة أكبر بين الكروت */
+    margin-bottom: 50px; /* مسافة أسفل الحاوية */
+    padding-top: 30px; /* مسافة من فوق عشان الميدالية تظهر كويس */
 }
 
-/* 2. الكارت بشكل عام */
+/* 2. الكارت بشكل عام (أساس كل بطل) */
 .champion-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    position: relative; /* مهم جداً عشان البادج يتحرك جواه */
+    background-color: #fff; /* خلفية بيضاء للكارت */
+    padding-bottom: 20px; /* مسافة أسفل الكارت للمعلومات */
+    border-radius: 15px; /* حواف دائرية للكارت */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* ظل خفيف للكارت كله */
+    transition: transform 0.3s ease; /* حركة عند الوقوف عليه */
+    width: 250px; /* عرض ثابت للكارت (هيتم تعديله للأول) */
 }
 
-/* 🥇 المركز الأول (مميز جداً) */
+.champion-card:hover {
+    transform: translateY(-5px); /* حركة بسيطة عند الوقريب بالماوس */
+}
+
+/* 3. الصورة الدائرية داخل الكارت */
+.champion-card .card-img {
+    border-radius: 50%; /* خلي الصورة دايرة */
+    object-fit: cover; /* لضمان أن الصورة تملأ الدائرة بدون تشويه */
+    border: 5px solid #eee; /* برواز أبيض خفيف للصورة */
+    margin-top: -60px; /* 🛑 رفع الصورة لأعلى قليلاً لتبدأ من فوق الكارت */
+    background-color: #f0f0f0; /* لون خلفية احتياطي لو الصورة مش موجودة */
+}
+
+/* 🥇 تنسيق خاص للمركز الأول (البطل الذهبي) */
 .champion-card:nth-child(1) {
-    flex-basis: 100%; /* 🛑 ياخد عرض الصفحة كله، فـ يجبر التاني والتالت ينزلوا تحته */
     order: 1; /* ترتيبه الأول */
-    margin-bottom: 10px; /* مسافة تحته */
-    transform: scale(1.1); /* تكبير الكارت كله شوية */
+    flex-basis: auto; /* عشان مياخدش عرض 100% ويوسع حسب محتواه */
+    transform: scale(1.15); /* تكبير الكارت كله أكثر */
     z-index: 10;
+    margin: 0 20px 40px; /* مسافات حول الأول عشان يميزه أكتر */
+    width: 280px; /* عرض أكبر لكارت الأول */
 }
 
-/* صورة المركز الأول (كبيرة + برواز ذهبي) */
+/* صورة المركز الأول (أكبر + برواز ذهبي واضح) */
 .champion-card:nth-child(1) .card-img {
-    width: 220px;  /* أكبر حجم */
-    height: 220px;
-    border: 8px solid #FFD700; /* ذهبي */
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); /* وهج ذهبي */
+    width: 180px;  /* 🛑 حجم الصورة نفسها، عشان الوهج يبقى حواليها مش عليها */
+    height: 180px;
+    border: 8px solid #FFD700; /* برواز ذهبي واضح */
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0.4); /* 🛑 الوهج كـ "Outer Glow" حوالين البرواز */
+    margin-bottom: 10px; /* مسافة بسيطة تحت الصورة */
 }
 
-/* 🥈🥉 المركز الثاني والثالث (جنب بعض تحت) */
+/* 🥈🥉 تنسيق المركز الثاني والثالث (جنب بعض) */
 .champion-card:nth-child(2),
 .champion-card:nth-child(3) {
     order: 2; /* ييجوا بعد الأول */
+    width: 220px; /* عرض أصغر لكروت الثاني والثالث */
 }
 
-/* صور المركز الثاني والثالث (أصغر شوية) */
+/* صور المركز الثاني والثالث (حجم متوسط + براويز فضية وبرونزية) */
 .champion-card:nth-child(2) .card-img,
 .champion-card:nth-child(3) .card-img {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
     border: 6px solid #C0C0C0; /* فضي */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 0 8px rgba(192, 192, 192, 0.3); /* وهج فضي خفيف */
 }
 
 /* تمييز المركز الثالث ببرواز برونزي */
 .champion-card:nth-child(3) .card-img {
     border-color: #cd7f32; /* برونزي */
+    box-shadow: 0 0 0 8px rgba(205, 127, 50, 0.3); /* وهج برونزي خفيف */
 }
 
-/* تنسيق رقم الترتيب (فوق الصورة) */
-.champion-card .rank {
+/* تنسيق اسم البطل */
+.champion-card h3 {
+    margin-top: 15px; /* مسافة أعلى الاسم */
+    font-size: 1.5em;
+    color: #333;
+    text-align: center;
+}
+
+/* تنسيق النقاط */
+.champion-card p {
+    font-size: 1.1em;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+}
+
+/* 🏅 تنسيق البادجات (الميداليات) - الوضع الجديد */
+.champion-card .rank-badge {
     position: absolute;
-    top: -15px;
+    top: -20px; /* 🛑 رفع البادج لفوق أكتر عشان يكون باين وميبقاش على الصورة */
     right: 50%;
     transform: translateX(50%);
-    background-color: #fff;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    border-radius: 50%;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    z-index: 5;
+    width: 60px; /* تكبير حجم البادج */
+    height: 60px;
+    object-fit: contain; /* لضمان أن الميدالية تظهر بالكامل */
+    z-index: 15; /* يضمن أنه فوق كل حاجة */
+}
+
+/* تنسيق خاص للبادج الأول (ممكن يكون أكبر شويه) */
+.champion-card:nth-child(1) .rank-badge {
+    width: 75px;
+    height: 75px;
+    top: -30px; /* يرتفع أعلى قليلاً */
+}
+
+
+/* تنسيق النصوص داخل الكارت */
+.champion-card h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin: 10px 0 5px;
+}
+
+.champion-card p {
+    font-size: 1.1em;
+    color: #555;
+    margin: 0;
 }
