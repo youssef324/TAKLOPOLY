@@ -66,7 +66,28 @@
     </style>
 </head>
 <body>
+<header class="top-banner">
+        <div class="banner-right">
+            كنيسة الانبا تكلا هيمانوت
+        </div>
+        
+        <div class="banner-center">
+            <div class="banner-title-ar">مسابقة صوم الميلاد</div>
+            <div class="banner-title-en">TAKLOPOLY</div>
+        </div>
 
+        <div class="banner-left">
+            خدمة اعدادي بنين
+        </div>
+    </header>
+    
+<div class="news-ticker-bar" id="news-ticker-bar" style="display: none;">
+    <div class="ticker-label">خبر هام</div>
+    <div class="ticker-wrapper">
+        <div class="ticker-content" id="ticker-text-display">
+            </div>
+    </div>
+</div>
     <div class="container">
         
         <div class="card-and-forms-wrapper">
@@ -87,11 +108,16 @@
                     <!-- 🛑🛑 حقل المستوى الجديد للمستخدم 🛑🛑 -->
                     <p id="user-level">المستوى: </p>
 
-                    <div class="transaction-history">
-                        <h4>سجل المعاملات</h4>
-                        <ul id="transaction-list">
-                            </ul>
-                    </div>
+                   <div class="transaction-history collapsible-container">
+    <h4 id="history-toggle-btn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        سجل المعاملات
+        <span id="history-arrow">▼</span> </h4>
+    
+    <div id="history-content" style="display: none; margin-top: 10px;">
+        <ul id="transaction-list">
+        </ul>
+    </div>
+</div>
                 </div>
             </div>
             
@@ -304,35 +330,51 @@
             </div>
 
             <!-- 🛑🛑 قسم مسح الحضور والمكافآت (جديد) 🛑🛑 -->
-            <div class="admin-section scan-section">
-                <h4>📷 مسح كود الحضور والمكافأة</h4>
-                <p style="font-size: 0.9em; color: #555;">
-                    امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية.
-                </p>
-                <div id="admin-scan-controls">
-                    <label for="reward-reason-select">نوع المكافأة:</label>
-                    <!-- 🛑🛑 تم تحديث قائمة المكافآت هنا 🛑🛑 -->
-                    <select id="reward-reason-select">
-                        <option value="300:القداس">القداس (300 نقطة)</option>
-                        <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
-                        <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
-                        <option value="200:عشية">عشية (200 نقطة)</option>
-                        <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
-                        <option value="200:تسبحة">تسبحة (200 نقطة)</option>
-                        <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
-                        <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
-                        <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
-                        <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
-                        <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
-                    </select>
-                    <button id="start-scan-btn" style="background-color: #f472b6;">
-                        تشغيل الكاميرا والمسح
-                    </button>
-                    <!-- حاوية عرض الكاميرا -->
-                    <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
-                </div>
-                <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
-            </div>
+          <div class="admin-section scan-section">
+    <h4>📷 مسح كود الحضور والمكافأة (تجميعي)</h4>
+    <p style="font-size: 0.9em; color: #555;">
+        امسح الأكواد المتتالية. ستظهر في القائمة بالأسفل. اضغط "تنفيذ المكافآت" عند الانتهاء.
+    </p>
+    
+    <div id="admin-scan-controls">
+        <label for="reward-reason-select">نوع المكافأة:</label>
+        <select id="reward-reason-select">
+            <option value="300:القداس">القداس (300 نقطة)</option>
+            <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+            <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+            <option value="200:عشية">عشية (200 نقطة)</option>
+            <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+            <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+            <option value="500:اعتراف">اعتراف (500 نقطة)</option>
+            <option value="150:مسابقة">مسابقة (150 نقطة)</option>
+            <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+            <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+            <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
+            <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+            <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+        </select>
+
+        <button id="start-scan-btn" style="background-color: #db2777; margin-bottom: 10px;">
+            تشغيل الكاميرا والمسح
+        </button>
+
+        <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+    </div>
+
+    <div id="batch-scan-container" style="margin-top: 20px; display: none;">
+        <h5 style="border-bottom: 2px solid #ddd; padding-bottom: 5px;">
+            القائمة الحالية (<span id="batch-count">0</span>):
+        </h5>
+        <ul id="batch-scan-list">
+            </ul>
+        
+        <button id="submit-batch-rewards-btn" class="pulse-button">
+            ✅ تنفيذ المكافآت للجميع
+        </button>
+    </div>
+
+    <p id="scan-status-message" style="margin-top: 10px; font-weight: bold; white-space: pre-line;"></p>
+</div>
             <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
             
             <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
@@ -396,11 +438,16 @@
 
             <div class="admin-section">
                 <h4>نشر إعلان عام</h4>
-                <form id="admin-announcement-form">
-                    <textarea id="admin-announcement-text" placeholder="اكتب الإعلان هنا..."></textarea>
-                    <button type="submit">نشر أو تحديث الإعلان</button>
-                </form>
-                <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
+<form id="admin-announcement-form">
+    <label style="font-weight:bold; display:block; margin-top:10px;">1. إعلان المربع الأصفر (الثابت):</label>
+    <textarea id="admin-box-text" placeholder="اكتب هنا الإعلان الطويل..." style="width:100%; height:60px; padding:5px;"></textarea>
+    
+    <label style="font-weight:bold; display:block; margin-top:10px;">2. شريط الأخبار المتحرك (تحت الهيدر):</label>
+    <input type="text" id="admin-ticker-text" placeholder="اكتب هنا الخبر العاجل..." style="width:100%; padding:10px;">
+    
+    <button type="submit" style="margin-top:15px; background-color: #ffc107; color: #333; font-weight:bold;">حفظ وتحديث الإعلانات</button>
+</form>
+<p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
             </div>
             
             <div class="admin-section">
@@ -505,6 +552,19 @@
                 <!-- سيتم وضع كود QR هنا -->
             </div>
             <small id="qr-user-email-display" style="display: block; margin-top: 10px; font-weight: bold;"></small>
+        </div>
+    </div>
+    <div id="guest-history-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close-btn" id="close-guest-history-btn">&times;</span>
+            
+            <h3 id="guest-modal-user-name" style="color: #007bff; margin-bottom: 5px;"></h3>
+            <p style="text-align: center; color: #777; font-size: 0.9em; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">تفاصيل المشاركة والحضور</p>
+            
+            <div class="stats-grid" id="stats-grid-container">
+                </div>
+    
+            <div id="loading-spinner" style="text-align: center; display: none; color: #007bff; font-weight: bold;">جاري التحميل...</div>
         </div>
     </div>
     <script src="app.js"></script>

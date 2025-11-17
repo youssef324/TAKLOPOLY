@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
     const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
-
+loadAnnouncement();
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
@@ -611,25 +611,49 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 🛑🛑 فانكشن جلب الإعلانات 🛑🛑
+  // 🛑🛑 دالة جلب الإعلانات (الشريط للكل - المربع للمسجلين فقط) 🛑🛑
     async function loadAnnouncement() {
-        userAnnouncementBox.style.display = "none";
-        userAnnouncementText.textContent = "";
+        const boxContainer = document.getElementById("user-announcement-box");
+        const boxText = document.getElementById("user-announcement-text");
+        const tickerBar = document.getElementById("news-ticker-bar");
+        const tickerText = document.getElementById("ticker-text-display");
         
+        const adminBoxInput = document.getElementById("admin-box-text");
+        const adminTickerInput = document.getElementById("admin-ticker-text");
+
+        // إخفاء مبدئي
+        if(tickerBar) tickerBar.style.display = "none";
+        // المربع الأصفر نضمن إنه مخفي في البداية
+        if(boxContainer) boxContainer.style.display = "none";
+
         try {
             const response = await fetch(`/get-announcement`, { method: "POST" });
-            if (!response.ok) throw new Error("فشل جلب الإعلان");
+            if (!response.ok) return;
 
             const data = await response.json();
-            if (data.message && data.message.trim()) {
-                userAnnouncementText.textContent = data.message;
-                userAnnouncementBox.style.display = "block";
-                if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
-                    adminAnnouncementText.value = data.message;
-                }
+            
+            // 1. عرض الشريط المتحرك (عام - يظهر للكل)
+            if (data.ticker_message && data.ticker_message.trim() !== "") {
+                if(tickerText) tickerText.textContent = data.ticker_message;
+                if(tickerBar) tickerBar.style.display = "flex";
+                if(adminTickerInput) adminTickerInput.value = data.ticker_message;
             }
+
+            // 2. عرض المربع الأصفر (للمسجلين فقط)
+            // 🛑 الشرط الجديد: (loggedInUserProfile)
+            if (loggedInUserProfile && data.message && data.message.trim() !== "") {
+                if(boxText) boxText.textContent = data.message;
+                if(boxContainer) boxContainer.style.display = "block";
+                if(adminBoxInput) adminBoxInput.value = data.message;
+            }
+            
+            // ملء خانات الأدمن (حتى لو المربع مخفي، عشان يقدر يعدل)
+            if (loggedInUserProfile && loggedInUserProfile.role === 'admin') {
+                 if(adminBoxInput) adminBoxInput.value = data.message || "";
+            }
+
         } catch (err) {
-            console.error("Load Announcement Error:", err);
+            console.error("Error loading announcements:", err);
         }
     }
 
@@ -1156,9 +1180,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+  // -----------------------------------------------------
+    // 🛑🛑🛑 منطق واجهة الزائر (القائمة + إحصائيات المربعات) 🛑🛑🛑
     // -----------------------------------------------------
-    // 🛑🛑🛑 منطق واجهة الزائر (جديد ومُصحح) 🛑🛑🛑
-    // -----------------------------------------------------
+    
+    const guestHistoryModal = document.getElementById("guest-history-modal-overlay");
+    const closeGuestHistoryBtn = document.getElementById("close-guest-history-btn");
+    const guestModalUserName = document.getElementById("guest-modal-user-name");
+    const statsGridContainer = document.getElementById("stats-grid-container");
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    // 1. التعامل مع أزرار الأسر (جلب القائمة)
     guestFamilyButtons.forEach(button => {
         button.addEventListener('click', async () => {
             const familyName = button.dataset.family;
@@ -1167,29 +1199,42 @@ document.addEventListener("DOMContentLoaded", () => {
             guestResultsList.innerHTML = '';
 
             try {
-                // 🛑🛑 التعديل: استدعاء الفانكشن الجديدة 🛑🛑
-                const response = await fetch('/guest-get-family', { // ⬅️ الرابط المُصحح
+                // طلب قائمة الأسرة
+                const response = await fetch('/guest-get-family', { 
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family: familyName })
+                    body: JSON.stringify({ family: familyName }) 
                 });
 
-                if (!response.ok) throw new Error('فشل تحميل القائمة');
+                if (!response.ok) throw new Error('فشل الاتصال');
                 
                 const data = await response.json();
                 
-                if (data.users && data.users.length > 0) {
-                    // 🛑 عرض العدد الإجمالي (مُصحح)
+                if (data.success && data.users && data.users.length > 0) {
                     guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
                     guestMessage.style.color = 'green';
+                    
                     data.users.forEach((user, index) => {
                         const li = document.createElement('li');
-                        // نستخدم نفس تنسيق لوحة الصدارة
+                        li.style.cursor = "pointer"; // شكل اليد عشان يعرفوا إنه قابل للضغط
+                        li.style.padding = "10px";
+                        li.style.borderBottom = "1px solid #eee";
+                        
+                        // تأثير بسيط عند المرور بالماوس
+                        li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
+                        li.onmouseout = () => li.style.backgroundColor = "transparent";
+
                         li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        
+                        // 🛑 هنا السحر: لما يدوس على الاسم، تفتح لوحة الإحصائيات
+                        li.addEventListener('click', () => {
+                            showGuestUserStats(user.email, user.name);
+                        });
+
                         guestResultsList.appendChild(li);
                     });
                 } else {
-                    guestMessage.textContent = 'لا يوجد مستخدمين لعرضهم في هذه الأسرة.';
+                    guestMessage.textContent = 'لا يوجد مستخدمين.';
                     guestMessage.style.color = 'black';
                 }
             } catch (err) {
@@ -1197,6 +1242,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 guestMessage.style.color = 'red';
             }
         });
+    });
+
+    // 2. دالة عرض الإحصائيات (جلب الأرقام ورسم المربعات)
+    async function showGuestUserStats(email, name) {
+        guestModalUserName.textContent = name;
+        statsGridContainer.innerHTML = '';
+        loadingSpinner.style.display = 'block';
+        guestHistoryModal.style.display = "flex";
+
+        try {
+            // طلب الإحصائيات لنفس الرابط بس بنبعت "targetEmail"
+            const response = await fetch('/guest-get-family', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ targetEmail: email }) 
+            });
+
+            const data = await response.json();
+            loadingSpinner.style.display = 'none';
+
+            if (data.success && data.stats) {
+                // رسم المربعات بناءً على الأرقام اللي جاية من السيرفر
+                for (const [key, value] of Object.entries(data.stats)) {
+                    // ارسم المربع (حتى لو القيمة صفر عشان الشكل يكمل)
+                    createStatBox(key, value);
+                }
+            } else {
+                statsGridContainer.innerHTML = '<p style="width:100%; text-align:center;">لا يوجد بيانات حضور مسجلة.</p>';
+            }
+
+        } catch (err) {
+            loadingSpinner.style.display = 'none';
+            statsGridContainer.innerHTML = '<p style="color:red; text-align:center;">خطأ في تحميل البيانات.</p>';
+            console.error(err);
+        }
+    }
+
+    // دالة مساعدة لرسم المربع الواحد
+    function createStatBox(label, count) {
+        const div = document.createElement("div");
+        div.className = "stat-box";
+        
+        // لو العدد أكبر من 0، نخليه مميز
+        if (count > 0) div.classList.add("highlight");
+
+        div.innerHTML = `
+            <span class="label">${label}</span>
+            <span class="count">${count}</span>
+        `;
+        statsGridContainer.appendChild(div);
+    }
+
+    // إغلاق المودال
+    if (closeGuestHistoryBtn) {
+        closeGuestHistoryBtn.addEventListener('click', () => guestHistoryModal.style.display = "none");
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === guestHistoryModal) guestHistoryModal.style.display = "none";
     });
 
 
@@ -1714,120 +1817,192 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+// -----------------------------------------------------
+        // 🛑🛑🛑 منطق مسح QR Code (للأدمن - وضع التجميع Batch) 🛑🛑🛑
         // -----------------------------------------------------
-        // 🛑🛑🛑 منطق مسح QR Code (للأدمن) - تم نقله إلى هنا 🛑🛑🛑
-        // -----------------------------------------------------
+        
+        // متغير لتخزين القائمة المؤقتة
+        let scannedBatchList = [];
+        const batchScanContainer = document.getElementById("batch-scan-container");
+        const batchScanList = document.getElementById("batch-scan-list");
+        const batchCountSpan = document.getElementById("batch-count");
+        const submitBatchBtn = document.getElementById("submit-batch-rewards-btn");
+        
+        // دالة تحديث واجهة القائمة
+        function updateBatchUI() {
+            batchScanList.innerHTML = '';
+            
+            if (scannedBatchList.length > 0) {
+                batchScanContainer.style.display = 'block';
+                batchCountSpan.textContent = scannedBatchList.length;
+                
+                // ترتيب القائمة بحيث يظهر الأحدث في الأعلى
+                [...scannedBatchList].reverse().forEach((email, index) => {
+                    // (index هنا معكوس لأننا قلبنا المصفوفة للعرض فقط)
+                    // سنجد الـ index الحقيقي للحذف
+                    const realIndex = scannedBatchList.length - 1 - index;
 
-        // 🛑🛑 دالة معالجة المسح 🛑🛑
-        async function onScanSuccess(decodedText, decodedResult) {
-            scanStatusMessage.textContent = `تم مسح كود: ${decodedText}. جاري معالجة المكافأة...`;
-            scanStatusMessage.style.color = 'blue';
-
-            // 1. إيقاف الكاميرا فوراً بعد المسح الأول
-            if (html5QrCode) {
-                try {
-                    await html5QrCode.stop();
-                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
-                    readerDiv.innerHTML = ''; // تفريغ الكاميرا
-                } catch(err) {
-                     console.error("Failed to stop scanner:", err)
-                }
-            }
-
-            // 2. تحليل بيانات المكافأة
-            const [amountStr, reason] = rewardReasonSelect.value.split(':');
-            const rewardAmount = parseInt(amountStr);
-            const scannedEmail = decodedText.trim();
-            const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
-
-            if (!scannedEmail || isNaN(rewardAmount) || rewardAmount <= 0) {
-                 scanStatusMessage.textContent = 'خطأ: بيانات الكود أو المكافأة غير صالحة.';
-                 scanStatusMessage.style.color = 'red';
-                 return;
-            }
-
-            // 3. إرسال إلى API المكافأة
-            try {
-                const response = await fetch(`/scan-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        scannedEmail, 
-                        rewardAmount, 
-                        reason: reason,
-                        adminEmail 
-                    })
+                    const li = document.createElement('li');
+                    li.className = 'batch-item';
+                    li.innerHTML = `
+                        <span>${email}</span>
+                        <button class="remove-batch-item" data-index="${realIndex}">&times;</button>
+                    `;
+                    batchScanList.appendChild(li);
                 });
 
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    scanStatusMessage.textContent = `✅ نجاح! تم إضافة ${rewardAmount} نقطة لـ ${scannedEmail}.`;
-                    scanStatusMessage.style.color = 'green';
-                    // تحديث بيانات الأدمن إذا كان المستخدم الذي تم مكافأته هو الأدمن نفسه
-                    if (scannedEmail === adminEmail) {
-                        refreshUserData();
-                    }
-                    // تحديث الكارت إذا كان المستخدم الممسوح هو المعروض حالياً
-                    if (currentSearchedUser && scannedEmail === currentSearchedUser.email) {
-                        currentSearchedUser.balance = data.new_balance;
-                        searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
-                    }
-                    
-                } else {
-                    scanStatusMessage.textContent = `❌ فشل: ${data.error || 'فشل في تحديث الرصيد.'}`;
-                    scanStatusMessage.style.color = 'red';
-                }
-
-            } catch (err) {
-                 scanStatusMessage.textContent = 'خطأ في الاتصال بالسيرفر أثناء معالجة المكافأة.';
-                 scanStatusMessage.style.color = 'red';
-                 console.error("Scan API Error:", err);
+                // تفعيل زر الحذف
+                document.querySelectorAll('.remove-batch-item').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(e.target.dataset.index);
+                        removeUserFromBatch(idx);
+                    });
+                });
+            } else {
+                batchScanContainer.style.display = 'none';
             }
         }
-        
+
+        // دالة حذف مستخدم من القائمة
+        function removeUserFromBatch(index) {
+            scannedBatchList.splice(index, 1);
+            updateBatchUI();
+            scanStatusMessage.textContent = "تم حذف المستخدم من القائمة.";
+            scanStatusMessage.style.color = "orange";
+        }
+
+        // 🛑🛑 دالة معالجة المسح (تجميعي) 🛑🛑
+        function onScanSuccess(decodedText, decodedResult) {
+            const scannedEmail = decodedText.trim();
+
+            // 1. التحقق من التكرار في القائمة الحالية
+            if (scannedBatchList.includes(scannedEmail)) {
+                scanStatusMessage.textContent = `⚠️ المستخدم ${scannedEmail} موجود بالفعل في القائمة!`;
+                scanStatusMessage.style.color = 'orange';
+                return; // لا تضف مرة أخرى
+            }
+
+            // 2. إضافة للقائمة
+            scannedBatchList.push(scannedEmail);
+            
+            // 3. تحديث الواجهة
+            updateBatchUI();
+            
+            // 4. رسالة نجاح مؤقتة
+            scanStatusMessage.textContent = `✅ تم التقاط: ${scannedEmail}`;
+            scanStatusMessage.style.color = 'green';
+
+            // ملاحظة: لا نوقف الكاميرا هنا، بل نتركها تعمل للمستخدم التالي
+        }
+
         // 🛑🛑 زر تشغيل الماسح 🛑🛑
         if (startScanBtn) {
             startScanBtn.addEventListener('click', () => {
                 if (html5QrCode && html5QrCode.isScanning) {
-                    // إيقاف الماسح
                     html5QrCode.stop().then(() => {
                         startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
                         readerDiv.innerHTML = '';
                         scanStatusMessage.textContent = 'تم إيقاف الماسح.';
-                        scanStatusMessage.style.color = 'gray';
-                    }).catch(err => {
-                        scanStatusMessage.textContent = 'حدث خطأ أثناء إيقاف الماسح.';
-                        scanStatusMessage.style.color = 'red';
-                    });
+                    }).catch(err => console.error(err));
                     return;
                 }
 
-                // تهيئة وتفعيل الماسح
                 if (!html5QrCode) {
                      html5QrCode = new Html5Qrcode("reader");
                 }
                 
-                scanStatusMessage.textContent = 'جاري تفعيل الكاميرا... قد تظهر رسالة طلب إذن.';
+                scanStatusMessage.textContent = 'الكاميرا تعمل... امسح الأكواد بالتتابع.';
                 scanStatusMessage.style.color = 'blue';
 
                 html5QrCode.start(
-                    { facingMode: "environment" }, // استخدام الكاميرا الخلفية (الأفضل للمسح)
+                    { facingMode: "environment" },
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     onScanSuccess,
-                    (errorMessage) => {
-                        // console.log(`QR Code no longer in sight. ${errorMessage}`);
-                    }
-                )
-                .then(() => {
+                    (errorMessage) => { /* ignore errors */ }
+                ).then(() => {
                     startScanBtn.textContent = 'إيقاف الماسح';
-                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح كود QR الآن.';
-                    scanStatusMessage.style.color = 'green';
-                })
-                .catch((err) => {
-                    scanStatusMessage.textContent = `❌ فشل تفعيل الكاميرا: ${err}. تأكد من صلاحية الكاميرا.`;
+                }).catch((err) => {
+                    scanStatusMessage.textContent = `فشل الكاميرا: ${err}`;
                     scanStatusMessage.style.color = 'red';
                 });
+            });
+        }
+
+        // 🛑🛑 منطق زر التنفيذ (إرسال القائمة للسيرفر) 🛑🛑
+        if (submitBatchBtn) {
+            submitBatchBtn.addEventListener('click', async () => {
+                if (scannedBatchList.length === 0) return;
+
+                const [amountStr, reason] = rewardReasonSelect.value.split(':');
+                const rewardAmount = parseInt(amountStr);
+                const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
+
+                if (!confirm(`هل أنت متأكد من منح ${rewardAmount} نقطة لـ ${scannedBatchList.length} مستخدم؟`)) return;
+
+                submitBatchBtn.disabled = true;
+                submitBatchBtn.textContent = "جاري التنفيذ...";
+                scanStatusMessage.textContent = "جاري إرسال المكافآت...";
+                
+                // إيقاف الكاميرا أثناء الإرسال لتوفير الموارد
+                if (html5QrCode && html5QrCode.isScanning) {
+                    await html5QrCode.stop();
+                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
+                    readerDiv.innerHTML = '';
+                }
+
+                let successCount = 0;
+                let failCount = 0;
+
+                // 🛑 Loop لإرسال الطلبات واحداً تلو الآخر (لتوافق مع الـ Backend الحالي)
+                for (const email of scannedBatchList) {
+                    try {
+                        const response = await fetch(`/scan-attendance`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                scannedEmail: email, 
+                                rewardAmount, 
+                                reason, 
+                                adminEmail 
+                            })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                            console.error(`Failed for ${email}:`, data.error);
+                        }
+                    } catch (err) {
+                        failCount++;
+                        console.error(`Error for ${email}:`, err);
+                    }
+                    
+                    // تحديث النسبة المئوية
+                    scanStatusMessage.textContent = `جاري المعالجة: ${successCount + failCount} / ${scannedBatchList.length}`;
+                }
+
+                // النتيجة النهائية
+                scanStatusMessage.textContent = `النتيجة: تم بنجاح لـ (${successCount})، وفشل (${failCount}).`;
+                
+                if (failCount === 0) {
+                    scanStatusMessage.style.color = "green";
+                    // تفريغ القائمة تماماً
+                    scannedBatchList = [];
+                    updateBatchUI();
+                } else {
+                    scanStatusMessage.style.color = "orange";
+                    // يمكننا هنا إبقاء المستخدمين الذين فشلوا في القائمة، لكن للتبسيط سنفرغها
+                    scannedBatchList = [];
+                    updateBatchUI();
+                    alert(`انتبه: حدثت مشكلة مع ${failCount} مستخدم. راجع الكونسول.`);
+                }
+
+                submitBatchBtn.textContent = "✅ تنفيذ المكافآت للجميع";
+                submitBatchBtn.disabled = false;
+                
+                // تحديث بيانات الأدمن لو كان بينهم
+                refreshUserData();
             });
         }
 
@@ -2062,45 +2237,53 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 🛑 8. كود فورم الإعلانات (مُصحح) 🛑
+       // 🛑🛑 كود حفظ الإعلانات (المربع + الشريط) في الداتا بيز 🛑🛑
         if (adminAnnouncementForm) {
             adminAnnouncementForm.addEventListener("submit", async (event) => {
-                event.preventDefault(); 
-                event.stopPropagation();
+                event.preventDefault();
                 
-                const announcementTextValue = document.getElementById("admin-announcement-text").value.trim();
+                // بنجيب القيم من الخانتين الجداد بتوع الـ HTML
+                const boxVal = document.getElementById("admin-box-text").value.trim();
+                const tickerVal = document.getElementById("admin-ticker-text").value.trim();
+                
+                const msgElement = document.getElementById("admin-announcement-message");
 
-                if (!announcementTextValue) {
-                    adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان أولاً.";
-                    adminAnnouncementMessage.style.color = "red";
+                // لو الخانتين فاضيين، نطلع تنبيه
+                if (!boxVal && !tickerVal) {
+                    msgElement.textContent = "الرجاء كتابة إعلان واحد على الأقل.";
+                    msgElement.style.color = "red";
                     return;
                 }
 
-                adminAnnouncementMessage.textContent = "جاري نشر الإعلان...";
-                adminAnnouncementMessage.style.color = "blue";
-                
+                msgElement.textContent = "جاري الحفظ...";
+                msgElement.style.color = "blue";
+
                 try {
+                    // الإرسال للفانكشن اللي بتسجل في الداتا بيز
                     const response = await fetch(`/admin-set-announcement`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message: announcementTextValue }),
+                        // بنبعت القيمتين (message و ticker_message)
+                        body: JSON.stringify({ 
+                            message: boxVal, 
+                            ticker_message: tickerVal 
+                        }),
                     });
 
-                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                     if (response.ok) {
-                        adminAnnouncementMessage.textContent = "تم نشر الإعلان بنجاح!";
-                        adminAnnouncementMessage.style.color = "green";
-                        document.getElementById("admin-announcement-text").value = ""; // تفريغ الحقل
-                        loadAnnouncement(); // 🛑 تحديث الإعلان لليوزر
+                        msgElement.textContent = "تم الحفظ وتحديث الموقع بنجاح!";
+                        msgElement.style.color = "green";
+                        
+                        // تحديث الشاشة فوراً عشان التغيير يظهر
+                        loadAnnouncement(); 
                     } else {
-                        adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
-                        adminAnnouncementMessage.style.color = "red";
+                        msgElement.textContent = "فشل الحفظ.";
+                        msgElement.style.color = "red";
                     }
                 } catch (err) {
-                    adminAnnouncementMessage.textContent = "خطأ في الاتصال بالـ API لنشر الإعلان.";
-                    adminAnnouncementMessage.style.color = "red";
-                    console.error("Set Announcement Error:", err);
+                    msgElement.textContent = "خطأ في الاتصال.";
+                    msgElement.style.color = "red";
+                    console.error(err);
                 }
             });
         }
@@ -2184,5 +2367,21 @@ document.addEventListener("DOMContentLoaded", () => {
         // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
+    
+// 🛑 كود طي/فتح سجل المعاملات 🛑
+    const historyBtn = document.getElementById("history-toggle-btn");
+    const historyContent = document.getElementById("history-content");
+    const historyArrow = document.getElementById("history-arrow");
 
+    if (historyBtn && historyContent) {
+        historyBtn.addEventListener("click", () => {
+            if (historyContent.style.display === "none") {
+                historyContent.style.display = "block";
+                historyArrow.textContent = "▲"; // سهم لفوق
+            } else {
+                historyContent.style.display = "none";
+                historyArrow.textContent = "▼"; // سهم لتحت
+            }
+        });
+    }
 }); // نهاية "DOMContentLoaded"

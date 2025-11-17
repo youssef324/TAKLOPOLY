@@ -1,30 +1,71 @@
-/*
- * API Endpoint: /guest-get-family
- * (جديدة - للجيست)
- * الوظيفة: جلب "كل" مستخدمي الأسرة (مرتبين بالنقاط)
- */
 export async function onRequestPost(context) {
     try {
-        const db = context.env.DB; 
-        const { family } = await context.request.json();
+        const db = context.env.DB;
+        // هنستقبل نوع الطلب (mode) أو نحدد بناء على البيانات
+        const { family, targetEmail } = await context.request.json();
 
-        if (!family) {
-            return new Response(JSON.stringify({ error: 'اسم العائلة مطلوب.' }), { status: 400 });
+        // 🛑 السيناريو الأول: طلب إحصائيات مستخدم معين (لو مبعوت إيميل)
+        if (targetEmail) {
+            // جلب المعاملات الإيجابية (الحضور)
+            const { results } = await db.prepare(
+                "SELECT reason FROM transactions WHERE user_email = ? AND amount > 0"
+            ).bind(targetEmail).all();
+
+            // تصفير العدادات
+            const stats = {
+                "القداس": 0,
+                "مدارس الاحد": 0,
+                "مدرسة شمامسة": 0,
+                "عشية": 0,
+                "درس كتاب": 0,
+                "تسبحة": 0,
+                "اعتراف": 0,
+                "مسابقة": 0,
+                "تسميع مزمور": 0,
+                "قداس اضافي": 0,
+                "قداس بدون تونية": 0,
+                "عشية او تسبحة(زيادة)": 0,
+                "اخرى": 0
+            };
+
+            // حساب التكرار
+            results.forEach(tx => {
+                const r = tx.reason || "";
+                if (r.includes("القداس") && !r.includes("اضافي") && !r.includes("تونية")) stats["القداس"]++;
+                else if (r.includes("مدارس الاحد")) stats["مدارس الاحد"]++;
+                else if (r.includes("مدرسة شمامسة")) stats["مدرسة شمامسة"]++;
+                else if (r.includes("عشية") && !r.includes("زيادة")) stats["عشية"]++;
+                else if (r.includes("درس كتاب")) stats["درس كتاب"]++;
+                else if (r.includes("تسبحة") && !r.includes("زيادة")) stats["تسبحة"]++;
+                 else if (r.includes("اعتراف")) stats["اعتراف"]++;
+                else if (r.includes("مسابقة")) stats["مسابقة"]++;
+                else if (r.includes("تسميع مزمور") || r.includes("مزمور")) stats["تسميع مزمور"]++;
+                else if (r.includes("قداس اضافي")) stats["قداس اضافي"]++;
+                else if (r.includes("قداس بدون تونية")) stats["قداس بدون تونية"]++;
+                else if (r.includes("عشية او تسبحة") || r.includes("زيادة")) stats["عشية او تسبحة(زيادة)"]++;
+                else stats["اخرى"]++;
+            });
+
+            return new Response(JSON.stringify({ success: true, mode: 'stats', stats }), {
+                status: 200, headers: { "Content-Type": "application/json" }
+            });
         }
 
-        // 🛑🛑 نفس الكود القديم لكن "بدون LIMIT 10" 🛑🛑
-        // وبرضه بنفلتر اليوزر العادي بس
-        const { results } = await db.prepare(
-            "SELECT name, balance FROM users WHERE family = ? AND role = 'user' ORDER BY balance DESC"
-        ).bind(family).all();
+        // 🛑 السيناريو الثاني: طلب قائمة الأسرة (لو مبعوت اسم الأسرة)
+        if (family) {
+            // 🛑🛑 مهم جداً: لازم نجيب الإيميل هنا عشان نعرف نطلبه في السيناريو الأول
+            const { results } = await db.prepare(
+                "SELECT name, email, balance FROM users WHERE family = ? AND role = 'user' ORDER BY balance DESC"
+            ).bind(family).all();
 
-        return new Response(JSON.stringify({ users: results }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-        });
+            return new Response(JSON.stringify({ success: true, mode: 'list', users: results }), {
+                status: 200, headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        return new Response(JSON.stringify({ error: 'بيانات غير كافية (مطلوب family أو targetEmail)' }), { status: 400 });
 
     } catch (e) {
-        console.error("Guest Get Family Error:", e);
         return new Response(JSON.stringify({ error: e.message }), { status: 500 });
     }
 }
