@@ -1714,120 +1714,192 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+// -----------------------------------------------------
+        // 🛑🛑🛑 منطق مسح QR Code (للأدمن - وضع التجميع Batch) 🛑🛑🛑
         // -----------------------------------------------------
-        // 🛑🛑🛑 منطق مسح QR Code (للأدمن) - تم نقله إلى هنا 🛑🛑🛑
-        // -----------------------------------------------------
+        
+        // متغير لتخزين القائمة المؤقتة
+        let scannedBatchList = [];
+        const batchScanContainer = document.getElementById("batch-scan-container");
+        const batchScanList = document.getElementById("batch-scan-list");
+        const batchCountSpan = document.getElementById("batch-count");
+        const submitBatchBtn = document.getElementById("submit-batch-rewards-btn");
+        
+        // دالة تحديث واجهة القائمة
+        function updateBatchUI() {
+            batchScanList.innerHTML = '';
+            
+            if (scannedBatchList.length > 0) {
+                batchScanContainer.style.display = 'block';
+                batchCountSpan.textContent = scannedBatchList.length;
+                
+                // ترتيب القائمة بحيث يظهر الأحدث في الأعلى
+                [...scannedBatchList].reverse().forEach((email, index) => {
+                    // (index هنا معكوس لأننا قلبنا المصفوفة للعرض فقط)
+                    // سنجد الـ index الحقيقي للحذف
+                    const realIndex = scannedBatchList.length - 1 - index;
 
-        // 🛑🛑 دالة معالجة المسح 🛑🛑
-        async function onScanSuccess(decodedText, decodedResult) {
-            scanStatusMessage.textContent = `تم مسح كود: ${decodedText}. جاري معالجة المكافأة...`;
-            scanStatusMessage.style.color = 'blue';
-
-            // 1. إيقاف الكاميرا فوراً بعد المسح الأول
-            if (html5QrCode) {
-                try {
-                    await html5QrCode.stop();
-                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
-                    readerDiv.innerHTML = ''; // تفريغ الكاميرا
-                } catch(err) {
-                     console.error("Failed to stop scanner:", err)
-                }
-            }
-
-            // 2. تحليل بيانات المكافأة
-            const [amountStr, reason] = rewardReasonSelect.value.split(':');
-            const rewardAmount = parseInt(amountStr);
-            const scannedEmail = decodedText.trim();
-            const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
-
-            if (!scannedEmail || isNaN(rewardAmount) || rewardAmount <= 0) {
-                 scanStatusMessage.textContent = 'خطأ: بيانات الكود أو المكافأة غير صالحة.';
-                 scanStatusMessage.style.color = 'red';
-                 return;
-            }
-
-            // 3. إرسال إلى API المكافأة
-            try {
-                const response = await fetch(`/scan-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        scannedEmail, 
-                        rewardAmount, 
-                        reason: reason,
-                        adminEmail 
-                    })
+                    const li = document.createElement('li');
+                    li.className = 'batch-item';
+                    li.innerHTML = `
+                        <span>${email}</span>
+                        <button class="remove-batch-item" data-index="${realIndex}">&times;</button>
+                    `;
+                    batchScanList.appendChild(li);
                 });
 
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    scanStatusMessage.textContent = `✅ نجاح! تم إضافة ${rewardAmount} نقطة لـ ${scannedEmail}.`;
-                    scanStatusMessage.style.color = 'green';
-                    // تحديث بيانات الأدمن إذا كان المستخدم الذي تم مكافأته هو الأدمن نفسه
-                    if (scannedEmail === adminEmail) {
-                        refreshUserData();
-                    }
-                    // تحديث الكارت إذا كان المستخدم الممسوح هو المعروض حالياً
-                    if (currentSearchedUser && scannedEmail === currentSearchedUser.email) {
-                        currentSearchedUser.balance = data.new_balance;
-                        searchedUserBalance.textContent = `الرصيد: $${data.new_balance}`;
-                    }
-                    
-                } else {
-                    scanStatusMessage.textContent = `❌ فشل: ${data.error || 'فشل في تحديث الرصيد.'}`;
-                    scanStatusMessage.style.color = 'red';
-                }
-
-            } catch (err) {
-                 scanStatusMessage.textContent = 'خطأ في الاتصال بالسيرفر أثناء معالجة المكافأة.';
-                 scanStatusMessage.style.color = 'red';
-                 console.error("Scan API Error:", err);
+                // تفعيل زر الحذف
+                document.querySelectorAll('.remove-batch-item').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(e.target.dataset.index);
+                        removeUserFromBatch(idx);
+                    });
+                });
+            } else {
+                batchScanContainer.style.display = 'none';
             }
         }
-        
+
+        // دالة حذف مستخدم من القائمة
+        function removeUserFromBatch(index) {
+            scannedBatchList.splice(index, 1);
+            updateBatchUI();
+            scanStatusMessage.textContent = "تم حذف المستخدم من القائمة.";
+            scanStatusMessage.style.color = "orange";
+        }
+
+        // 🛑🛑 دالة معالجة المسح (تجميعي) 🛑🛑
+        function onScanSuccess(decodedText, decodedResult) {
+            const scannedEmail = decodedText.trim();
+
+            // 1. التحقق من التكرار في القائمة الحالية
+            if (scannedBatchList.includes(scannedEmail)) {
+                scanStatusMessage.textContent = `⚠️ المستخدم ${scannedEmail} موجود بالفعل في القائمة!`;
+                scanStatusMessage.style.color = 'orange';
+                return; // لا تضف مرة أخرى
+            }
+
+            // 2. إضافة للقائمة
+            scannedBatchList.push(scannedEmail);
+            
+            // 3. تحديث الواجهة
+            updateBatchUI();
+            
+            // 4. رسالة نجاح مؤقتة
+            scanStatusMessage.textContent = `✅ تم التقاط: ${scannedEmail}`;
+            scanStatusMessage.style.color = 'green';
+
+            // ملاحظة: لا نوقف الكاميرا هنا، بل نتركها تعمل للمستخدم التالي
+        }
+
         // 🛑🛑 زر تشغيل الماسح 🛑🛑
         if (startScanBtn) {
             startScanBtn.addEventListener('click', () => {
                 if (html5QrCode && html5QrCode.isScanning) {
-                    // إيقاف الماسح
                     html5QrCode.stop().then(() => {
                         startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
                         readerDiv.innerHTML = '';
                         scanStatusMessage.textContent = 'تم إيقاف الماسح.';
-                        scanStatusMessage.style.color = 'gray';
-                    }).catch(err => {
-                        scanStatusMessage.textContent = 'حدث خطأ أثناء إيقاف الماسح.';
-                        scanStatusMessage.style.color = 'red';
-                    });
+                    }).catch(err => console.error(err));
                     return;
                 }
 
-                // تهيئة وتفعيل الماسح
                 if (!html5QrCode) {
                      html5QrCode = new Html5Qrcode("reader");
                 }
                 
-                scanStatusMessage.textContent = 'جاري تفعيل الكاميرا... قد تظهر رسالة طلب إذن.';
+                scanStatusMessage.textContent = 'الكاميرا تعمل... امسح الأكواد بالتتابع.';
                 scanStatusMessage.style.color = 'blue';
 
                 html5QrCode.start(
-                    { facingMode: "environment" }, // استخدام الكاميرا الخلفية (الأفضل للمسح)
+                    { facingMode: "environment" },
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     onScanSuccess,
-                    (errorMessage) => {
-                        // console.log(`QR Code no longer in sight. ${errorMessage}`);
-                    }
-                )
-                .then(() => {
+                    (errorMessage) => { /* ignore errors */ }
+                ).then(() => {
                     startScanBtn.textContent = 'إيقاف الماسح';
-                    scanStatusMessage.textContent = 'الكاميرا جاهزة! امسح كود QR الآن.';
-                    scanStatusMessage.style.color = 'green';
-                })
-                .catch((err) => {
-                    scanStatusMessage.textContent = `❌ فشل تفعيل الكاميرا: ${err}. تأكد من صلاحية الكاميرا.`;
+                }).catch((err) => {
+                    scanStatusMessage.textContent = `فشل الكاميرا: ${err}`;
                     scanStatusMessage.style.color = 'red';
                 });
+            });
+        }
+
+        // 🛑🛑 منطق زر التنفيذ (إرسال القائمة للسيرفر) 🛑🛑
+        if (submitBatchBtn) {
+            submitBatchBtn.addEventListener('click', async () => {
+                if (scannedBatchList.length === 0) return;
+
+                const [amountStr, reason] = rewardReasonSelect.value.split(':');
+                const rewardAmount = parseInt(amountStr);
+                const adminEmail = loggedInUserProfile ? loggedInUserProfile.email : '';
+
+                if (!confirm(`هل أنت متأكد من منح ${rewardAmount} نقطة لـ ${scannedBatchList.length} مستخدم؟`)) return;
+
+                submitBatchBtn.disabled = true;
+                submitBatchBtn.textContent = "جاري التنفيذ...";
+                scanStatusMessage.textContent = "جاري إرسال المكافآت...";
+                
+                // إيقاف الكاميرا أثناء الإرسال لتوفير الموارد
+                if (html5QrCode && html5QrCode.isScanning) {
+                    await html5QrCode.stop();
+                    startScanBtn.textContent = 'تشغيل الكاميرا والمسح';
+                    readerDiv.innerHTML = '';
+                }
+
+                let successCount = 0;
+                let failCount = 0;
+
+                // 🛑 Loop لإرسال الطلبات واحداً تلو الآخر (لتوافق مع الـ Backend الحالي)
+                for (const email of scannedBatchList) {
+                    try {
+                        const response = await fetch(`/scan-attendance`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                scannedEmail: email, 
+                                rewardAmount, 
+                                reason, 
+                                adminEmail 
+                            })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                            console.error(`Failed for ${email}:`, data.error);
+                        }
+                    } catch (err) {
+                        failCount++;
+                        console.error(`Error for ${email}:`, err);
+                    }
+                    
+                    // تحديث النسبة المئوية
+                    scanStatusMessage.textContent = `جاري المعالجة: ${successCount + failCount} / ${scannedBatchList.length}`;
+                }
+
+                // النتيجة النهائية
+                scanStatusMessage.textContent = `النتيجة: تم بنجاح لـ (${successCount})، وفشل (${failCount}).`;
+                
+                if (failCount === 0) {
+                    scanStatusMessage.style.color = "green";
+                    // تفريغ القائمة تماماً
+                    scannedBatchList = [];
+                    updateBatchUI();
+                } else {
+                    scanStatusMessage.style.color = "orange";
+                    // يمكننا هنا إبقاء المستخدمين الذين فشلوا في القائمة، لكن للتبسيط سنفرغها
+                    scannedBatchList = [];
+                    updateBatchUI();
+                    alert(`انتبه: حدثت مشكلة مع ${failCount} مستخدم. راجع الكونسول.`);
+                }
+
+                submitBatchBtn.textContent = "✅ تنفيذ المكافآت للجميع";
+                submitBatchBtn.disabled = false;
+                
+                // تحديث بيانات الأدمن لو كان بينهم
+                refreshUserData();
             });
         }
 
