@@ -1,40 +1,29 @@
-/*
- * API Endpoint: /admin-set-announcement
- * الوظيفة: حفظ إعلان المربع الأصفر وشريط الأخبار في KV
- */
 export async function onRequestPost(context) {
   try {
-    // 1. استقبال البيانات
-    // بنستخدم let عشان نقدر نعدل عليهم لو جم فاضيين
+    const db = context.env.DB; // الاتصال بـ D1
     let { message, ticker_message } = await context.request.json();
 
-    // 2. تنظيف البيانات (Validation)
-    // لو القيمة undefined او null خليها نص فاضي عشان متبوظش الدنيا
+    // تنظيف البيانات
     message = message ? String(message) : "";
     ticker_message = ticker_message ? String(ticker_message) : "";
 
-    // 3. تجهيز الكائن للحفظ
-    const dataToSave = {
-      message: message,          // الصندوق الأصفر
-      ticker_message: ticker_message // الشريط المتحرك
-    };
+    // تحديث الصف رقم 1
+    const result = await db.prepare(
+      "UPDATE announcements SET box_message = ?, ticker_message = ? WHERE id = 1"
+    ).bind(message, ticker_message).run();
 
-    // 4. الحفظ في KV
-    // اسم المفتاح: 'current_announcement'
-    await context.env.KIROPAY_KV.put('current_announcement', JSON.stringify(dataToSave));
+    // لو الجدول كان فاضي، ننشئ الصف
+    if (result.meta.changes === 0) {
+        await db.prepare(
+            "INSERT INTO announcements (id, box_message, ticker_message) VALUES (1, ?, ?)"
+        ).bind(message, ticker_message).run();
+    }
 
-    return new Response(JSON.stringify({ 
-        success: true, 
-        message: "تم تحديث الإعلانات بنجاح!" 
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ success: true, message: "تم الحفظ في قاعدة البيانات!" }), {
+      status: 200, headers: { "Content-Type": "application/json" }
     });
 
   } catch (e) {
-    return new Response(JSON.stringify({ success: false, error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
   }
 }
