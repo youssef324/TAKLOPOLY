@@ -108,11 +108,16 @@
                     <!-- 🛑🛑 حقل المستوى الجديد للمستخدم 🛑🛑 -->
                     <p id="user-level">المستوى: </p>
 
-                    <div class="transaction-history">
-                        <h4>سجل المعاملات</h4>
-                        <ul id="transaction-list">
-                            </ul>
-                    </div>
+                   <div class="transaction-history collapsible-container">
+    <h4 id="history-toggle-btn" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+        سجل المعاملات
+        <span id="history-arrow">▼</span> </h4>
+    
+    <div id="history-content" style="display: none; margin-top: 10px;">
+        <ul id="transaction-list">
+        </ul>
+    </div>
+</div>
                 </div>
             </div>
             
