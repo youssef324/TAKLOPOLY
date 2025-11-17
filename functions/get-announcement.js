@@ -1,42 +1,36 @@
 /*
  * API Endpoint: /get-announcement
- * (نسخة KV - لقراءة الرسالتين)
+ * الوظيفة: قراءة الإعلانات من KV وعرضها للمستخدم
  */
 export async function onRequestPost(context) {
   try {
-    // جلب القيمة من KV
-    const value = await context.env.KIROPAY_KV.get('current_announcement');
+    // 1. محاولة قراءة البيانات المخزنة
+    const rawData = await context.env.KIROPAY_KV.get('current_announcement');
     
-    // القيم الافتراضية
-    let data = { message: "", ticker_message: "" };
+    let data;
 
-    if (value) {
-      try {
-        // 🛑 محاولة قراءة البيانات كـ JSON
-        const parsed = JSON.parse(value);
-        
-        // لو نجح التحليل، نستخدم البيانات المحفوظة
-        if (typeof parsed === 'object' && parsed !== null) {
-           data = parsed;
-        } else {
-           // دعم قديم: لو كان نص عادي محفوظ من زمان
-           data.message = value;
+    if (!rawData) {
+        // 🛑 لو مفيش أي حاجة محفوظة قبل كده، نرجع كائن فاضي
+        // عشان الفرونت إند مايضربش error
+        data = { message: "", ticker_message: "" };
+    } else {
+        // 🛑 لو فيه داتا، نحولها من نص لـ Object
+        try {
+            data = JSON.parse(rawData);
+        } catch (parseError) {
+            // لو الملف المحفوظ بايظ، نرجع فاضي برضه للأمان
+            data = { message: "", ticker_message: "" };
         }
-      } catch (e) {
-        // لو فشل التحليل (يعني كان نص عادي مش JSON)، نعرضه في الرسالة الثابتة
-        data.message = value;
-      }
     }
 
+    // 2. إرسال الرد
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    // لو حصل خطأ في الاتصال بالـ KV نفسه
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
   }
 }
