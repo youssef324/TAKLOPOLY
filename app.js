@@ -611,39 +611,63 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-          // 🛑 8. كود فورم الإعلانات (مُصحح للتعامل مع الخانتين) 🛑
-        if (adminAnnouncementForm) {
-            adminAnnouncementForm.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // 1. جلب القيم من الخانتين الجداد
-                const boxVal = document.getElementById("admin-box-text").value.trim();
-                const tickerVal = document.getElementById("admin-ticker-text").value.trim();
-                
-                const msgElement = document.getElementById("admin-announcement-message");
+      // 🛑🛑 دالة جلب وعرض الإعلانات (D1 Database Version) 🛑🛑
+    async function loadAnnouncement() {
+        // تعريف العناصر (المربع الأصفر + الشريط المتحرك)
+        const boxContainer = document.getElementById("user-announcement-box");
+        const boxText = document.getElementById("user-announcement-text");
+        const tickerBar = document.getElementById("news-ticker-bar");
+        const tickerText = document.getElementById("ticker-text-display");
+        
+        // خانات الأدمن (عشان لما يفتح يشوف الكلام القديم)
+        const adminBoxInput = document.getElementById("admin-box-text");
+        const adminTickerInput = document.getElementById("admin-ticker-text");
 
-                // التحقق إن فيه حاجة مكتوبة (مش لازم الاتنين، واحد كفاية)
-                if (!boxVal && !tickerVal) {
-                    msgElement.textContent = "الرجاء كتابة إعلان واحد على الأقل.";
+        // إخفاء مبدئي
+        if(boxContainer) boxContainer.style.display = "none";
+        if(tickerBar) tickerBar.style.display = "none";
+
+        try {
+            const response = await fetch(`/get-announcement`, { method: "POST" });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            // البيانات جاية من الداتا بيز: { message: "...", ticker_message: "..." }
+            
+            // 1. عرض المربع الأصفر (message)
+            if (data.message && data.message.trim() !== "") {
+                if(boxText) boxText.textContent = data.message;
+                if(boxContainer) boxContainer.style.display = "block";
+                if(adminBoxInput) adminBoxInput.value = data.message;
+            }
+
+            // 2. عرض الشريط المتحرك (ticker_message)
+            if (data.ticker_message && data.ticker_message.trim() !== "") {
+                if(tickerText) tickerText.textContent = data.ticker_message;
+                if(tickerBar) tickerBar.style.display = "flex";
+                if(adminTickerInput) adminTickerInput.value = data.ticker_message;
+            }
+
+        } catch (err) {
+            console.error("Error loading announcements:", err);
+        }
+    }
+
+                    if (response.ok) {
+                        msgElement.textContent = "تم الحفظ وتحديث الموقع بنجاح!";
+                        msgElement.style.color = "green";
+                        loadAnnouncement(); // تحديث فوري للشاشة عشان الأدمن يشوف النتيجة
+                    } else {
+                        msgElement.textContent = "فشل الحفظ.";
+                        msgElement.style.color = "red";
+                    }
+                } catch (err) {
+                    msgElement.textContent = "خطأ في الاتصال.";
                     msgElement.style.color = "red";
-                    return;
+                    console.error(err);
                 }
-
-                msgElement.textContent = "جاري الحفظ...";
-                msgElement.style.color = "blue";
-
-                try {
-                    const response = await fetch(`/admin-set-announcement`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        // 🛑 إرسال القيمتين بنفس الأسماء اللي الفانكشن مستنياها
-                        body: JSON.stringify({ 
-                            message: boxVal, 
-                            ticker_message: tickerVal 
-                        }),
-                    });
-
+            });
+        }
                     const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
                     if (response.ok) {
@@ -2244,55 +2268,48 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-       // 🛑 8. كود فورم الإعلانات (مُصحح للتعامل مع الخانتين) 🛑
+       // 🛑 كود حفظ الإعلانات في الداتا بيز (للمربع والشريط معاً) 🛑
         if (adminAnnouncementForm) {
             adminAnnouncementForm.addEventListener("submit", async (event) => {
                 event.preventDefault();
-                event.stopPropagation();
                 
-                // 1. جلب القيم من الخانتين الجداد
+                // بنجيب القيم من الخانتين الجداد
                 const boxVal = document.getElementById("admin-box-text").value.trim();
                 const tickerVal = document.getElementById("admin-ticker-text").value.trim();
-                
                 const msgElement = document.getElementById("admin-announcement-message");
 
-                // التحقق إن فيه حاجة مكتوبة (مش لازم الاتنين، واحد كفاية)
+                // لو الخانتين فاضيين
                 if (!boxVal && !tickerVal) {
                     msgElement.textContent = "الرجاء كتابة إعلان واحد على الأقل.";
                     msgElement.style.color = "red";
                     return;
                 }
 
-                msgElement.textContent = "جاري الحفظ...";
+                msgElement.textContent = "جاري الحفظ في قاعدة البيانات...";
                 msgElement.style.color = "blue";
 
                 try {
                     const response = await fetch(`/admin-set-announcement`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        // 🛑 إرسال القيمتين بنفس الأسماء اللي الفانكشن مستنياها
+                        // بنبعت القيمتين (message و ticker_message) للداتا بيز
                         body: JSON.stringify({ 
                             message: boxVal, 
                             ticker_message: tickerVal 
                         }),
                     });
 
-                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
                     if (response.ok) {
-                        msgElement.textContent = "تم تحديث الإعلانات بنجاح!";
+                        msgElement.textContent = "تم الحفظ بنجاح!";
                         msgElement.style.color = "green";
-                        
-                        // تحديث الشاشة فوراً عشان الأدمن يشوف النتيجة
-                        loadAnnouncement(); 
+                        loadAnnouncement(); // تحديث فوري للشاشة
                     } else {
-                        msgElement.textContent = `فشل الحفظ: ${data.error || "خطأ غير محدد"}`;
+                        msgElement.textContent = "فشل الحفظ.";
                         msgElement.style.color = "red";
                     }
                 } catch (err) {
                     msgElement.textContent = "خطأ في الاتصال.";
                     msgElement.style.color = "red";
-                    console.error("Announcement Error:", err);
                 }
             });
         }
