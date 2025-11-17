@@ -2213,45 +2213,55 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 🛑 8. كود فورم الإعلانات (مُصحح) 🛑
+       // 🛑 8. كود فورم الإعلانات (مُصحح للتعامل مع الخانتين) 🛑
         if (adminAnnouncementForm) {
             adminAnnouncementForm.addEventListener("submit", async (event) => {
-                event.preventDefault(); 
+                event.preventDefault();
                 event.stopPropagation();
                 
-                const announcementTextValue = document.getElementById("admin-announcement-text").value.trim();
+                // 1. جلب القيم من الخانتين الجداد
+                const boxVal = document.getElementById("admin-box-text").value.trim();
+                const tickerVal = document.getElementById("admin-ticker-text").value.trim();
+                
+                const msgElement = document.getElementById("admin-announcement-message");
 
-                if (!announcementTextValue) {
-                    adminAnnouncementMessage.textContent = "الرجاء كتابة نص الإعلان أولاً.";
-                    adminAnnouncementMessage.style.color = "red";
+                // التحقق إن فيه حاجة مكتوبة (مش لازم الاتنين، واحد كفاية)
+                if (!boxVal && !tickerVal) {
+                    msgElement.textContent = "الرجاء كتابة إعلان واحد على الأقل.";
+                    msgElement.style.color = "red";
                     return;
                 }
 
-                adminAnnouncementMessage.textContent = "جاري نشر الإعلان...";
-                adminAnnouncementMessage.style.color = "blue";
-                
+                msgElement.textContent = "جاري الحفظ...";
+                msgElement.style.color = "blue";
+
                 try {
                     const response = await fetch(`/admin-set-announcement`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message: announcementTextValue }),
+                        // 🛑 إرسال القيمتين بنفس الأسماء اللي الفانكشن مستنياها
+                        body: JSON.stringify({ 
+                            message: boxVal, 
+                            ticker_message: tickerVal 
+                        }),
                     });
 
                     const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
 
                     if (response.ok) {
-                        adminAnnouncementMessage.textContent = "تم نشر الإعلان بنجاح!";
-                        adminAnnouncementMessage.style.color = "green";
-                        document.getElementById("admin-announcement-text").value = ""; // تفريغ الحقل
-                        loadAnnouncement(); // 🛑 تحديث الإعلان لليوزر
+                        msgElement.textContent = "تم تحديث الإعلانات بنجاح!";
+                        msgElement.style.color = "green";
+                        
+                        // تحديث الشاشة فوراً عشان الأدمن يشوف النتيجة
+                        loadAnnouncement(); 
                     } else {
-                        adminAnnouncementMessage.textContent = `فشل النشر: ${data.error || "خطأ غير محدد"}`;
-                        adminAnnouncementMessage.style.color = "red";
+                        msgElement.textContent = `فشل الحفظ: ${data.error || "خطأ غير محدد"}`;
+                        msgElement.style.color = "red";
                     }
                 } catch (err) {
-                    adminAnnouncementMessage.textContent = "خطأ في الاتصال بالـ API لنشر الإعلان.";
-                    adminAnnouncementMessage.style.color = "red";
-                    console.error("Set Announcement Error:", err);
+                    msgElement.textContent = "خطأ في الاتصال.";
+                    msgElement.style.color = "red";
+                    console.error("Announcement Error:", err);
                 }
             });
         }
