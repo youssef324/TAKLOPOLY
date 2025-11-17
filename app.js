@@ -2367,5 +2367,21 @@ loadAnnouncement();
         // (تم إضافة loadAdminStoreItems في دالة loginForm.addEventListener و refreshUserData)
 
     })(); // 🛑 نهاية أكواد الأدمن 🛑
+    
+// 🛑 كود طي/فتح سجل المعاملات 🛑
+    const historyBtn = document.getElementById("history-toggle-btn");
+    const historyContent = document.getElementById("history-content");
+    const historyArrow = document.getElementById("history-arrow");
 
+    if (historyBtn && historyContent) {
+        historyBtn.addEventListener("click", () => {
+            if (historyContent.style.display === "none") {
+                historyContent.style.display = "block";
+                historyArrow.textContent = "▲"; // سهم لفوق
+            } else {
+                historyContent.style.display = "none";
+                historyArrow.textContent = "▼"; // سهم لتحت
+            }
+        });
+    }
 }); // نهاية "DOMContentLoaded"
