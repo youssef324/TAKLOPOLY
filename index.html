@@ -80,6 +80,14 @@
             خدمة اعدادي بنين
         </div>
     </header>
+    <div class="news-ticker-bar" id="news-ticker-bar" style="display: none;">
+    <div class="ticker-label">خبر هام</div>
+    <div class="ticker-wrapper">
+        <div class="ticker-content" id="ticker-text-display">
+            جاري التحميل...
+        </div>
+    </div>
+</div>
     <div class="container">
         
         <div class="card-and-forms-wrapper">
@@ -425,11 +433,16 @@
 
             <div class="admin-section">
                 <h4>نشر إعلان عام</h4>
-                <form id="admin-announcement-form">
-                    <textarea id="admin-announcement-text" placeholder="اكتب الإعلان هنا..."></textarea>
-                    <button type="submit">نشر أو تحديث الإعلان</button>
-                </form>
-                <p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
+<form id="admin-announcement-form">
+    <label style="font-weight:bold; display:block; margin-top:10px;">1. إعلان المربع الأصفر (الثابت):</label>
+    <textarea id="admin-box-text" placeholder="اكتب هنا الإعلان الطويل..." style="width:100%; height:60px; padding:5px;"></textarea>
+    
+    <label style="font-weight:bold; display:block; margin-top:10px;">2. شريط الأخبار المتحرك (تحت الهيدر):</label>
+    <input type="text" id="admin-ticker-text" placeholder="اكتب هنا الخبر العاجل..." style="width:100%; padding:10px;">
+    
+    <button type="submit" style="margin-top:15px; background-color: #ffc107; color: #333; font-weight:bold;">حفظ وتحديث الإعلانات</button>
+</form>
+<p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
             </div>
             
             <div class="admin-section">
