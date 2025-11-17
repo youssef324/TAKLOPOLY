@@ -1351,17 +1351,19 @@ form#admin-add-item-form button[type="submit"]:hover {
     background-color: #e9ecef;
 }
 
-/* 🛑🛑 تنسيق شريط التذييل وحقوق النشر (APP FOOTER) 🛑🛑 */
+/* 🛑🛑 تنسيق شريط التذييل وحقوق النشر (APP FOOTER - FINAL) 🛑🛑 */
 .app-footer {
-    text-align: center;
+    /* 🛑 تم تعديل الخلفية لتطابق الهيدر 🛑 */
+    background-color: #003366; 
+    color: #ddd; /* لون النص الفاتح */
+    
     padding: 30px 0 40px;
-    
-    /* 🛑 التعديل هنا: أزرق فاتح */
-    background-color: #f0f8ff; /* AliceBlue أو أي لون أزرق فاتح تفضله */
-    
-    color: #333; /* 🛑 مهم: نغير لون النص للأسود عشان يظهر على الخلفية الفاتحة */
+    text-align: center;
     margin-top: 50px;
     border-top: 3px solid #007bff;
+    
+    width: 100%;
+    display: block; 
 }
 
 .social-icons-wrapper {
@@ -1371,18 +1373,27 @@ form#admin-add-item-form button[type="submit"]:hover {
 }
 
 .social-icon {
-    font-size: 2.5em; /* حجم الأيقونة */
+    font-size: 2.5em;
     margin: 0 15px;
-    color: #ccc; /* لون رمادي فاتح */
+    color: #ccc; /* لون أساسي فاتح يظهر على الأزرق الغامق */
     transition: color 0.3s, transform 0.2s;
 }
 
-.social-icon:hover {
-    color: white; /* تبيض اللون عند الوقوف بالماوس */
-    transform: translateY(-3px); /* رفع خفيف للحركة */
+/* 🛑 أيقونة الفيسبوك: تتغير للأزرق 🛑 */
+.social-icon.facebook:hover {
+    color: #3b5998; /* أزرق الفيسبوك */
+    transform: translateY(-5px); 
+}
+
+/* 🛑 أيقونة الواتساب: تتغير للأخضر 🛑 */
+.social-icon.whatsapp:hover {
+    color: #25d366; /* أخضر الواتساب */
+    transform: translateY(-5px); 
 }
 
 .copyright-info {
     font-size: 0.9em;
-    color: #bbb;
+    color: #bbb; 
+    display: block; 
+    margin-top: 5px; 
 }
