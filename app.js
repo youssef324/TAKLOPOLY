@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
     const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
-
+loadAnnouncement();
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
     const resetUI = () => {
