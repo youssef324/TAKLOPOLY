@@ -1330,10 +1330,51 @@ form#admin-add-item-form button[type="submit"]:hover {
     font-weight: bold;
 }
 
-/* الموبايل */
-@media (max-width: 600px) {
-    .champions-container { flex-direction: column; align-items: center; gap: 40px; }
-    .champion-card:nth-child(1) { order: 1; transform: scale(1.1); margin-bottom: 20px; }
-    .champion-card:nth-child(2) { order: 2; }
+/* 📱 تظبيط الموبايل (عشان يظهروا جنب بعض مش تحت بعض) */
+@media (max-width: 768px) {
+    .champions-container {
+        flex-direction: row; /* 🛑 يخليهم جنب بعض */
+        align-items: flex-end; /* محاذاة من تحت */
+        gap: 5px; /* مسافة صغيرة جداً عشان يكفوا */
+        padding-top: 10px;
+    }
+
+    .champion-card {
+        width: 32%; /* 🛑 كل كارت ياخد تلت الشاشة تقريباً */
+        padding-bottom: 5px;
+    }
+
+    /* تصغير الصورة للموبايل */
+    .champion-card .card-img {
+        width: 90px;  /* كان 130 */
+        height: 90px; /* كان 130 */
+        border-width: 3px;
+    }
+
+    /* تظبيط مكان الميدالية على الحجم الجديد */
+    .champion-card .rank {
+        font-size: 3em; /* تصغير الإيموجي شوية */
+        top: 65px; /* 🛑 نرفعها عشان تناسب الصورة الصغيرة */
+    }
+
+    /* تظبيط مكان الاسم */
+    .champion-card .name {
+        margin-top: 40px; /* تقليل المسافة */
+        font-size: 0.9em; /* تصغير الخط */
+        white-space: normal; /* السماح بنزول الاسم سطرين */
+        line-height: 1.2;
+    }
+    
+    .champion-card small {
+        font-size: 0.8em;
+    }
+
+    /* الحفاظ على الترتيب الهرمي (الاول في النص) */
+    .champion-card:nth-child(1) {
+        order: 2; 
+        transform: translateY(-15px) scale(1.1); 
+        margin-bottom: 0; /* إلغاء المسافة السفلية الزيادة */
+    }
+    .champion-card:nth-child(2) { order: 1; }
     .champion-card:nth-child(3) { order: 3; }
 }
