@@ -1,36 +1,25 @@
-/*
- * API Endpoint: /get-announcement
- * الوظيفة: قراءة الإعلانات من KV وعرضها للمستخدم
- */
 export async function onRequestPost(context) {
   try {
-    // 1. محاولة قراءة البيانات المخزنة
-    const rawData = await context.env.KIROPAY_KV.get('current_announcement');
+    const db = context.env.DB;
     
-    let data;
+    // قراءة الصف رقم 1
+    const result = await db.prepare("SELECT box_message, ticker_message FROM announcements WHERE id = 1").first();
 
-    if (!rawData) {
-        // 🛑 لو مفيش أي حاجة محفوظة قبل كده، نرجع كائن فاضي
-        // عشان الفرونت إند مايضربش error
-        data = { message: "", ticker_message: "" };
-    } else {
-        // 🛑 لو فيه داتا، نحولها من نص لـ Object
-        try {
-            data = JSON.parse(rawData);
-        } catch (parseError) {
-            // لو الملف المحفوظ بايظ، نرجع فاضي برضه للأمان
-            data = { message: "", ticker_message: "" };
-        }
+    if (!result) {
+        return new Response(JSON.stringify({ message: "", ticker_message: "" }), { 
+            headers: { "Content-Type": "application/json" } 
+        });
     }
 
-    // 2. إرسال الرد
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    // إرجاع البيانات
+    return new Response(JSON.stringify({
+        message: result.box_message || "",          
+        ticker_message: result.ticker_message || "" 
+    }), { 
+        status: 200, headers: { "Content-Type": "application/json" } 
     });
 
   } catch (e) {
-    // لو حصل خطأ في الاتصال بالـ KV نفسه
     return new Response(JSON.stringify({ error: e.message }), { status: 500 });
   }
 }
