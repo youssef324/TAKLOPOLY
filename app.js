@@ -1156,9 +1156,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+  // -----------------------------------------------------
+    // 🛑🛑🛑 منطق واجهة الزائر (القائمة + إحصائيات المربعات) 🛑🛑🛑
     // -----------------------------------------------------
-    // 🛑🛑🛑 منطق واجهة الزائر (جديد ومُصحح) 🛑🛑🛑
-    // -----------------------------------------------------
+    
+    const guestHistoryModal = document.getElementById("guest-history-modal-overlay");
+    const closeGuestHistoryBtn = document.getElementById("close-guest-history-btn");
+    const guestModalUserName = document.getElementById("guest-modal-user-name");
+    const statsGridContainer = document.getElementById("stats-grid-container");
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    // 1. التعامل مع أزرار الأسر (جلب القائمة)
     guestFamilyButtons.forEach(button => {
         button.addEventListener('click', async () => {
             const familyName = button.dataset.family;
@@ -1167,29 +1175,42 @@ document.addEventListener("DOMContentLoaded", () => {
             guestResultsList.innerHTML = '';
 
             try {
-                // 🛑🛑 التعديل: استدعاء الفانكشن الجديدة 🛑🛑
-                const response = await fetch('/guest-get-family', { // ⬅️ الرابط المُصحح
+                // طلب قائمة الأسرة
+                const response = await fetch('/guest-get-family', { 
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family: familyName })
+                    body: JSON.stringify({ family: familyName }) 
                 });
 
-                if (!response.ok) throw new Error('فشل تحميل القائمة');
+                if (!response.ok) throw new Error('فشل الاتصال');
                 
                 const data = await response.json();
                 
-                if (data.users && data.users.length > 0) {
-                    // 🛑 عرض العدد الإجمالي (مُصحح)
+                if (data.success && data.users && data.users.length > 0) {
                     guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
                     guestMessage.style.color = 'green';
+                    
                     data.users.forEach((user, index) => {
                         const li = document.createElement('li');
-                        // نستخدم نفس تنسيق لوحة الصدارة
+                        li.style.cursor = "pointer"; // شكل اليد عشان يعرفوا إنه قابل للضغط
+                        li.style.padding = "10px";
+                        li.style.borderBottom = "1px solid #eee";
+                        
+                        // تأثير بسيط عند المرور بالماوس
+                        li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
+                        li.onmouseout = () => li.style.backgroundColor = "transparent";
+
                         li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        
+                        // 🛑 هنا السحر: لما يدوس على الاسم، تفتح لوحة الإحصائيات
+                        li.addEventListener('click', () => {
+                            showGuestUserStats(user.email, user.name);
+                        });
+
                         guestResultsList.appendChild(li);
                     });
                 } else {
-                    guestMessage.textContent = 'لا يوجد مستخدمين لعرضهم في هذه الأسرة.';
+                    guestMessage.textContent = 'لا يوجد مستخدمين.';
                     guestMessage.style.color = 'black';
                 }
             } catch (err) {
@@ -1197,6 +1218,64 @@ document.addEventListener("DOMContentLoaded", () => {
                 guestMessage.style.color = 'red';
             }
         });
+    });
+
+    // 2. دالة عرض الإحصائيات (جلب الأرقام ورسم المربعات)
+    async function showGuestUserStats(email, name) {
+        guestModalUserName.textContent = name;
+        statsGridContainer.innerHTML = '';
+        loadingSpinner.style.display = 'block';
+        guestHistoryModal.style.display = "flex";
+
+        try {
+            // طلب الإحصائيات لنفس الرابط بس بنبعت "targetEmail"
+            const response = await fetch('/guest-get-family', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ targetEmail: email }) 
+            });
+
+            const data = await response.json();
+            loadingSpinner.style.display = 'none';
+
+            if (data.success && data.stats) {
+                // رسم المربعات بناءً على الأرقام اللي جاية من السيرفر
+                for (const [key, value] of Object.entries(data.stats)) {
+                    // ارسم المربع (حتى لو القيمة صفر عشان الشكل يكمل)
+                    createStatBox(key, value);
+                }
+            } else {
+                statsGridContainer.innerHTML = '<p style="width:100%; text-align:center;">لا يوجد بيانات حضور مسجلة.</p>';
+            }
+
+        } catch (err) {
+            loadingSpinner.style.display = 'none';
+            statsGridContainer.innerHTML = '<p style="color:red; text-align:center;">خطأ في تحميل البيانات.</p>';
+            console.error(err);
+        }
+    }
+
+    // دالة مساعدة لرسم المربع الواحد
+    function createStatBox(label, count) {
+        const div = document.createElement("div");
+        div.className = "stat-box";
+        
+        // لو العدد أكبر من 0، نخليه مميز
+        if (count > 0) div.classList.add("highlight");
+
+        div.innerHTML = `
+            <span class="label">${label}</span>
+            <span class="count">${count}</span>
+        `;
+        statsGridContainer.appendChild(div);
+    }
+
+    // إغلاق المودال
+    if (closeGuestHistoryBtn) {
+        closeGuestHistoryBtn.addEventListener('click', () => guestHistoryModal.style.display = "none");
+    }
+    window.addEventListener('click', (e) => {
+        if (e.target === guestHistoryModal) guestHistoryModal.style.display = "none";
     });
 
 
