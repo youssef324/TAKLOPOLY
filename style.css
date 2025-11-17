@@ -1238,3 +1238,70 @@ form#admin-add-item-form button[type="submit"]:hover {
     .banner-title-ar { font-size: 1.3em; }
     .banner-title-en { font-size: 1.1em; }
 }
+/* 🛑🛑 ستايلات شريط الأخبار المتحرك 🛑🛑 */
+.news-ticker-bar {
+    background-color: #111; /* أسود غامق */
+    color: white;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-bottom: 3px solid #b30000; /* خط أحمر أسفل الشريط */
+    font-family: Tahoma, sans-serif;
+    direction: rtl;
+    margin-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.ticker-label {
+    background-color: #dc3545; /* المربع الأحمر للعنوان */
+    color: white;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+    z-index: 5; /* عشان يفضل فوق الكلام */
+    position: relative;
+    white-space: nowrap;
+}
+
+.ticker-wrapper {
+    flex-grow: 1;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #222;
+}
+
+.ticker-content {
+    position: absolute;
+    top: 50%;
+    /* بداية الحركة ونهايتها */
+    white-space: nowrap;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #fff;
+    line-height: 0;
+    /* الحركة */
+    animation: ticker-scroll 20s linear infinite;
+}
+
+/* كود الأنيميشن (من الشمال لليمين عشان عربي) */
+@keyframes ticker-scroll {
+    0% {
+        right: 100%; /* يبدأ من أقصى اليسار */
+        transform: translate(0, -50%);
+    }
+    100% {
+        right: -100%; /* ينتهي في أقصى اليمين */
+        transform: translate(100%, -50%);
+    }
+}
+
+/* تظبيط للموبايل */
+@media (max-width: 768px) {
+    .ticker-label { padding: 0 10px; font-size: 0.8em; }
+    .ticker-content { font-size: 0.9em; animation-duration: 10s; /* أسرع شوية */ }
+}
