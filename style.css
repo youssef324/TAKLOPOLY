@@ -1116,25 +1116,25 @@ form#admin-add-item-form button[type="submit"]:hover {
 }
 
 /* =========================================
-   ⬇️⬇️⬇️ إضافات الهيدر والشريط (توضع في نهاية الملف) ⬇️⬇️⬇️
+   ⬇️⬇️⬇️ إضافات الهيدر والشريط والمربعات ⬇️⬇️⬇️
    ========================================= */
 
 /* 1. الهيدر الأزرق (Top Banner) */
 .top-banner {
-    background-color: #003366;
+    background-color: #003366; /* أزرق كحلي */
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-right: 8px solid #dc3545;
+    border-right: 8px solid #dc3545; /* الشريط الأحمر */
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    font-family: Tahoma, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .banner-right { width: 25%; text-align: right; font-weight: bold; font-size: 1.2em; }
 .banner-center { flex-grow: 1; text-align: center; }
-.banner-title-ar { font-size: 1.8em; font-weight: bold; }
-.banner-title-en { font-size: 1.4em; font-weight: bold; letter-spacing: 1px; }
+.banner-title-ar { font-size: 1.6em; font-weight: bold; margin-bottom: 2px; }
+.banner-title-en { font-size: 1.4em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
 .banner-left { width: 25%; text-align: left; font-weight: bold; font-size: 1.2em; }
 
 @media (max-width: 768px) {
@@ -1143,9 +1143,9 @@ form#admin-add-item-form button[type="submit"]:hover {
     .banner-title-ar { font-size: 1.4em; }
 }
 
-/* 2. شريط الأخبار المتحرك (Ticker) */
+/* 2. شريط الأخبار المتحرك (News Ticker) */
 .news-ticker-bar {
-    background-color: #111;
+    background-color: #111; /* أسود */
     color: white;
     height: 40px;
     display: flex;
@@ -1191,100 +1191,36 @@ form#admin-add-item-form button[type="submit"]:hover {
     0% { right: 100%; transform: translate(0, -50%); }
     100% { right: -100%; transform: translate(100%, -50%); }
 }
+@media (max-width: 768px) {
+    .ticker-label { padding: 0 10px; font-size: 0.8em; }
+    .ticker-content { font-size: 0.9em; animation-duration: 12s; }
+}
 
-/* 3. شبكة الإحصائيات (للمربعات) */
+/* 3. شبكة الإحصائيات (Stats Grid) */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 15px;
     padding: 10px;
-    max-height: 400px;
+    max-height: 450px;
     overflow-y: auto;
 }
 .stat-box {
     background-color: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 15px 10px;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    min-height: 100px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    min-height: 110px;
+    transition: transform 0.2s;
 }
-.stat-box span.label { font-size: 0.9em; color: #666; font-weight: bold; margin-bottom: 5px; }
-.stat-box span.count { font-size: 2em; font-weight: bold; color: #333; }
-.stat-box.highlight span.count { color: #007bff; }
+.stat-box:hover { transform: translateY(-3px); border-color: #007bff; }
+.stat-box span.label { font-size: 0.95em; color: #555; margin-bottom: 8px; font-weight: bold; }
 .stat-box span.count { font-size: 2.2em; font-weight: 900; color: #333; }
 .stat-box.highlight { border-bottom: 4px solid #007bff; }
 .stat-box.highlight span.count { color: #007bff; }
-
-/* 🛑🛑 ستايلات شريط الأخبار المتحرك (Ticker) 🛑🛑 */
-.news-ticker-bar {
-    background-color: #111; /* لون الخلفية أسود */
-    color: white;
-    height: 40px;
-    display: flex; /* مهم عشان يظهر جنب بعض */
-    align-items: center;
-    overflow: hidden;
-    border-bottom: 3px solid #b30000; /* خط أحمر تحت */
-    direction: rtl;
-    position: relative;
-    margin-bottom: 0; /* عشان يلزق في اللي تحته */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-.ticker-label {
-    background-color: #dc3545; /* المربع الأحمر "خبر هام" */
-    color: white;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    font-weight: bold;
-    font-size: 0.9em;
-    z-index: 10; /* عشان يفضل فوق الكلام */
-    position: relative;
-    white-space: nowrap;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
-}
-
-.ticker-wrapper {
-    flex-grow: 1; /* ياخد باقي المساحة */
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-    background-color: #222;
-}
-
-.ticker-content {
-    position: absolute;
-    top: 50%;
-    white-space: nowrap;
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #fff;
-    line-height: 0;
-    /* كود الحركة */
-    animation: ticker-scroll 20s linear infinite;
-}
-
-/* تعريف الحركة من الشمال لليمين */
-@keyframes ticker-scroll {
-    0% {
-        right: 100%; 
-        transform: translate(0, -50%);
-    }
-    100% {
-        right: -100%; 
-        transform: translate(100%, -50%);
-    }
-}
-
-/* تظبيط للموبايل */
-@media (max-width: 768px) {
-    .ticker-label { padding: 0 10px; font-size: 0.8em; }
-    .ticker-content { font-size: 0.9em; animation-duration: 12s; }
-}
