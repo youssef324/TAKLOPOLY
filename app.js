@@ -1020,7 +1020,7 @@ loadAnnouncement();
         try {
             if (avatarFile) {
                 messageDiv.textContent = "جاري ضغط ورفع الصورة...";
-                const resizedBlob = await resizeImage(avatarFile, 150, 150, 0.7); 
+                const resizedBlob = await resizeImage(avatarFile, 250, 250, 0.7); 
                 const formData = new FormData();
                 formData.append('file', resizedBlob);
                 formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
