@@ -1224,3 +1224,78 @@ form#admin-add-item-form button[type="submit"]:hover {
 .stat-box span.count { font-size: 2.2em; font-weight: 900; color: #333; }
 .stat-box.highlight { border-bottom: 4px solid #007bff; }
 .stat-box.highlight span.count { color: #007bff; }
+
+/* =========================================
+   ⬇️⬇️⬇️ تنسيق أبطال الأسر (شكل هرمي) ⬇️⬇️⬇️
+   ========================================= */
+
+/* 1. الحاوية الأب: نستخدم Flexbox مع السماح بالنزول لسطر جديد */
+.champions-container {
+    display: flex;
+    flex-wrap: wrap; /* 🛑 ده السر: بيسمح للعناصر تنزل تحت بعض */
+    justify-content: center; /* توسيط العناصر */
+    align-items: flex-end; /* محاذاة من الأسفل عشان الشكل يبان متناسق */
+    gap: 30px; /* مسافة بين الكروت */
+    margin-bottom: 40px;
+}
+
+/* 2. الكارت بشكل عام */
+.champion-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* 🥇 المركز الأول (مميز جداً) */
+.champion-card:nth-child(1) {
+    flex-basis: 100%; /* 🛑 ياخد عرض الصفحة كله، فـ يجبر التاني والتالت ينزلوا تحته */
+    order: 1; /* ترتيبه الأول */
+    margin-bottom: 10px; /* مسافة تحته */
+    transform: scale(1.1); /* تكبير الكارت كله شوية */
+    z-index: 10;
+}
+
+/* صورة المركز الأول (كبيرة + برواز ذهبي) */
+.champion-card:nth-child(1) .card-img {
+    width: 220px;  /* أكبر حجم */
+    height: 220px;
+    border: 8px solid #FFD700; /* ذهبي */
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); /* وهج ذهبي */
+}
+
+/* 🥈🥉 المركز الثاني والثالث (جنب بعض تحت) */
+.champion-card:nth-child(2),
+.champion-card:nth-child(3) {
+    order: 2; /* ييجوا بعد الأول */
+}
+
+/* صور المركز الثاني والثالث (أصغر شوية) */
+.champion-card:nth-child(2) .card-img,
+.champion-card:nth-child(3) .card-img {
+    width: 160px;
+    height: 160px;
+    border: 6px solid #C0C0C0; /* فضي */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* تمييز المركز الثالث ببرواز برونزي */
+.champion-card:nth-child(3) .card-img {
+    border-color: #cd7f32; /* برونزي */
+}
+
+/* تنسيق رقم الترتيب (فوق الصورة) */
+.champion-card .rank {
+    position: absolute;
+    top: -15px;
+    right: 50%;
+    transform: translateX(50%);
+    background-color: #fff;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    z-index: 5;
+}
