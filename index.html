@@ -304,35 +304,51 @@
             </div>
 
             <!-- 🛑🛑 قسم مسح الحضور والمكافآت (جديد) 🛑🛑 -->
-            <div class="admin-section scan-section">
-                <h4>📷 مسح كود الحضور والمكافأة</h4>
-                <p style="font-size: 0.9em; color: #555;">
-                    امسح كود QR الخاص بالمستخدم لمنحه مكافأة فورية.
-                </p>
-                <div id="admin-scan-controls">
-                    <label for="reward-reason-select">نوع المكافأة:</label>
-                    <!-- 🛑🛑 تم تحديث قائمة المكافآت هنا 🛑🛑 -->
-                    <select id="reward-reason-select">
-                        <option value="300:القداس">القداس (300 نقطة)</option>
-                        <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
-                        <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
-                        <option value="200:عشية">عشية (200 نقطة)</option>
-                        <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
-                        <option value="200:تسبحة">تسبحة (200 نقطة)</option>
-                        <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
-                        <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
-                        <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
-                        <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
-                        <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
-                    </select>
-                    <button id="start-scan-btn" style="background-color: #f472b6;">
-                        تشغيل الكاميرا والمسح
-                    </button>
-                    <!-- حاوية عرض الكاميرا -->
-                    <div id="reader" style="width: 100%; max-width: 400px; margin: 15px auto;"></div>
-                </div>
-                <p id="scan-status-message" style="margin-top: 10px; font-weight: bold;"></p>
-            </div>
+          <div class="admin-section scan-section">
+    <h4>📷 مسح كود الحضور والمكافأة (تجميعي)</h4>
+    <p style="font-size: 0.9em; color: #555;">
+        امسح الأكواد المتتالية. ستظهر في القائمة بالأسفل. اضغط "تنفيذ المكافآت" عند الانتهاء.
+    </p>
+    
+    <div id="admin-scan-controls">
+        <label for="reward-reason-select">نوع المكافأة:</label>
+        <select id="reward-reason-select">
+            <option value="300:القداس">القداس (300 نقطة)</option>
+            <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+            <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+            <option value="200:عشية">عشية (200 نقطة)</option>
+            <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+            <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+            <option value="500:اعتراف">اعتراف (500 نقطة)</option>
+            <option value="150:مسابقة">مسابقة (150 نقطة)</option>
+            <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+            <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+            <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
+            <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+            <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+        </select>
+
+        <button id="start-scan-btn" style="background-color: #db2777; margin-bottom: 10px;">
+            تشغيل الكاميرا والمسح
+        </button>
+
+        <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+    </div>
+
+    <div id="batch-scan-container" style="margin-top: 20px; display: none;">
+        <h5 style="border-bottom: 2px solid #ddd; padding-bottom: 5px;">
+            القائمة الحالية (<span id="batch-count">0</span>):
+        </h5>
+        <ul id="batch-scan-list">
+            </ul>
+        
+        <button id="submit-batch-rewards-btn" class="pulse-button">
+            ✅ تنفيذ المكافآت للجميع
+        </button>
+    </div>
+
+    <p id="scan-status-message" style="margin-top: 10px; font-weight: bold; white-space: pre-line;"></p>
+</div>
             <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
             
             <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
