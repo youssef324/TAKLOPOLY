@@ -1,16 +1,17 @@
-//functions/buy-store-item.js
+// File: functions/buy-store-item.js
 export async function onRequestPost(context) {
     try {
         const db = context.env.DB;
         const { email, itemId } = await context.request.json();
 
-        // 1. جلب تفاصيل المنتج أولاً (عشان نعرف هو تكراري ولا لأ)
+        // 1. جلب تفاصيل المنتج (بما فيها allow_multiple)
         const item = await db.prepare('SELECT * FROM store_items WHERE id = ?').bind(itemId).first();
         
         if (!item) return new Response(JSON.stringify({ success: false, error: 'العنصر غير موجود.' }), { status: 404 });
 
         // 🛑🛑 الشرط الذكي: لو المنتج "مرة واحدة" (allow_multiple = 0)، نتأكد إنه مش معاه 🛑🛑
-        if (item.allow_multiple === 0) {
+        // لاحظ: نستخدم item.allow_multiple === 0 كقيمة افتراضية إذا كانت null أو undefined
+        if ((item.allow_multiple === 0) || (item.allow_multiple === null)) { 
             const checkPurchase = await db.prepare(
                 "SELECT id FROM user_unlocked_items WHERE user_email = ? AND item_id = ?"
             ).bind(email, itemId).first();
@@ -20,7 +21,7 @@ export async function onRequestPost(context) {
             }
         }
 
-        // 2. جلب بيانات المستخدم للتحقق من الرصيد
+        // 2. جلب بيانات المستخدم للتحقق من الرصيد والمستوى
         const user = await db.prepare('SELECT balance, level FROM users WHERE email = ?').bind(email).first();
         
         // التحقق من المستوى
@@ -33,7 +34,7 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية.' }), { status: 403 });
         }
 
-        // 3. التنفيذ (خصم + إضافة)
+        // 3. التنفيذ
         const newBalance = user.balance - item.price;
         await db.batch([
             db.prepare('INSERT INTO user_unlocked_items (user_email, item_id) VALUES (?, ?)').bind(email, itemId),
