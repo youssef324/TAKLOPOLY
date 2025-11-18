@@ -1,20 +1,28 @@
-// 🛑 تم التعديل: إضافة التحقق من المستوى
+//functions/buy-store-item.js
 export async function onRequestPost(context) {
     try {
-        const db = context.env.DB; 
-        const request = context.request; 
-
-        const { email, itemId } = await request.json();
+        const db = context.env.DB;
+        const { email, itemId } = await context.request.json();
 
         if (!email || !itemId) {
             return new Response(JSON.stringify({ success: false, error: 'بيانات غير كاملة.' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // ----------------- 🛑 بداية عملية المعاملة (Transaction) 🛑 -----------------
+        // 🛑🛑 1. التحقق: هل المستخدم اشترى العنصر ده قبل كده؟ 🛑🛑
+        const checkPurchase = await db.prepare(
+            "SELECT id FROM user_unlocked_items WHERE user_email = ? AND item_id = ?"
+        ).bind(email, itemId).first();
+
+        if (checkPurchase) {
+            return new Response(JSON.stringify({ 
+                success: false, 
+                error: "لقد قمت بشراء هذا العنصر بالفعل!" 
+            }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 2. جلب بيانات المستخدم والعنصر (للتحقق من الرصيد والمستوى)
         const transactionResult = await db.batch([
-            // 🛑🛑 التعديل: جلب المستوى (level) للمستخدم 🛑🛑
             db.prepare('SELECT balance, level FROM users WHERE email = ?').bind(email),
-            // 🛑🛑 التعديل: جلب المستوى المطلوب (required_level) للمنتج 🛑🛑
             db.prepare('SELECT id, price, name, required_level FROM store_items WHERE id = ?').bind(itemId)
         ]);
 
@@ -24,43 +32,34 @@ export async function onRequestPost(context) {
         if (!user) return new Response(JSON.stringify({ success: false, error: 'المستخدم غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
         if (!item) return new Response(JSON.stringify({ success: false, error: 'العنصر غير موجود.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
 
-        // 🛑🛑 التحقق من المستوى (الشرط الجديد) 🛑🛑
+        // التحقق من المستوى
         const userLevel = user.level || 1;
         const requiredLevel = item.required_level || 1;
         if (userLevel < requiredLevel) {
-             return new Response(JSON.stringify({ success: false, error: 'المستوى الخاص بك غير كافٍ لشراء هذا العنصر.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+             return new Response(JSON.stringify({ success: false, error: `يتطلب مستوى ${requiredLevel} للشراء.` }), { status: 403, headers: { 'Content-Type': 'application/json' } });
         }
 
-        // 🛑🛑 التحقق من الرصيد (الشرط القديم) 🛑🛑
-        const itemPrice = item.price;
-        if (user.balance < itemPrice) {
-            return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية لإتمام عملية الشراء.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+        // التحقق من الرصيد
+        if (user.balance < item.price) {
+            return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية.' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
         }
 
-        const newBalance = user.balance - itemPrice;
-        const transactionReason = `شراء عنصر: ${item.name}`;
-
-        // ----------------- 🛑 تنفيذ التغييرات 🛑 -----------------
+        // 3. إتمام عملية الشراء (خصم وإضافة)
+        const newBalance = user.balance - item.price;
+        
         await db.batch([
-            // 3. تسجيل العنصر للمستخدم
             db.prepare('INSERT INTO user_unlocked_items (user_email, item_id) VALUES (?, ?)').bind(email, itemId),
-            // 4. تحديث رصيد المستخدم
             db.prepare('UPDATE users SET balance = ? WHERE email = ?').bind(newBalance, email),
-            // 5. تسجيل الخصم في جدول transactions
-            db.prepare('INSERT INTO transactions (user_email, amount, reason) VALUES (?, ?, ?)').bind(email, -itemPrice, transactionReason)
+            db.prepare('INSERT INTO transactions (user_email, amount, reason) VALUES (?, ?, ?)').bind(email, -item.price, `شراء: ${item.name}`)
         ]);
-        // ----------------- 🛑 نهاية عملية المعاملة (Transaction) 🛑 -----------------
 
-        return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح.`, new_balance: newBalance }), { 
-            status: 200, 
-            headers: { 'Content-Type': 'application/json' } 
-        });
+        return new Response(JSON.stringify({ 
+            success: true, 
+            message: `مبروك! تم شراء ${item.name} بنجاح.`, 
+            new_balance: newBalance 
+        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
     } catch (error) {
-        console.error('Buy item fatal error:', error);
-        return new Response(JSON.stringify({ success: false, error: 'فشل إتمام عملية الشراء بسبب خطأ في الخادم (Transaction Failure).' }), { 
-            status: 500, 
-            headers: { 'Content-Type': 'application/json' } 
-        });
+        return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 }
