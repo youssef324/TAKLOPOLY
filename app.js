@@ -919,112 +919,79 @@ async function handleEditItem(itemId, name, price, imageUrl, requiredLevel, allo
     };
 }
     
-   // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (مُحدَّثة لـ Allow Multiple) 🛑🛑
-async function loadAdminStoreItems() {
-    if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
+ // 🛑🛑 فانكشن تحميل عناصر المتجر للأدمن (تم تعديل حجم الأزرار) ---
+    async function loadAdminStoreItems() {
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') return;
 
-    adminStoreItemsList.innerHTML = '<li>جاري تحميل العناصر...</li>';
-    adminStoreMessage.textContent = "";
-
-    try {
-        const response = await fetch(`/admin-get-items`); 
-        
-        if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن"); 
-
-        const text = await response.text();
-        if (!text) throw new Error("استجابة فارغة من الخادم. (DB Binding Error?)");
-
-        const data = JSON.parse(text); 
-        adminStoreItemsList.innerHTML = '';
-
-        if (data.items && data.items.length > 0) {
-            data.items.forEach(item => {
-                const itemName = item.name || item.namel || 'غير معروف';
-                const itemLevel = item.required_level || 1; 
-                const itemAllowMultiple = item.allow_multiple || 0; // 🆕 جلب قيمة التكرار (جديد) 🆕
-
-                const li = document.createElement('li');
-                li.className = 'admin-item-card'; 
-                li.innerHTML = `
-                    <div class="admin-item-info">
-                        <strong>${itemName}</strong>
-                        <small>السعر: $${item.price} | المستوى: ${itemLevel} | التكرار: ${itemAllowMultiple == 1 ? 'مسموح' : 'مرة واحدة'} | ID: ${item.id}</small>
-                        <small>صورة: ${item.image_url ? 'مرفوعة' : 'لا يوجد'}</small>
-                    </div>
-                    <div class="admin-item-actions">
-                        <button class="edit-item-btn" 
-                            data-item-id="${item.id}" 
-                            data-item-name="${itemName}" 
-                            data-item-price="${item.price}" 
-                            data-item-url="${item.image_url || ''}"
-                            data-item-level="${itemLevel}" 
-                            data-item-multiple="${itemAllowMultiple}" // 🆕 تمرير قيمة التكرار (جديد) 🆕
-                            style="background-color: #ffc107; color: #333; margin-left: 10px; padding: 10px 15px; border-radius: 6px; font-weight: bold;">
-                                تعديل
-                            </button>
-                            <button class="delete-store-item-btn" data-item-id="${item.id}" style="padding: 10px 15px; border-radius: 6px; font-weight: bold;">حذف</button>
-                        </div>
-                    `;
-                    adminStoreItemsList.appendChild(li);
-                });
-
-                document.querySelectorAll('.delete-store-item-btn').forEach(btn => {
-                    btn.addEventListener('click', handleDeleteItem);
-                });
-                
-                // 🛑 إضافة مُستمعي الأحداث لأزرار التعديل 🛑
-                document.querySelectorAll('.edit-item-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const itemId = e.currentTarget.dataset.itemId;
-                        const itemName = e.currentTarget.dataset.itemName;
-                        const itemPrice = e.currentTarget.dataset.itemPrice;
-                        const imageUrl = e.currentTarget.dataset.itemUrl;
-                        const itemLevel = e.currentTarget.dataset.itemLevel; 
-                        const itemMultiple = e.currentTarget.dataset.itemMultiple; // 🆕 جلب قيمة التكرار من الـ Data (جديد) 🆕
-                        
-                        // 🛑 استدعاء دالة التعديل (لفتح النموذج) مع تمرير قيمة التكرار 🛑
-                        handleEditItem(itemId, itemName, itemPrice, imageUrl, itemLevel, itemMultiple); 
-                    });
-                });
-            } else {
-                adminStoreItemsList.innerHTML = `<li style="text-align: center;">لا توجد عناصر مضافة حالياً.</li>`;
-            }
-        } catch(err) {
-            adminStoreItemsList.innerHTML = `<li style="color: red; text-align: center;">خطأ في تحميل العناصر: ${err.message}.</li>`;
-            console.error("Admin Store Load Error:", err);
-        }
-    }
-
-    // --- فانكشن حذف عنصر ---
-    async function handleDeleteItem(event) {
-        const itemId = event.target.dataset.itemId;
-        if (!confirm(`هل أنت متأكد من حذف العنصر ذو ID: ${itemId} نهائياً؟`)) return;
-
-        adminStoreMessage.textContent = "جاري حذف العنصر...";
-        adminStoreMessage.style.color = "blue";
+        adminStoreItemsList.innerHTML = '<li>جاري تحميل العناصر...</li>';
+        adminStoreMessage.textContent = "";
 
         try {
-            const response = await fetch(`/admin-delete-item`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ itemId }),
-            });
+            const response = await fetch(`/admin-get-items`);
+            
+            if (!response.ok) throw new Error("فشل جلب عناصر المتجر للأدمن");
 
-            const data = await response.json();
+            const text = await response.text();
+            if (!text) throw new Error("استجابة فارغة من الخادم. (DB Binding Error?)");
 
-            if (response.ok) {
-                adminStoreMessage.textContent = `تم حذف العنصر بنجاح.`;
-                adminStoreMessage.style.color = "green";
-                await loadAdminStoreItems(); // تحديث القائمة بعد الحذف
-                await refreshUserData(); // لتحديث واجهة المستخدمين إذا كان مفتوحاً
+            const data = JSON.parse(text);
+            adminStoreItemsList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const itemName = item.name || item.namel || 'غير معروف';
+                    const itemLevel = item.required_level || 1; 
+
+                    const li = document.createElement('li');
+                    li.className = 'admin-item-card'; 
+                    li.innerHTML = `
+                        <div class="admin-item-info">
+                            <strong>${itemName}</strong>
+                            <small>السعر: $${item.price} | المستوى: ${itemLevel} | ID: ${item.id}</small>
+                            <small>صورة: ${item.image_url ? 'مرفوعة' : 'لا يوجد'}</small>
+                        </div>
+                        <div class="admin-item-actions">
+                            <button class="edit-item-btn" 
+                                data-item-id="${item.id}" 
+                                data-item-name="${itemName}" 
+                                data-item-price="${item.price}" 
+                                data-item-url="${item.image_url || ''}"
+                                data-item-level="${itemLevel}" 
+                                style="background-color: #ffc107; color: #333; margin-left: 10px; padding: 5px 10px; border-radius: 4px; font-size: 14px; font-weight: bold; border: none;">
+                                تعديل
+                            </button>
+                            <button class="delete-store-item-btn" data-item-id="${item.id}" 
+                                style="background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 4px; font-size: 14px; font-weight: bold; border: none;">
+                                حذف
+                            </button>
+                        </div>
+                    `;
+                    adminStoreItemsList.appendChild(li);
+                });
+
+                document.querySelectorAll('.delete-store-item-btn').forEach(btn => {
+                    btn.addEventListener('click', handleDeleteItem);
+                });
+                
+                // 🛑 إضافة مُستمعي الأحداث لأزرار التعديل 🛑
+                document.querySelectorAll('.edit-item-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const itemId = e.currentTarget.dataset.itemId;
+                        const itemName = e.currentTarget.dataset.itemName;
+                        const itemPrice = e.currentTarget.dataset.itemPrice;
+                        const imageUrl = e.currentTarget.dataset.itemUrl;
+                        const itemLevel = e.currentTarget.dataset.itemLevel; 
+                        
+                        // 🛑 استدعاء دالة التعديل (لفتح النموذج) 🛑
+                        handleEditItem(itemId, itemName, itemPrice, imageUrl, itemLevel); 
+                    });
+                });
             } else {
-                adminStoreMessage.textContent = `فشل الحذف: ${data.error || "خطأ غير محدد"}`;
-                deleteMessage.style.color = "red";
+                adminStoreItemsList.innerHTML = `<li style="text-align: center;">لا توجد عناصر مضافة حالياً.</li>`;
             }
-        } catch (err) {
-            adminStoreMessage.textContent = "خطأ في الاتصال بالـ API لحذف العنصر.";
-            adminStoreMessage.style.color = "red";
-            console.error("Delete Item Error:", err);
+        } catch(err) {
+            adminStoreItemsList.innerHTML = `<li style="color: red; text-align: center;">خطأ في تحميل العناصر: ${err.message}.</li>`;
+            console.error("Admin Store Load Error:", err);
         }
     }
 
