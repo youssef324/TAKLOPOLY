@@ -5,13 +5,13 @@ export async function onRequestPost(context) {
         const { email, itemId } = await context.request.json();
 
         // 1. جلب تفاصيل المنتج (بما فيها allow_multiple)
+        // D1 column 'allow_multiple' is confirmed to exist now
         const item = await db.prepare('SELECT * FROM store_items WHERE id = ?').bind(itemId).first();
         
         if (!item) return new Response(JSON.stringify({ success: false, error: 'العنصر غير موجود.' }), { status: 404 });
 
-        // 🛑🛑 الشرط الذكي: لو المنتج "مرة واحدة" (allow_multiple = 0)، نتأكد إنه مش معاه 🛑🛑
-        // لاحظ: نستخدم item.allow_multiple === 0 كقيمة افتراضية إذا كانت null أو undefined
-        if ((item.allow_multiple === 0) || (item.allow_multiple === null)) { 
+        // 🛑 الشرط: لو المنتج "مرة واحدة فقط" (allow_multiple = 0)، نتأكد إنه مش معاه 🛑
+        if (item.allow_multiple === 0) { 
             const checkPurchase = await db.prepare(
                 "SELECT id FROM user_unlocked_items WHERE user_email = ? AND item_id = ?"
             ).bind(email, itemId).first();
@@ -20,16 +20,14 @@ export async function onRequestPost(context) {
                 return new Response(JSON.stringify({ success: false, error: "هذا المنتج للشراء مرة واحدة فقط وقد امتلكته بالفعل!" }), { status: 400 });
             }
         }
-
-        // 2. جلب بيانات المستخدم للتحقق من الرصيد والمستوى
+        
+        // 2. جلب بيانات المستخدم والتحقق من الرصيد والمستوى
         const user = await db.prepare('SELECT balance, level FROM users WHERE email = ?').bind(email).first();
         
-        // التحقق من المستوى
         if ((user.level || 1) < (item.required_level || 1)) {
              return new Response(JSON.stringify({ success: false, error: `يتطلب مستوى ${item.required_level}.` }), { status: 403 });
         }
 
-        // التحقق من الرصيد
         if (user.balance < item.price) {
             return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية.' }), { status: 403 });
         }
@@ -45,6 +43,8 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح.`, new_balance: newBalance }), { status: 200 });
 
     } catch (error) {
-        return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500 });
+        // هذا السجل سيساعدنا في المرات القادمة
+        console.error("Buy Item Worker Error:", error);
+        return new Response(JSON.stringify({ success: false, error: `Worker Error: ${error.message}` }), { status: 500 });
     }
 }
