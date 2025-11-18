@@ -674,7 +674,7 @@ loadAnnouncement();
         }
     }
 
-    // 🛑🛑 دالة عرض عناصر المتجر (المعدلة لمنع التكرار) 🛑🛑
+   // 🛑🛑 دالة عرض المتجر (الذكية: تدعم الشراء المتكرر أو لمرة واحدة) 🛑🛑
     async function loadStoreItems() {
         if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
         
@@ -684,10 +684,10 @@ loadAnnouncement();
         if(storeMessage) storeMessage.textContent = "";
 
         try {
-            // 1. بنجيب حاجتين مع بعض: (قائمة المتجر) و (مشتريات اليوزر)
+            // 1. بنجيب حاجتين: المنتجات + سجل مشتريات اليوزر
             const [itemsResponse, unlockedNames] = await Promise.all([
-                fetch(`/get-store-items`), // هات كل المنتجات
-                fetchUserUnlockedItems(loggedInUserProfile.email) // هات اللي اليوزر اشتراه
+                fetch(`/get-store-items`), 
+                fetchUserUnlockedItems(loggedInUserProfile.email) 
             ]);
 
             const itemsData = await itemsResponse.json();
@@ -703,17 +703,21 @@ loadAnnouncement();
                     const canAfford = loggedInUserProfile.balance >= item.price;
                     const highEnoughLevel = userLevel >= (item.required_level || 1);
                     
-                    // 🛑 هل اليوزر يمتلك المنتج ده؟
+                    // هل اليوزر معاه المنتج ده؟
                     const isOwned = unlockedNames.includes(item.name);
+                    
+                    // 🛑🛑 الجديد: هل المنتج ده مسموح بتكراره؟ (لو 1 يبقى نعم) 🛑🛑
+                    const allowMultiple = item.allow_multiple === 1; 
 
                     let btnText = `شراء (${item.price} نقطة)`;
                     let btnDisabled = false;
                     let cardClass = '';
 
-                    if (isOwned) {
+                    // 🛑 اللوجيك الجديد: نقفل الزرار فقط لو (معاه المنتج) AND (ممنوع التكرار)
+                    if (isOwned && !allowMultiple) {
                         btnText = `تم الشراء ✅`;
                         btnDisabled = true;
-                        cardClass = 'owned'; // عشان نميزه لو حبيت
+                        cardClass = 'owned'; 
                     } else if (!highEnoughLevel) {
                         btnText = `يتطلب مستوى ${item.required_level}`;
                         btnDisabled = true;
@@ -730,13 +734,12 @@ loadAnnouncement();
                         <img src="${item.image_url || '/default-item.png'}" alt="${item.name}">
                         <h5>${item.name}</h5>
                         ${levelText}
-                        <p class="price">${isOwned ? 'مملوك' : '$' + item.price}</p>
+                        <p class="price">${(isOwned && !allowMultiple) ? 'مملوك' : '$' + item.price}</p>
                         <button class="buy-item-btn" data-id="${item.id}" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
                     `;
-                    if(storeItemsList) storeItemsList.appendChild(card);
+                    storeItemsList.appendChild(card);
                 });
                 
-                // تفعيل الأزرار (للي مش disabled بس)
                 document.querySelectorAll('.buy-item-btn:not([disabled])').forEach(btn => {
                     btn.addEventListener('click', handleBuyItem);
                 });
@@ -747,10 +750,13 @@ loadAnnouncement();
         } catch(err) { console.error("Store Load Error:", err); }
     }
 
-    // 🛑🛑 فانكشن شراء عنصر (إصلاح الخطأ الوهمي) 🛑🛑
+    // 🛑🛑 فانكشن شراء عنصر 🛑🛑
     async function handleBuyItem(event) {
         const itemId = event.target.dataset.id;
+        
+        // تعطيل الزر مؤقتاً لمنع الضغط المزدوج
         event.target.disabled = true;
+        
         if(storeMessage) {
             storeMessage.textContent = "جاري إتمام عملية الشراء...";
             storeMessage.style.color = "blue";
@@ -773,14 +779,14 @@ loadAnnouncement();
                     storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
                     storeMessage.style.color = "green";
                 }
-                // تحديث الواجهة بالكامل عشان الزرار يتقفل
+                // تحديث الواجهة بالكامل (الرصيد + حالة الأزرار)
                 await refreshUserData(); 
             } else {
                 if(storeMessage) {
                     storeMessage.textContent = data.error || "فشل عملية الشراء.";
                     storeMessage.style.color = "red";
                 }
-                // لو فشل، نرجع الزرار شغال تاني عشان يحاول
+                // لو فشل، نرجع الزرار شغال تاني
                 event.target.disabled = false; 
             }
         } catch (err) {
@@ -2299,32 +2305,40 @@ loadAnnouncement();
             });
         }
         
-        // 9. --- فورم إضافة عنصر جديد (المعدل لرفع الملفات) ---
+       // 9. --- فورم إضافة عنصر جديد (مُحدث: نوع الشراء + الصورة كما هي) ---
         if (adminAddItemForm) {
             adminAddItemForm.addEventListener("submit", async (event) => {
-                event.preventDefault(); 
+                event.preventDefault();
+                
                 const name = document.getElementById("store-item-name").value.trim();
                 const price = parseInt(document.getElementById("store-item-price").value);
-                const requiredLevel = parseInt(document.getElementById("store-item-required-level").value) || 1; // 🛑 جلب المستوى
-                const imageFile = storeItemImageFile.files[0]; // 🛑 جلب الملف
+                const requiredLevel = parseInt(document.getElementById("store-item-required-level").value) || 1;
+                
+                // 🛑 1. جلب قيمة نوع الشراء (0 أو 1) من القائمة الجديدة
+                const allowMultiple = document.getElementById("store-item-multiple").value; 
+                
+                const imageFile = document.getElementById("store-item-image-file").files[0];
 
-                // 🛑🛑 التعديل لجعل الصورة اختيارية 🛑🛑
-                if (!name || isNaN(price) || price <= 0 || isNaN(requiredLevel) || requiredLevel < 1) { // 🛑 إضافة التحقق
-                    adminStoreMessage.textContent = "الرجاء ملء الاسم والسعر والمستوى المطلوب بشكل صحيح.";
-                    adminStoreMessage.style.color = "red";
+                const msgElement = document.getElementById("admin-store-message");
+
+                if (!name || isNaN(price) || price <= 0 || isNaN(requiredLevel) || requiredLevel < 1) {
+                    msgElement.textContent = "الرجاء ملء الاسم والسعر والمستوى بشكل صحيح.";
+                    msgElement.style.color = "red";
                     return;
                 }
 
-                adminStoreMessage.textContent = "جاري التحقق والإضافة...";
-                adminStoreMessage.style.color = "blue";
+                msgElement.textContent = "جاري التحقق والإضافة...";
+                msgElement.style.color = "blue";
                 
                 let final_image_url = ''; 
 
                 try {
-                    if (imageFile) { // 🛑 فقط إذا اختار المستخدم ملفاً، نقوم بالرفع
-                        adminStoreMessage.textContent = "جاري رفع الصورة وضغطها...";
-                        // 🛑 منطق رفع الصورة إلى Cloudinary مع الضغط 🛑
-                        const resizedBlob = await resizeImage(imageFile, 400, 400, 0.8); // ضغط الصورة
+                    if (imageFile) {
+                        msgElement.textContent = "جاري رفع الصورة...";
+                        
+                        // 🛑 2. إعدادات الصورة القديمة (زي ما هي)
+                        const resizedBlob = await resizeImage(imageFile, 400, 400, 0.8);
+                        
                         const formData = new FormData();
                         formData.append('file', resizedBlob);
                         formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -2340,35 +2354,38 @@ loadAnnouncement();
                         final_image_url = cloudinaryData.secure_url;
                     }
                     
-                    adminStoreMessage.textContent = "جاري إرسال بيانات المنتج...";
+                    msgElement.textContent = "جاري حفظ المنتج...";
                     
-                    // 🛑 إرسال الرابط (الذي قد يكون فارغاً) إلى الـ Function 🛑
+                    // 🛑 3. إرسال البيانات (بما فيها allow_multiple)
                     const response = await fetch(`/admin-add-item`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ 
                             name, 
                             price, 
-                            image_url: final_image_url,
-                            required_level: requiredLevel, // 🛑 إرسال المستوى
-                            email: loggedInUserProfile.email // 🛑 إرسال إيميل الأدمن للتحقق
+                            image_url: final_image_url, 
+                            required_level: requiredLevel,
+                            allow_multiple: allowMultiple, // 👈 دي الإضافة الوحيدة اللي محتاجينها
+                            email: loggedInUserProfile.email 
                         }),
                     });
 
                     const data = await response.json();
 
                     if (response.ok) {
-                        adminStoreMessage.textContent = `تم إضافة المنتج: ${name} بنجاح!`;
-                        adminStoreMessage.style.color = "green";
+                        msgElement.textContent = `تم إضافة المنتج: ${name} بنجاح!`;
+                        msgElement.style.color = "green";
                         adminAddItemForm.reset(); 
-                        await loadAdminStoreItems(); // تحديث القائمة بعد الإضافة
+                        // إعادة تعيين القائمة للقيمة الافتراضية
+                        document.getElementById("store-item-multiple").value = "0"; 
+                        await loadAdminStoreItems(); 
                     } else {
-                        adminStoreMessage.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
-                        adminStoreMessage.style.color = "red";
+                        msgElement.textContent = `فشل الإضافة: ${data.error || "خطأ غير محدد"}`;
+                        msgElement.style.color = "red";
                     }
                 } catch (err) {
-                    adminStoreMessage.textContent = `خطأ: ${err.message || "فشل غير متوقع أثناء رفع الصورة أو الإضافة."}`;
-                    adminStoreMessage.style.color = "red";
+                    msgElement.textContent = `خطأ: ${err.message || "فشل الاتصال."}`;
+                    msgElement.style.color = "red";
                     console.error("Add Item Error:", err);
                 }
             });
