@@ -4,11 +4,12 @@ export async function onRequestPost(context) {
         const db = context.env.DB; 
         const request = context.request;
 
+        // استقبال allow_multiple
         const { name, price, image_url, required_level, allow_multiple } = await request.json();
 
         const itemPrice = parseInt(price);
         const itemLevel = parseInt(required_level) || 1; 
-        const isMultiple = parseInt(allow_multiple) || 0; // القيمة الجديدة
+        const isMultiple = parseInt(allow_multiple) || 0; // تحويلها إلى رقم (0 أو 1)
 
         if (!name || isNaN(itemPrice) || itemPrice <= 0 || isNaN(itemLevel) || itemLevel < 1) {
             return new Response(JSON.stringify({ error: 'بيانات العنصر غير كاملة.' }), { 
@@ -18,7 +19,7 @@ export async function onRequestPost(context) {
         }
 
         try {
-            // إضافة العمود الجديد
+            // جملة SQL لحفظ العنصر، تشمل allow_multiple
             const result = await db.prepare(
                 'INSERT INTO store_items (name, price, image_url, required_level, allow_multiple) VALUES (?, ?, ?, ?, ?)'
             )
