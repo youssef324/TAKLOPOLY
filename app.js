@@ -657,89 +657,104 @@ loadAnnouncement();
         }
     }
 
-    // 🛑🛑 فانكشن جلب وعرض عناصر المتجر (للمستخدم) 🛑🛑
-    async function loadStoreItems() {
-        if (loggedInUserProfile && loggedInUserProfile.role === 'admin') return; 
+    // دالة مساعدة تجلب مشتريات اليوزر (قائمة الأسماء أو IDs)
+    async function fetchUserUnlockedItems(email) {
+        try {
+            const response = await fetch(`/get-unlocked-items`, { 
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const data = await response.json();
+            // الدالة بترجع { success: true, items: [...] }
+            // احنا محتاجين قائمة بأسماء العناصر اللي اشتراها عشان نقارن بيها
+            return (data.items || []).map(item => item.name); 
+        } catch (e) {
+            console.error("Error fetching unlocked items:", e);
+            return [];
+        }
+    }
 
-        storeContainer.style.display = "block"; // 🛑 الإظهار أولاً
-        storeLoadingMessage.style.display = 'block';
-        storeItemsList.innerHTML = '';
-        storeMessage.textContent = "";
+    // 🛑🛑 دالة عرض عناصر المتجر (المعدلة لمنع التكرار) 🛑🛑
+    async function loadStoreItems() {
+        if (!loggedInUserProfile || loggedInUserProfile.role === 'admin') return;
+        
+        storeContainer.style.display = "block";
+        if(storeLoadingMessage) storeLoadingMessage.style.display = 'block';
+        if(storeItemsList) storeItemsList.innerHTML = '';
+        if(storeMessage) storeMessage.textContent = "";
 
         try {
-            // 🛑🛑 تم تعديلها إلى GET 🛑🛑
-            const response = await fetch(`/get-store-items`); 
-            
-            if (!response.ok) throw new Error("فشل جلب عناصر المتجر"); 
-            const data = await response.json();
-            
-            storeLoadingMessage.style.display = 'none';
-            storeItemsList.innerHTML = ''; // تفريغ القائمة قبل الملء
+            // 1. بنجيب حاجتين مع بعض: (قائمة المتجر) و (مشتريات اليوزر)
+            const [itemsResponse, unlockedNames] = await Promise.all([
+                fetch(`/get-store-items`), // هات كل المنتجات
+                fetchUserUnlockedItems(loggedInUserProfile.email) // هات اللي اليوزر اشتراه
+            ]);
 
-            if (data.items && data.items.length > 0) {
-                data.items.forEach(item => {
+            const itemsData = await itemsResponse.json();
+            
+            if(storeLoadingMessage) storeLoadingMessage.style.display = 'none';
+            
+            if (itemsData.items && itemsData.items.length > 0) {
+                itemsData.items.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'store-item-card';
                     
-                    // 🛑🛑 منطق التحقق الجديد (الرصيد + المستوى) 🛑🛑
-                    const userLevel = loggedInUserProfile ? loggedInUserProfile.level : 1;
-                    const userBalance = loggedInUserProfile ? loggedInUserProfile.balance : 0;
-                    const requiredLevel = item.required_level || 1;
-
-                    const canAfford = userBalance >= item.price;
-                    const highEnoughLevel = userLevel >= requiredLevel;
-                    const canBuy = canAfford && highEnoughLevel;
-
-                    let buttonText = `شراء (${item.price} نقطة)`;
+                    const userLevel = loggedInUserProfile.level || 1;
+                    const canAfford = loggedInUserProfile.balance >= item.price;
+                    const highEnoughLevel = userLevel >= (item.required_level || 1);
                     
-                    if (!highEnoughLevel) {
-                        buttonText = `يتطلب مستوى ${requiredLevel}`;
-                        card.classList.add('locked'); // 🛑 إضافة كلاس للقفل
+                    // 🛑 هل اليوزر يمتلك المنتج ده؟
+                    const isOwned = unlockedNames.includes(item.name);
+
+                    let btnText = `شراء (${item.price} نقطة)`;
+                    let btnDisabled = false;
+                    let cardClass = '';
+
+                    if (isOwned) {
+                        btnText = `تم الشراء ✅`;
+                        btnDisabled = true;
+                        cardClass = 'owned'; // عشان نميزه لو حبيت
+                    } else if (!highEnoughLevel) {
+                        btnText = `يتطلب مستوى ${item.required_level}`;
+                        btnDisabled = true;
+                        cardClass = 'locked';
                     } else if (!canAfford) {
-                        buttonText = `النقاط غير كافية`;
+                        btnText = "النقاط غير كافية";
+                        btnDisabled = true;
                     }
-                    // 🛑🛑 نهاية منطق التحقق الجديد 🛑🛑
                     
-                    const itemName = item.name || item.namel || 'منتج غير معروف'; 
-
-                    // 🛑 إضافة نص المستوى المطلوب
-                    const requiredLevelText = (requiredLevel > 1) 
-                        ? `<p class="level-req">يتطلب مستوى ${requiredLevel}</p>` 
-                        : '<p class="level-req" style="color: #28a745;">متاح للجميع</p>';
+                    if(cardClass) card.classList.add(cardClass);
+                    const levelText = (item.required_level > 1) ? `<p class="level-req">يتطلب مستوى ${item.required_level}</p>` : '';
 
                     card.innerHTML = `
-                        <img src="${item.image_url || '/default-item.png'}" alt="${itemName}">
-                        <h5>${itemName}</h5>
-                        ${requiredLevelText} 
-                        <p class="price">$${item.price}</p>
-                        <button class="buy-item-btn" data-item-id="${item.id}" ${canBuy ? '' : 'disabled'}>
-                            ${buttonText}
-                        </button>
+                        <img src="${item.image_url || '/default-item.png'}" alt="${item.name}">
+                        <h5>${item.name}</h5>
+                        ${levelText}
+                        <p class="price">${isOwned ? 'مملوك' : '$' + item.price}</p>
+                        <button class="buy-item-btn" data-id="${item.id}" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
                     `;
-                    storeItemsList.appendChild(card);
+                    if(storeItemsList) storeItemsList.appendChild(card);
                 });
                 
-                // إضافة مُستمعي الأحداث لأزرار الشراء
-                document.querySelectorAll('.buy-item-btn').forEach(btn => {
+                // تفعيل الأزرار (للي مش disabled بس)
+                document.querySelectorAll('.buy-item-btn:not([disabled])').forEach(btn => {
                     btn.addEventListener('click', handleBuyItem);
                 });
 
             } else {
-                storeItemsList.innerHTML = `<p style="text-align: center; color: #888;">لا توجد عناصر متاحة حالياً في المتجر.</p>`;
+                if(storeItemsList) storeItemsList.innerHTML = '<p style="text-align:center;">المتجر فارغ حالياً.</p>';
             }
-        } catch(err) {
-            storeLoadingMessage.style.display = 'none';
-            storeItemsList.innerHTML = `<li style="color: red;">خطأ في تحميل المتجر: ${err.message}.</li>`;
-            console.error("Store Load Error:", err);
-        }
+        } catch(err) { console.error("Store Load Error:", err); }
     }
 
     // 🛑🛑 فانكشن شراء عنصر (إصلاح الخطأ الوهمي) 🛑🛑
     async function handleBuyItem(event) {
-        const itemId = event.target.dataset.itemId;
+        const itemId = event.target.dataset.id;
         event.target.disabled = true;
-        storeMessage.textContent = "جاري إتمام عملية الشراء...";
-        storeMessage.style.color = "blue";
+        if(storeMessage) {
+            storeMessage.textContent = "جاري إتمام عملية الشراء...";
+            storeMessage.style.color = "blue";
+        }
 
         try {
             const response = await fetch(`/buy-store-item`, {
@@ -751,34 +766,30 @@ loadAnnouncement();
                 }),
             });
 
-            // 🛑🛑 التعديل لحل مشكلة الخطأ الوهمي 🛑🛑
-            const data = await response.json(); 
+            const data = await response.json();
 
-            if (data.success || response.ok) { 
-                // 1. إظهار رسالة النجاح الفورية
-                storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
-                storeMessage.style.color = "green";
-                
-                // 2. تحديث الواجهة بشكل منفصل لتجنب انهيار الرسالة الخضراء
-                try {
-                    await refreshUserData(); // 🛑 تحديث الرصيد والعناصر والسجل
-                } catch (refreshErr) {
-                    console.error("Failed to refresh UI after purchase:", refreshErr);
-                    storeMessage.textContent += " (لكن حدث خطأ في تحديث الواجهة. يرجى التحديث يدوياً.)";
-                    storeMessage.style.color = "orange";
+            if (data.success || response.ok) {
+                if(storeMessage) {
+                    storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
+                    storeMessage.style.color = "green";
                 }
-                
+                // تحديث الواجهة بالكامل عشان الزرار يتقفل
+                await refreshUserData(); 
             } else {
-                storeMessage.textContent = data.error || "فشل عملية الشراء.";
-                storeMessage.style.color = "red";
+                if(storeMessage) {
+                    storeMessage.textContent = data.error || "فشل عملية الشراء.";
+                    storeMessage.style.color = "red";
+                }
+                // لو فشل، نرجع الزرار شغال تاني عشان يحاول
+                event.target.disabled = false; 
             }
         } catch (err) {
-            // سنعرض رسالة الخطأ العامة، لكن بما أن الخصم حدث، هذا غالباً خطأ وهمي في الـ JSON
-            storeMessage.textContent = "حدث خطأ أثناء إتمام العملية. (الرجاء التحقق من الرصيد والسجل).";
-            storeMessage.style.color = "orange";
+            if(storeMessage) {
+                storeMessage.textContent = "حدث خطأ أثناء إتمام العملية.";
+                storeMessage.style.color = "orange";
+            }
             console.error("Buy Item Error:", err);
-        } finally {
-            // لا نعيد تفعيل الزر هنا، لأن refreshUserData سيعيد تحميل المتجر
+            event.target.disabled = false;
         }
     }
     
