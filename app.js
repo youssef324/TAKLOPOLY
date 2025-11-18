@@ -750,54 +750,59 @@ loadAnnouncement();
         } catch(err) { console.error("Store Load Error:", err); }
     }
 
-    // 🛑🛑 فانكشن شراء عنصر 🛑🛑
-    async function handleBuyItem(event) {
-        const itemId = event.target.dataset.id;
-        
-        // تعطيل الزر مؤقتاً لمنع الضغط المزدوج
-        event.target.disabled = true;
-        
-        if(storeMessage) {
-            storeMessage.textContent = "جاري إتمام عملية الشراء...";
-            storeMessage.style.color = "blue";
-        }
+   // 🛑🛑 فانكشن شراء عنصر (المُصَحَّحَة) 🛑🛑
+async function handleBuyItem(event) {
+    const itemId = event.target.dataset.id;
+    
+    // تعطيل الزر مؤقتاً لمنع الضغط المزدوج
+    event.target.disabled = true;
+    
+    if(storeMessage) {
+        storeMessage.textContent = "جاري إتمام عملية الشراء...";
+        storeMessage.style.color = "blue";
+    }
 
-        try {
-            const response = await fetch(`/buy-store-item`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    email: loggedInUserProfile.email,
-                    itemId: itemId
-                }),
-            });
+    try {
+        const response = await fetch(`/buy-store-item`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: loggedInUserProfile.email,
+                itemId: itemId
+            }),
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (data.success || response.ok) {
-                if(storeMessage) {
-                    storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
-                    storeMessage.style.color = "green";
-                }
-                // تحديث الواجهة بالكامل (الرصيد + حالة الأزرار)
-                await refreshUserData(); 
-            } else {
-                if(storeMessage) {
-                    storeMessage.textContent = data.error || "فشل عملية الشراء.";
-                    storeMessage.style.color = "red";
-                }
-                // لو فشل، نرجع الزرار شغال تاني
-                event.target.disabled = false; 
-            }
-        } catch (err) {
-            if(storeMessage) {
-                storeMessage.textContent = "حدث خطأ أثناء إتمام العملية.";
-                storeMessage.style.color = "orange";
-            }
-            console.error("Buy Item Error:", err);
-            event.target.disabled = false;
-        }
-    }
+        if (data.success || response.ok) {
+            if(storeMessage) {
+                storeMessage.textContent = data.message || "تمت العملية بنجاح! جاري التحديث...";
+                storeMessage.style.color = "green";
+            }
+            // تحديث بيانات المستخدم (الرصيد)
+            await refreshUserData(); 
+            
+            // 🆕🆕 السطر المضاف الجديد والمهم 🆕🆕
+            // لإعادة تحميل المتجر وعرض حالة "تم الشراء" للعناصر لمرة واحدة
+            await loadStoreItems();
+            
+        } else {
+            if(storeMessage) {
+                storeMessage.textContent = data.error || "فشل عملية الشراء.";
+                storeMessage.style.color = "red";
+            }
+            // لو فشل، نرجع الزرار شغال تاني
+            event.target.disabled = false; 
+        }
+    } catch (err) {
+        if(storeMessage) {
+            storeMessage.textContent = "حدث خطأ أثناء إتمام العملية.";
+            storeMessage.style.color = "orange";
+        }
+        console.error("Buy Item Error:", err);
+        event.target.disabled = false;
+    }
+}
     
   // 🛑🛑 دالة معالجة تعديل عنصر المتجر (مُحدَّثة لـ Allow Multiple) 🛑🛑
 // 🆕 إضافة allowMultiple إلى معلمات الدالة 🆕
