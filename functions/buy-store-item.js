@@ -5,12 +5,11 @@ export async function onRequestPost(context) {
         const { email, itemId } = await context.request.json();
 
         // 1. جلب تفاصيل المنتج (بما فيها allow_multiple)
-        // D1 column 'allow_multiple' is confirmed to exist now
         const item = await db.prepare('SELECT * FROM store_items WHERE id = ?').bind(itemId).first();
         
         if (!item) return new Response(JSON.stringify({ success: false, error: 'العنصر غير موجود.' }), { status: 404 });
 
-        // 🛑 الشرط: لو المنتج "مرة واحدة فقط" (allow_multiple = 0)، نتأكد إنه مش معاه 🛑
+        // 🛑 المنطق الجديد: لو المنتج "مرة واحدة فقط" (allow_multiple = 0)
         if (item.allow_multiple === 0) { 
             const checkPurchase = await db.prepare(
                 "SELECT id FROM user_unlocked_items WHERE user_email = ? AND item_id = ?"
@@ -20,19 +19,21 @@ export async function onRequestPost(context) {
                 return new Response(JSON.stringify({ success: false, error: "هذا المنتج للشراء مرة واحدة فقط وقد امتلكته بالفعل!" }), { status: 400 });
             }
         }
-        
+
         // 2. جلب بيانات المستخدم والتحقق من الرصيد والمستوى
         const user = await db.prepare('SELECT balance, level FROM users WHERE email = ?').bind(email).first();
         
+        // التحقق من المستوى
         if ((user.level || 1) < (item.required_level || 1)) {
              return new Response(JSON.stringify({ success: false, error: `يتطلب مستوى ${item.required_level}.` }), { status: 403 });
         }
 
+        // التحقق من الرصيد
         if (user.balance < item.price) {
             return new Response(JSON.stringify({ success: false, error: 'نقاطك غير كافية.' }), { status: 403 });
         }
 
-        // 3. التنفيذ
+        // 3. التنفيذ: خصم الرصيد وإضافة العنصر
         const newBalance = user.balance - item.price;
         await db.batch([
             db.prepare('INSERT INTO user_unlocked_items (user_email, item_id) VALUES (?, ?)').bind(email, itemId),
@@ -43,7 +44,6 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ success: true, message: `تم شراء ${item.name} بنجاح.`, new_balance: newBalance }), { status: 200 });
 
     } catch (error) {
-        // هذا السجل سيساعدنا في المرات القادمة
         console.error("Buy Item Worker Error:", error);
         return new Response(JSON.stringify({ success: false, error: `Worker Error: ${error.message}` }), { status: 500 });
     }
