@@ -1,46 +1,122 @@
-/*
- * API Endpoint: /update-profile-image
- * وظيفته: تحديث لينك صورة المستخدم في الداتا بيز
- */
-export async function onRequestPost(context) {
-  try {
-    const db = context.env.DB;
-    const data = await context.request.json();
-    
-    // 🛑🛑 التعديل هنا 🛑🛑
-    // نستقبل 'image_url' ليتطابق مع ما ترسله الواجهة الأمامية
-    const { email, image_url } = data; 
+// ----------------------------------------------------------------------
+// دوال المساعدة: مطلوبة لعملية الحذف الآمن من Cloudinary
+// ----------------------------------------------------------------------
 
-    // ملاحظة: يمكن أيضاً استقبال old_image_url هنا للحذف لاحقاً
-    // const { email, image_url, old_image_url } = data; 
+function extractPublicId(url) {
+    if (!url || url.includes('default-avatar')) return null; 
+    const uploadIndex = url.indexOf('/upload/');
+    if (uploadIndex === -1) return null;
 
-    if (!email || !image_url) {
-      return new Response(JSON.stringify({ error: "بيانات ناقصة (الإيميل أو رابط الصورة)" }), { 
-        status: 400, 
-        headers: { "Content-Type": "application/json" } 
-      });
+    let path = url.substring(uploadIndex + '/upload/'.length);
+
+    const versionMatch = path.match(/^v\d+\//);
+    if (versionMatch) {
+        path = path.substring(versionMatch[0].length);
     }
 
+    const dotIndex = path.lastIndexOf('.');
+    if (dotIndex !== -1) {
+        path = path.substring(0, dotIndex);
+    }
+    
+    return path;
+}
+
+async function signAPIRequest(params, apiSecret) {
+    const sortedKeys = Object.keys(params).sort();
+    const queryString = sortedKeys
+        .map(key => `${key}=${params[key]}`)
+        .join('&');
+    
+    const signatureBase = queryString + apiSecret;
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(signatureBase);
+    
+    const hash = await crypto.subtle.digest('SHA-1', data);
+    
+    return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
+
+// ----------------------------------------------------------------------
+// نقطة النهاية الرئيسية: /update-profile-image
+// ----------------------------------------------------------------------
+export async function onRequestPost(context) {
+  const { env, request } = context;
+  const db = env.DB;
+  // يجب أن يكون هذا الاسم مطابقاً لاسمك في Cloudinary
+  const CLOUDINARY_CLOUD_NAME = "Dhbanzq4n"; 
+
+  try {
+    const data = await request.json();
+    
+    // استقبال البيانات من الواجهة الأمامية
+    const { email, image_url, old_image_url } = data; 
+    
+    if (!email || !image_url) {
+      return new Response(JSON.stringify({ error: "بيانات ناقصة" }), { status: 400 });
+    }
+
+    // ------------------------------------------------
+    // 1. تنفيذ عملية الحذف من Cloudinary
+    // ------------------------------------------------
+    const publicIdToDelete = extractPublicId(old_image_url);
+
+    if (publicIdToDelete) {
+      
+      const timestamp = Math.floor(Date.now() / 1000);
+      const paramsToSign = {
+        public_id: publicIdToDelete,
+        timestamp: timestamp,
+      };
+
+      const signature = await signAPIRequest(paramsToSign, env.CLOUDINARY_API_SECRET);
+      
+      const deleteFormData = new FormData();
+      deleteFormData.append('public_id', publicIdToDelete);
+      deleteFormData.append('api_key', env.CLOUDINARY_API_KEY);
+      deleteFormData.append('timestamp', timestamp);
+      deleteFormData.append('signature', signature);
+
+      const deleteResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/destroy`,
+        {
+          method: 'POST',
+          body: deleteFormData,
+        }
+      );
+      
+      const deleteData = await deleteResponse.json();
+      
+      if (deleteData.result !== 'deleted' && deleteData.result !== 'not found') {
+           console.error("Cloudinary Deletion Failed for:", publicIdToDelete, deleteData);
+      } else {
+           console.log("Cloudinary Deletion Success for:", publicIdToDelete);
+      }
+    }
+    // ------------------------------------------------
+
+    // 2. تحديث الرابط الجديد في قاعدة البيانات (D1)
     const ps = db.prepare(
       "UPDATE users SET profile_image_url = ? WHERE email = ?"
     );
     
-    // 🛑 التعديل: نستخدم المتغير image_url
     await ps.bind(image_url, email).run();
 
-    // رجّع رسالة نجاح
     return new Response(JSON.stringify({ 
         success: true, 
-        message: "تم تحديث الصورة!", 
-        newUrl: image_url // 🛑 التعديل: نرجع image_url
+        message: "تم تحديث الصورة وحذف القديمة!", 
+        newUrl: image_url 
     }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
-    console.error("DB Update Error:", e.message);
-    return new Response(JSON.stringify({ error: `خطأ في تحديث قاعدة البيانات: ${e.message}` }), {
+    console.error("Critical API Error:", e.message);
+    return new Response(JSON.stringify({ error: `خطأ داخلي: ${e.message}` }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
