@@ -1148,14 +1148,14 @@ avatarUploadInput.addEventListener("change", async (event) => {
         // 3. تجهيز بيانات التحديث
         const oldImageUrl = loggedInUserProfile.profile_image_url; // حفظ الرابط القديم للحذف لاحقاً
         
-        // 4. تحديث الرابط في قاعدة البيانات (باستخدام المسار الصحيح)
+        // 4. تحديث الرابط في قاعدة البيانات (وطلب حذف القديم من الباك إند)
         const updateResponse = await fetch('/update-profile-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: loggedInUserProfile.email,
                 image_url: newImageUrl,
-                old_image_url: oldImageUrl // حقل للحذف لاحقاً
+                old_image_url: oldImageUrl // حقل للحذف لاحقاً (مهم للباك إند)
             })
         });
 
@@ -1168,7 +1168,7 @@ avatarUploadInput.addEventListener("change", async (event) => {
             userAvatarImg.src = newImageUrl;
             loggedInUserProfile.profile_image_url = newImageUrl;
             userNameP.textContent = originalText;
-            console.log("تم تحديث الصورة بنجاح.");
+            console.log("تم تحديث الصورة وحذف القديمة بنجاح.");
         } else {
             throw new Error(updateData.error || "خطأ غير معروف من السيرفر");
         }
@@ -1180,7 +1180,7 @@ avatarUploadInput.addEventListener("change", async (event) => {
             userNameP.textContent = originalText;
         }, 3000);
     }
-    // 🛑 إغلاق مودال الأدمن (إذا كان موجوداً، يمكن نقله خارج الـ try/catch إذا أردت)
+    // 🛑 إغلاق مودال الأدمن 
     if (closeAdminModal) {
         closeAdminModal.click();
     }
