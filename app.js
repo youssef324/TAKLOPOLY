@@ -1116,69 +1116,75 @@ async function loadAdminStoreItems() {
     logoutBtn.addEventListener("click", handleLogout);
     logoutBtnGuest.addEventListener("click", handleLogout); // 🛑 ربط الزر الجديد
 
-
-    // --- كود "تغيير الصورة" ---
-   avatarUploadInput.addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file || !loggedInUserProfile) return;
+// --- كود "تغيير الصورة" ---
+avatarUploadInput.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    // شرط التوقف: تأكد من وجود ملف والمستخدم مسجل الدخول
+    if (!file || !loggedInUserProfile) return; 
+    
+    // إظهار رسالة "جاري الرفع"
+    const originalText = userNameP.textContent;
+    userNameP.textContent = "جاري رفع الصورة الجديدة...";
+    
+    try {
+        // 1. تصغير وضغط الصورة (تتطلب وجود دالة resizeImage)
+        const resizedBlob = await resizeImage(file, 150, 150, 0.7);
         
-        // 🛑 إغلاق مودال الأدمن
-        if (closeAdminModal) {
-            closeAdminModal.addEventListener('click', () => {
-                if (adminModalOverlay) adminModalOverlay.style.display = 'none';
-            });
-        }
+        const formData = new FormData();
+        formData.append('file', resizedBlob);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-        // إظهار رسالة "جاري الرفع"
-        const originalText = userNameP.textContent;
-        userNameP.textContent = "جاري رفع الصورة الجديدة...";
-        
-        try {
-            const resizedBlob = await resizeImage(file, 150, 150, 0.7);
-            const formData = new FormData();
-            formData.append('file', resizedBlob);
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        // 2. الرفع إلى Cloudinary
+        const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+            method: 'POST',
+            body: formData
+        });
 
-            const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+        if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
             
-            const cloudinaryData = await cloudinaryResponse.json();
-            const newImageUrl = cloudinaryData.secure_url;
+        const cloudinaryData = await cloudinaryResponse.json();
+        const newImageUrl = cloudinaryData.secure_url;
 
-            // الآن، تحديث الرابط في قاعدة البيانات
-            const updateResponse = await fetch('/update-profile-image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: loggedInUserProfile.email,
-                    image_url: newImageUrl
-                })
-            });
+        // 3. تجهيز بيانات التحديث
+        const oldImageUrl = loggedInUserProfile.profile_image_url; // حفظ الرابط القديم للحذف لاحقاً
+        
+        // 4. تحديث الرابط في قاعدة البيانات (باستخدام المسار الصحيح)
+        const updateResponse = await fetch('/update-profile-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: loggedInUserProfile.email,
+                image_url: newImageUrl,
+                old_image_url: oldImageUrl // حقل للحذف لاحقاً
+            })
+        });
 
-            if (!updateResponse.ok) throw new Error("فشل تحديث الرابط في قاعدة البيانات");
+        if (!updateResponse.ok) throw new Error("فشل تحديث الرابط في قاعدة البيانات");
 
-            const updateData = await updateResponse.json();
+        const updateData = await updateResponse.json();
 
-            if (updateData.success) {
-                userAvatarImg.src = newImageUrl;
-                loggedInUserProfile.profile_image_url = newImageUrl;
-                userNameP.textContent = originalText; // استعادة النص الأصلي
-            } else {
-                throw new Error(updateData.error || "خطأ غير معروف من السيرفر");
-            }
-
-        } catch (err) {
-            console.error("Avatar Upload Error:", err);
-            userNameP.textContent = "فشل رفع الصورة. حاول مجدداً.";
-            setTimeout(() => {
-                userNameP.textContent = originalText; // استعادة النص الأصلي بعد فترة
-            }, 3000);
+        if (updateData.success) {
+            // النجاح: تحديث الواجهة والبيانات المخزنة محلياً
+            userAvatarImg.src = newImageUrl;
+            loggedInUserProfile.profile_image_url = newImageUrl;
+            userNameP.textContent = originalText;
+            console.log("تم تحديث الصورة بنجاح.");
+        } else {
+            throw new Error(updateData.error || "خطأ غير معروف من السيرفر");
         }
-    });
+
+    } catch (err) {
+        console.error("Avatar Upload Error:", err);
+        userNameP.textContent = `فشل رفع الصورة: ${err.message}. حاول مجدداً.`;
+        setTimeout(() => {
+            userNameP.textContent = originalText;
+        }, 3000);
+    }
+    // 🛑 إغلاق مودال الأدمن (إذا كان موجوداً، يمكن نقله خارج الـ try/catch إذا أردت)
+    if (closeAdminModal) {
+        closeAdminModal.click();
+    }
+});
 
     // 🛑🛑 أكواد الكويز (تمت استعادتها بالكامل) 🛑🛑
     quizOptionButtons.forEach(button => {
