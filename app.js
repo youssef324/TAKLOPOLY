@@ -1116,9 +1116,75 @@ async function loadAdminStoreItems() {
     logoutBtn.addEventListener("click", handleLogout);
     logoutBtnGuest.addEventListener("click", handleLogout); // 🛑 ربط الزر الجديد
 
+// --- كود "تغيير الصورة" ---
+avatarUploadInput.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    // شرط التوقف: تأكد من وجود ملف والمستخدم مسجل الدخول
+    if (!file || !loggedInUserProfile) return; 
+    
+    // إظهار رسالة "جاري الرفع"
+    const originalText = userNameP.textContent;
+    userNameP.textContent = "جاري رفع الصورة الجديدة...";
+    
+    try {
+        // 1. تصغير وضغط الصورة (تتطلب وجود دالة resizeImage)
+        const resizedBlob = await resizeImage(file, 150, 150, 0.7);
+        
+        const formData = new FormData();
+        formData.append('file', resizedBlob);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-    // --- كود "تغيير الصورة" ---
-    avatarUploadInput.addEventListener("change", async () => { /* ... كود تغيير الصورة كما هو ... */ });
+        // 2. الرفع إلى Cloudinary
+        const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+            
+        const cloudinaryData = await cloudinaryResponse.json();
+        const newImageUrl = cloudinaryData.secure_url;
+
+        // 3. تجهيز بيانات التحديث
+        const oldImageUrl = loggedInUserProfile.profile_image_url; // حفظ الرابط القديم للحذف لاحقاً
+        
+        // 4. تحديث الرابط في قاعدة البيانات (وطلب حذف القديم من الباك إند)
+        const updateResponse = await fetch('/update-profile-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: loggedInUserProfile.email,
+                image_url: newImageUrl,
+                old_image_url: oldImageUrl // حقل للحذف لاحقاً (مهم للباك إند)
+            })
+        });
+
+        if (!updateResponse.ok) throw new Error("فشل تحديث الرابط في قاعدة البيانات");
+
+        const updateData = await updateResponse.json();
+
+        if (updateData.success) {
+            // النجاح: تحديث الواجهة والبيانات المخزنة محلياً
+            userAvatarImg.src = newImageUrl;
+            loggedInUserProfile.profile_image_url = newImageUrl;
+            userNameP.textContent = originalText;
+            console.log("تم تحديث الصورة وحذف القديمة بنجاح.");
+        } else {
+            throw new Error(updateData.error || "خطأ غير معروف من السيرفر");
+        }
+
+    } catch (err) {
+        console.error("Avatar Upload Error:", err);
+        userNameP.textContent = `فشل رفع الصورة: ${err.message}. حاول مجدداً.`;
+        setTimeout(() => {
+            userNameP.textContent = originalText;
+        }, 3000);
+    }
+    // 🛑 إغلاق مودال الأدمن 
+    if (closeAdminModal) {
+        closeAdminModal.click();
+    }
+});
 
     // 🛑🛑 أكواد الكويز (تمت استعادتها بالكامل) 🛑🛑
     quizOptionButtons.forEach(button => {
