@@ -1118,7 +1118,67 @@ async function loadAdminStoreItems() {
 
 
     // --- كود "تغيير الصورة" ---
-    avatarUploadInput.addEventListener("change", async () => { /* ... كود تغيير الصورة كما هو ... */ });
+   avatarUploadInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file || !loggedInUserProfile) return;
+        
+        // 🛑 إغلاق مودال الأدمن
+        if (closeAdminModal) {
+            closeAdminModal.addEventListener('click', () => {
+                if (adminModalOverlay) adminModalOverlay.style.display = 'none';
+            });
+        }
+
+        // إظهار رسالة "جاري الرفع"
+        const originalText = userNameP.textContent;
+        userNameP.textContent = "جاري رفع الصورة الجديدة...";
+        
+        try {
+            const resizedBlob = await resizeImage(file, 150, 150, 0.7);
+            const formData = new FormData();
+            formData.append('file', resizedBlob);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+            const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+            
+            const cloudinaryData = await cloudinaryResponse.json();
+            const newImageUrl = cloudinaryData.secure_url;
+
+            // الآن، تحديث الرابط في قاعدة البيانات
+            const updateResponse = await fetch('/update-profile-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: loggedInUserProfile.email,
+                    image_url: newImageUrl
+                })
+            });
+
+            if (!updateResponse.ok) throw new Error("فشل تحديث الرابط في قاعدة البيانات");
+
+            const updateData = await updateResponse.json();
+
+            if (updateData.success) {
+                userAvatarImg.src = newImageUrl;
+                loggedInUserProfile.profile_image_url = newImageUrl;
+                userNameP.textContent = originalText; // استعادة النص الأصلي
+            } else {
+                throw new Error(updateData.error || "خطأ غير معروف من السيرفر");
+            }
+
+        } catch (err) {
+            console.error("Avatar Upload Error:", err);
+            userNameP.textContent = "فشل رفع الصورة. حاول مجدداً.";
+            setTimeout(() => {
+                userNameP.textContent = originalText; // استعادة النص الأصلي بعد فترة
+            }, 3000);
+        }
+    });
 
     // 🛑🛑 أكواد الكويز (تمت استعادتها بالكامل) 🛑🛑
     quizOptionButtons.forEach(button => {
