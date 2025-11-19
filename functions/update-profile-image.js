@@ -47,7 +47,7 @@ export async function onRequestPost(context) {
   const { env, request } = context;
   const db = env.DB;
   // يجب أن يكون هذا الاسم مطابقاً لاسمك في Cloudinary
-  const CLOUDINARY_CLOUD_NAME = "Dhbanzq4n"; 
+  const CLOUDINARY_CLOUD_NAME = "dhbanzq4n"; 
 
   try {
     const data = await request.json();
