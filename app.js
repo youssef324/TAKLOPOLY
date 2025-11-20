@@ -2250,36 +2250,63 @@ if (generatePrintCardsBtn) {
     
 // ----------------------------------------------------
 
-// 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
-// يجب استخدام اسم المتغير downloadCardsAsImageBtn كما اتفقنا
+// 🛑🛑 6. كود تحميل الكروت كملف PDF (الحل الجذري للقص واللغة) 🛑🛑
 
-if (downloadCardsAsImageBtn) { 
+if (downloadCardsAsImageBtn) { // تأكد من اسم المتغير الصحيح لديك
     downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
         
-        // ... (تأكد من وجود رسائل التنبيه والتحقق من المكتبة) ...
+        if (containerToCapture.children.length === 0) {
+            qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
+            qrListMessage.style.color = "red";
+            return;
+        }
 
-        const { jsPDF } = window.jspdf;
-        // إنشاء مستند PDF بحجم A4 وبتنسيق عمودي (P)
-        const doc = new jsPDF('p', 'mm', 'a4'); 
+        qrListMessage.textContent = "جاري توليد ملف PDF... يرجى الانتظار...";
+        qrListMessage.style.color = "blue";
 
-        // تحويل محتوى الـ HTML إلى PDF
-        doc.html(containerToCapture, {
-            // 💡 الإعدادات المعدلة هنا:
-            html2canvas: { 
-                scale: 0.5, // 1. مقياس الضغط: نصف الحجم ليتناسب 8 كروت في صفحة A4
-                useCORS: true // 2. هام لتضمين الصور (الـ QR) بشكل صحيح
+        // التحقق من المكتبة
+        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+            qrListMessage.textContent = "❌ خطأ: مكتبة jsPDF غير موجودة.";
+            qrListMessage.style.color = "red";
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        // استخدام A4
+        const doc = new jsPDF('p', 'mm', 'a4'); 
+        
+        // 🛑 هنا الحل السحري: إجبار الحاوية على عرض ثابت أثناء التحويل فقط 🛑
+        const originalWidth = containerToCapture.style.width;
+        const originalGrid = containerToCapture.style.gridTemplateColumns;
+        
+        // تغيير مؤقت للتنسيق ليناسب PDF (800px لضمان عدم القص)
+        containerToCapture.style.width = '800px'; 
+        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)'; // تثبيت 4 أعمدة
+
+        doc.html(containerToCapture, {
+            callback: function (doc) {
+                // إرجاع التنسيق لأصله بعد الانتهاء
+                containerToCapture.style.width = originalWidth;
+                containerToCapture.style.gridTemplateColumns = originalGrid;
+                
+                doc.save('kiropay-qr-cards.pdf');
+                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح!";
+                qrListMessage.style.color = "green";
             },
-            // 3. إضافة margin هام
-            margin: [5, 5, 5, 5], 
-            
-            callback: function (doc) {
-                doc.save('kiropay-qr-cards.pdf');
-                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح! جودة عالية جاهزة للطباعة.";
-                qrListMessage.style.color = "green";
-            },
-        });
-    });
+            x: 0,
+            y: 0,
+            html2canvas: { 
+                scale: 0.24, // 🛑 تعديل المقياس ليتناسب مع عرض 800px داخل A4 (210mm)
+                useCORS: true, // للصور
+                // 🛑 محاولة لحل مشكلة العربي (تجريبية لكنها الأفضل المتاحة)
+                letterRendering: true 
+            },
+            // هوامش بسيطة
+            margin: [5, 5, 5, 5],
+            autoPaging: 'text'
+        });
+    });
 }
 
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
