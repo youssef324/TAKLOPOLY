@@ -2110,139 +2110,148 @@ avatarUploadInput.addEventListener("change", async (event) => {
         }
 
         // 🛑🛑 4. كود جلب قائمة الـ QR للطباعة (مُعدل) 🛑🛑
-        if(fetchQrListBtn) {
-            fetchQrListBtn.addEventListener('click', async () => {
-                if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
-                    qrListMessage.textContent = "خطأ: غير مصرح لك.";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
+// يجب افتراض أن المتغيرات التالية مُعرفة في مكان أعلى في الملف:
+// const fetchQrListBtn, qrListResults, qrListMessage, loggedInUserProfile
+// const printableCardsContainer, generatePrintCardsBtn, downloadCardsAsPDFBtn
 
-                qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
-                qrListMessage.style.color = "blue";
-                qrListResults.value = ""; // تفريغ المربع
-                fetchQrListBtn.disabled = true;
-
-                try {
-                    const response = await fetch(`/admin-get-qr-list`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            adminEmail: loggedInUserProfile.email 
-                        })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        qrListMessage.textContent = `✅ نجاح! تم جلب ${data.users.length} مستخدم. اضغط "الخطوة 2" للتوليد.`;
-                        qrListMessage.style.color = 'green';
-                        // 🛑 تخزين الـ JSON في مربع النص (المخفي)
-                        qrListResults.value = JSON.stringify(data.users); 
-                    } else {
-                        qrListMessage.textContent = `❌ فشل: ${data.error || 'فشل في جلب القائمة.'}`;
-                        qrListMessage.style.color = 'red';
-                    }
-
-                } catch (err) {
-                     qrListMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
-                     qrListMessage.style.color = 'red';
-                     console.error("Fetch QR List Error:", err);
-                } finally {
-                    fetchQrListBtn.disabled = false;
-                }
-            });
+if(fetchQrListBtn) {
+    fetchQrListBtn.addEventListener('click', async () => {
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
+            qrListMessage.textContent = "خطأ: غير مصرح لك.";
+            qrListMessage.style.color = "red";
+            return;
         }
 
-        // 🛑🛑 5. كود توليد كروت الطباعة (جديد) 🛑🛑
-        if (generatePrintCardsBtn) {
-            generatePrintCardsBtn.addEventListener('click', () => {
-                const jsonData = qrListResults.value;
-                if (!jsonData) {
-                    qrListMessage.textContent = "الرجاء الضغط على 'الخطوة 1' أولاً لجلب البيانات.";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
+        qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
+        qrListMessage.style.color = "blue";
+        qrListResults.value = ""; // تفريغ المربع
+        fetchQrListBtn.disabled = true;
 
-                try {
-                    const users = JSON.parse(jsonData);
-                    printableCardsContainer.innerHTML = ''; // تفريغ الحاوية
-                    qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
-
-                    if (users.length === 0) {
-                         qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
-                         return;
-                    }
-
-                    // استخدام setTimeout لتقسيم العمليات ومنع "تجمد" المتصفح
-                    let i = 0;
-                    function processBatch() {
-                        let count = 0;
-                        while(count < 50 && i < users.length) { // معالجة 50 كارت في المرة
-                            const user = users[i];
-                            
-                            // 1. إنشاء الكارت
-                            const card = document.createElement('div');
-                            card.className = 'print-card';
-
-                            // 2. إنشاء الاسم والعائلة
-                            const nameEl = document.createElement('div');
-                            nameEl.className = 'print-card-name';
-                            nameEl.textContent = user.name || 'اسم غير معروف';
-                            
-                            const familyEl = document.createElement('div');
-                            familyEl.className = 'print-card-family';
-                            familyEl.textContent = user.family || 'أسرة غير معروفة';
-
-                            // 3. إنشاء حاوية الـ QR
-                            const qrEl = document.createElement('div');
-                            qrEl.className = 'print-card-qr';
-                            
-                            // 4. إضافة العناصر للكارت
-                            card.appendChild(nameEl);
-                            card.appendChild(familyEl);
-                            card.appendChild(qrEl);
-                            
-                            // 5. إضافة الكارت للحاوية الرئيسية
-                            printableCardsContainer.appendChild(card);
-
-                          // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
-new QRCode(qrEl, {
-    text: user.email,
-    width: 250, // 🚀 تم التعديل إلى 250
-    height: 250, // 🚀 تم التعديل إلى 250
-    colorDark : "#000000",
-// ...
-                            count++;
-                            i++;
-                        }
-
-                        if (i < users.length) {
-                            // لو لسه فيه تاني، كمل بعد 100 مللي ثانية
-                            qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
-                            setTimeout(processBatch, 100);
-                        } else {
-                            // خلصنا
-                            qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كصورة أو للطباعة.`;
-                            qrListMessage.style.color = 'green';
-                            alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كصورة أو استخدام (Ctrl+P) لطباعتها.");
-                        }
-                    }
-                    
-                    processBatch(); // بدء أول دفعة
-
-                } catch (e) {
-                    qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
-                    qrListMessage.style.color = "red";
-                    console.error("Failed to parse JSON for printing:", e);
-                }
+        try {
+            const response = await fetch(`/admin-get-qr-list`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    adminEmail: loggedInUserProfile.email 
+                })
             });
+
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                qrListMessage.textContent = `✅ نجاح! تم جلب ${data.users.length} مستخدم. اضغط "الخطوة 2" للتوليد.`;
+                qrListMessage.style.color = 'green';
+                // 🛑 تخزين الـ JSON في مربع النص (المخفي)
+                qrListResults.value = JSON.stringify(data.users); 
+            } else {
+                qrListMessage.textContent = `❌ فشل: ${data.error || 'فشل في جلب القائمة.'}`;
+                qrListMessage.style.color = 'red';
+            }
+
+        } catch (err) {
+             qrListMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
+             qrListMessage.style.color = 'red';
+             console.error("Fetch QR List Error:", err);
+        } finally {
+            fetchQrListBtn.disabled = false;
         }
-        
-       // 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
-const downloadCardsAsPDFBtn = document.getElementById('admin-download-cards-as-image-btn'); 
-const printableCardsContainer = document.getElementById('admin-printable-cards-container');
-const qrListMessage = document.getElementById('admin-qr-list-message');
+    });
+}
+
+// ----------------------------------------------------
+
+// 🛑🛑 5. كود توليد كروت الطباعة (تم تصحيح الـ Syntax) 🛑🛑
+if (generatePrintCardsBtn) {
+    generatePrintCardsBtn.addEventListener('click', () => {
+        const jsonData = qrListResults.value;
+        if (!jsonData) {
+            qrListMessage.textContent = "الرجاء الضغط على 'الخطوة 1' أولاً لجلب البيانات.";
+            qrListMessage.style.color = "red";
+            return;
+        }
+
+        try {
+            const users = JSON.parse(jsonData);
+            printableCardsContainer.innerHTML = ''; // تفريغ الحاوية
+            qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
+
+            if (users.length === 0) {
+                 qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
+                 return;
+            }
+
+            // استخدام setTimeout لتقسيم العمليات ومنع "تجمد" المتصفح
+            let i = 0;
+            function processBatch() {
+                let count = 0;
+                while(count < 50 && i < users.length) { // معالجة 50 كارت في المرة
+                    const user = users[i];
+                    
+                    // 1. إنشاء الكارت
+                    const card = document.createElement('div');
+                    card.className = 'print-card';
+
+                    // 2. إنشاء الاسم والعائلة
+                    const nameEl = document.createElement('div');
+                    nameEl.className = 'print-card-name';
+                    nameEl.textContent = user.name || 'اسم غير معروف';
+                    
+                    const familyEl = document.createElement('div');
+                    familyEl.className = 'print-card-family';
+                    familyEl.textContent = user.family || 'أسرة غير معروفة';
+
+                    // 3. إنشاء حاوية الـ QR
+                    const qrEl = document.createElement('div');
+                    qrEl.className = 'print-card-qr';
+                    
+                    // 4. إضافة العناصر للكارت
+                    card.appendChild(nameEl);
+                    card.appendChild(familyEl);
+                    card.appendChild(qrEl);
+                    
+                    // 5. إضافة الكارت للحاوية الرئيسية
+                    printableCardsContainer.appendChild(card);
+
+                    // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
+                    new QRCode(qrEl, {
+                        text: user.email,
+                        width: 250, // 🚀 تم التعديل إلى 250
+                        height: 250, // 🚀 تم التعديل إلى 250
+                        colorDark : "#000000",
+                        colorLight : "#ffffff", // أضيفت الخيارات المفقودة
+                        correctLevel : QRCode.CorrectLevel.M // أضيفت الخيارات المفقودة
+                    }); // ⬅️⬅️ تم تصحيح خطأ بناء الجملة هنا 
+
+                    count++;
+                    i++;
+                } // نهاية while
+
+                if (i < users.length) {
+                    // لو لسه فيه تاني، كمل بعد 100 مللي ثانية
+                    qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
+                    setTimeout(processBatch, 100);
+                } else {
+                    // خلصنا
+                    qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كـ PDF.`;
+                    qrListMessage.style.color = 'green';
+                    alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كملف PDF.");
+                }
+            }
+            
+            processBatch(); // بدء أول دفعة
+
+        } catch (e) {
+            qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
+            qrListMessage.style.color = "red";
+            console.error("Failed to parse JSON for printing:", e);
+        }
+    });
+}
+    
+// ----------------------------------------------------
+
+// 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
+// تم حذف إعادة تعريف المتغيرات هنا لتجنب خطأ التعارض.
 
 if (downloadCardsAsPDFBtn) { 
     downloadCardsAsPDFBtn.addEventListener('click', () => {
