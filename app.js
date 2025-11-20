@@ -2254,7 +2254,7 @@ if (generatePrintCardsBtn) {
 // تم حذف إعادة تعريف المتغيرات هنا لتجنب خطأ التعارض.
 
 if (downloadCardsAsImageBtn) { 
-    downloadCardsAsImageBtn('click', () => {
+    downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
         if (containerToCapture.children.length === 0) {
             qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
