@@ -849,14 +849,18 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 🛑 حاوية كروت الطباعة 🛑 */
 #admin-printable-cards-container {
+    /* 🛑 التعديل هنا: نحدد العرض ليكون ضعف عرض A4 تقريباً 🛑 */
+    width: 794px !important; 
+    
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
+    /* 🛑 التعديل هنا: نحدد 4 أعمدة ثابتة (بدلاً من auto-fit) 🛑 */
+    grid-template-columns: repeat(4, 1fr); 
+    
+    gap: 15px; /* يمكن أن تبقى كما هي */
     margin-top: 20px;
     padding: 10px;
     border: 1px dashed #007bff;
     background: #fff;
-    /* 🛑 مهم: التأكد من أن الحاوية فارغة في البداية */
     min-height: 0; 
 }
 
@@ -1449,4 +1453,27 @@ form#admin-add-item-form button[type="submit"]:hover {
         padding: 0;
         border: none;
     }
+}
+/* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF (يُضاف هذا الكود كاملاً) 🛑🛑 */
+
+/* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت (لإظهار الإيميل) */
+.print-card * {
+    /* الخط Arial مضمون الظهور في html2canvas */
+    font-family: Arial, Tahoma, sans-serif !important; 
+    color: #000 !important; /* لون أسود لضمان التباين */
+}
+
+/* 2. تحديد ارتفاع ثابت للكارت لمنع تقطيع المحتوى أو سوء التنسيق */
+.print-card {
+    /* ارتفاع ثابت يضمن مساحة كافية للـ 4x2 ومنع التقطيع */
+    height: 350px !important; 
+}
+
+/* 3. تعديل حجم الـ QR لمنع التداخل مع النصوص (نلغي الأبعاد الثابتة) */
+.print-card-qr {
+    /* إزالة الأبعاد الثابتة (width/height: 120px) التي كانت موجودة سابقاً */
+    width: auto !important;
+    height: auto !important;
+    max-width: 150px !important; /* حجم أقصى معقول */
+    max-height: 150px !important;
 }
