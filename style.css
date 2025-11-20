@@ -847,84 +847,61 @@ form#admin-add-item-form button[type="submit"]:hover {
     display: none; /* 🛑 مخفي افتراضياً، سنستخدمه للتخزين فقط 🛑 */
 }
 
-/* 🛑🛑 الكود الموحد لتنسيق كروت الطباعة (لحل مشاكل PDF واللغة العربية) 🛑🛑 */
-
-/* 1. تنسيق الحاوية الرئيسية (#admin-printable-cards-container) */
+/* 🛑 حاوية كروت الطباعة 🛑 */
 #admin-printable-cards-container {
-    /* 🔑 التعديل الحاسم: تثبيت العرض بـ 794px لـ 4 كروت عند مقياس 0.5 */
-    width: 794px !important; 
-    
-    display: grid;
-    /* تثبيت 4 أعمدة */
-    grid-template-columns: repeat(4, 1fr); 
-    
-    gap: 15px; 
-    margin-top: 20px;
-    /* 🔑 هام: إزالة الـ padding لمنع قص الكروت على اليمين */
-    padding: 0 !important; 
-    border: 1px dashed #007bff;
-    background: #fff;
-    min-height: 0; 
+    width: 794px !important; 
+    
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    
+    gap: 15px; 
+    margin-top: 20px;
+    padding: 0 !important; /* 🛑 هام جداً: إزالة الهوامش الداخلية للحاوية */
+    border: 1px dashed #007bff;
+    background: #fff;
+    min-height: 0; 
 }
 
-/* 2. تنسيق الكارت الواحد (.print-card) */
 .print-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    /* 🛑 تعديل الـ padding من 15px إلى 10px لتوفير مساحة */
-    padding: 10px !important; 
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    /* 🔑 ارتفاع ثابت لمنع التقطيع */
-    height: 350px !important; 
-    /* تثبيت الأبعاد الداخلية */
-    margin: 0 !important;
-    box-sizing: border-box !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    /* 🛑 إضافة الارتفاع الثابت لمنع التقطيع والتحسين لـ 4x2 */
+    height: 350px !important; 
 }
-
-/* 3. تنسيق عناصر النص الداخلي */
 .print-card-name {
-    font-weight: bold;
-    font-size: 1.1em;
-    margin: 0 0 5px 0;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 0 0 5px 0;
 }
 .print-card-family {
-    font-size: 0.9em;
-    color: #555;
-    margin: 0 0 10px 0;
+    font-size: 0.9em;
+    color: #555;
+    margin: 0 0 10px 0;
 }
-
-/* 4. تنسيق الـ QR Code (.print-card-qr) */
 .print-card-qr {
-    width: auto !important;
-    height: auto !important;
-    max-width: 150px !important;
-    max-height: 150px !important;
-    
-    margin: 0 auto;
-    padding: 5px;
-    background: white;
-    border: 1px solid #eee;
+    /* تم إلغاء width: 120px و height: 120px */
+    width: auto !important;
+    height: auto !important;
+    max-width: 150px !important;
+    max-height: 150px !important;
+    
+    margin: 0 auto;
+    padding: 5px;
+    background: white;
+    border: 1px solid #eee;
 }
-
-/* 5. ضمان أن الـ QR يملأ الحاوية المخصصة له */
+/* 🛑 ضمان أن الـ QR يملأ الحاوية المخصصة له */
 .print-card-qr img,
 .print-card-qr canvas {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
-/* 🛑🛑 قواعد الخطوط العربية النهائية (لحل مشكلة الكلام العربي في PDF) 🛑🛑 */
-.print-card * {
-    /* 🔑 فرض خط Arial لضمان ظهوره في PDF */
-    font-family: Arial, Tahoma, sans-serif !important; 
-    color: #000 !important;
-    /* 🔑 القواعد الحاسمة: لضمان اتجاه النص العربي */
-    direction: rtl !important; 
-    unicode-bidi: embed !important; 
-}
 
-/* 🛑🛑 ستايل قسم مسح الـ QR 🛑🛑 */
+/* 🛑🛑 ستايل قسم مسح الـ QR (جديد) 🛑🛑 */
 #admin-scan-controls {
     display: flex;
     flex-direction: column;
@@ -938,17 +915,19 @@ form#admin-add-item-form button[type="submit"]:hover {
     border: 1px solid #ccc;
 }
 #start-scan-btn {
-    background-color: #db2777; 
+    background-color: #db2777; /* وردي غامق */
     color: white;
     font-weight: bold;
     border: none;
     cursor: pointer;
 }
 #reader {
+    /* 🛑 التأكد من أن منطقة القارئ لا تنضغط */
     min-height: 250px; 
 }
 
-/* 🛑🛑 ستايلات واجهة الزائر 🛑🛑 */
+
+/* 🛑🛑 ستايلات واجهة الزائر (جديدة) 🛑🛑 */
 .guest-container {
     max-width: 600px;
     margin: 2rem auto;
@@ -994,6 +973,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     min-height: 100px;
     background-color: #fdfdfd;
 }
+/* نستخدم نفس تنسيق لوحة الصدارة */
 .guest-results-container .leaderboard-list {
     margin: 0;
 }
@@ -1008,6 +988,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     border: 1px solid #eee;
     border-radius: 4px;
 }
+
 .batch-item {
     display: flex;
     justify-content: space-between;
@@ -1017,14 +998,18 @@ form#admin-add-item-form button[type="submit"]:hover {
     padding: 8px 10px;
     animation: slideIn 0.3s ease-out;
 }
+
 .batch-item:last-child {
     border-bottom: none;
 }
+
 .batch-item span {
     font-weight: bold;
     font-size: 0.95em;
     color: #333;
 }
+
+/* زر الحذف (X) */
 .remove-batch-item {
     background-color: #ff4d4d;
     color: white;
@@ -1039,9 +1024,12 @@ form#admin-add-item-form button[type="submit"]:hover {
     justify-content: center;
     margin-right: 10px;
 }
+
 .remove-batch-item:hover {
     background-color: #cc0000;
 }
+
+/* زر التنفيذ */
 #submit-batch-rewards-btn {
     background-color: #28a745;
     color: white;
@@ -1055,14 +1043,18 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin-top: 10px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
+
 #submit-batch-rewards-btn:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
 }
+
 @keyframes slideIn {
     from { opacity: 0; transform: translateX(-10px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+/* تأثير وميض للزر */
 .pulse-button {
     animation: pulse 2s infinite;
 }
@@ -1072,19 +1064,78 @@ form#admin-add-item-form button[type="submit"]:hover {
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
 }
 
+/* 🛑🛑 ستايلات خاصة بالطباعة (معدلة لتجنب الصفحة البيضاء) 🛑🛑 */
+@media print {
+    /* إخفاء كل شيء افتراضياً */
+    body > * {
+        display: none !important;
+    }
+    
+    /* * إظهار حاوية الكروت فقط. 
+     * يجب أن تكون الحاوية هي "ابن" مباشر للـ body لضمان عمل هذا الكود.
+     * بما أنها ليست كذلك (هي داخل .admin-panel-container)، سنغير الاستراتيجية.
+     */
+    
+    /* استراتيجية بديلة: إخفاء كل شيء ما عدا الحاوية المطلوبة */
+    body * {
+        visibility: hidden; /* إخفاء كل العناصر */
+    }
+
+    #admin-printable-cards-container, 
+    #admin-printable-cards-container * {
+        visibility: visible; /* إظهار حاوية الطباعة وكل ما بداخلها */
+    }
+
+    #admin-printable-cards-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: none !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
+        gap: 10px;
+    }
+
+    .print-card {
+        display: block !important;
+        page-break-inside: avoid; /* منع الكارت من الانقسام بين صفحتين */
+        border: 1px solid #000;
+        box-shadow: none;
+        padding: 10px;
+        text-align: center;
+    }
+
+    /* التأكد من ظهور الـ QR */
+    .print-card-qr {
+        width: 100px; 
+        height: 100px;
+        margin: 5px auto;
+    }
+    .print-card-qr img,
+    .print-card-qr canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        visibility: visible !important; /* تأكيد إظهارها */
+    }
+}
+
 /* =========================================
    ⬇️⬇️⬇️ إضافات الهيدر والشريط والمربعات ⬇️⬇️⬇️
    ========================================= */
 
 /* 1. الهيدر الأزرق (Top Banner) */
 .top-banner {
-    background-color: #003366; 
+    background-color: #003366; /* أزرق كحلي */
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-right: 8px solid #dc3545; 
+    border-right: 8px solid #dc3545; /* الشريط الأحمر */
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -1102,7 +1153,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 2. شريط الأخبار المتحرك (News Ticker) */
 .news-ticker-bar {
-    background-color: #111; 
+    background-color: #111; /* أسود */
     color: white;
     height: 40px;
     display: flex;
@@ -1215,9 +1266,10 @@ form#admin-add-item-form button[type="submit"]:hover {
     border: 5px solid #fff;
     transition: transform 0.3s;
     
+    /* 🛑 التعديل هنا: خلينا الصورة فوق الميدالية 🛑 */
     position: relative;
-    z-index: 5; 
-    background-color: #fff; 
+    z-index: 5; /* رقم كبير عشان تبقى فوق */
+    background-color: #fff; /* عشان الميدالية متبانش من وراها لو الصورة شفافة */
     
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
@@ -1251,6 +1303,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 .champion-card .rank {
     position: absolute;
     
+    /* نزلناها تحت شوية عشان تبرز من ورا الصورة */
     top: 95px; 
     left: 50%;
     transform: translateX(-50%);
@@ -1259,7 +1312,8 @@ form#admin-add-item-form button[type="submit"]:hover {
     line-height: 1;
     text-shadow: 0 4px 8px rgba(0,0,0,0.3);
     
-    z-index: 1; 
+    /* 🛑 التعديل هنا: خليناها ورا الصورة 🛑 */
+    z-index: 1; /* رقم صغير عشان ترجع ورا */
     
     background: none;
     border: none;
@@ -1268,7 +1322,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* الاسم */
 .champion-card .name {
-    margin-top: 45px; 
+    margin-top: 45px; /* مسافة عشان الميدالية اللي نازلة */
     font-weight: bold;
     color: #333;
     font-size: 1.1em;
@@ -1298,7 +1352,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     border-radius: 5px;
     border: 1px solid #ddd;
     margin-bottom: 0;
-    user-select: none; 
+    user-select: none; /* يمنع تحديد النص عند الضغط */
 }
 
 .collapsible-container h4:hover {
@@ -1307,8 +1361,9 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 🛑🛑 تنسيق شريط التذييل وحقوق النشر (APP FOOTER - FINAL) 🛑🛑 */
 .app-footer {
+    /* 🛑 تم تعديل الخلفية لتطابق الهيدر 🛑 */
     background-color: #003366; 
-    color: #ddd; 
+    color: #ddd; /* لون النص الفاتح */
     
     padding: 30px 0 40px;
     text-align: center;
@@ -1328,19 +1383,19 @@ form#admin-add-item-form button[type="submit"]:hover {
 .social-icon {
     font-size: 2.5em;
     margin: 0 15px;
-    color: #ccc; 
+    color: #ccc; /* لون أساسي فاتح يظهر على الأزرق الغامق */
     transition: color 0.3s, transform 0.2s;
 }
 
 /* 🛑 أيقونة الفيسبوك: تتغير للأزرق 🛑 */
 .social-icon.facebook:hover {
-    color: #3b5998; 
+    color: #3b5998; /* أزرق الفيسبوك */
     transform: translateY(-5px); 
 }
 
 /* 🛑 أيقونة الواتساب: تتغير للأخضر 🛑 */
 .social-icon.whatsapp:hover {
-    color: #25d366; 
+    color: #25d366; /* أخضر الواتساب */
     transform: translateY(-5px); 
 }
 
@@ -1349,4 +1404,84 @@ form#admin-add-item-form button[type="submit"]:hover {
     color: #bbb; 
     display: block; 
     margin-top: 5px; 
+}
+
+/* 🛑🛑 تنسيقات خاصة بالطباعة والـ PDF (لترتيب 8 كروت في الصفحة) 🛑🛑 */
+@media print {
+
+    /* 1. إخفاء العناصر غير المرغوب فيها (الأزرار والرسائل) في ملف PDF */
+    #admin-qr-list-controls, 
+    #admin-qr-list-message {
+        display: none !important;
+    }
+
+    /* 2. تعديل تنسيق حاوية الكروت للطباعة */
+    #admin-printable-cards-container {
+        display: grid;
+        /* تقسيم الصفحة إلى 4 أعمدة متساوية للطباعة */
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 5mm; /* مسافة بسيطة بالملليمتر */
+        padding: 5mm;
+        border: none !important; /* إزالة الحدود المنقطة */
+        box-shadow: none !important;
+    }
+
+    /* 3. تعديل تنسيق الكارت ليلائم الترتيب في الشبكة */
+    .print-card {
+        width: 100%;
+        /* حافة بسيطة للمساعدة في القص بعد الطباعة */
+        border: 1px dashed #000; 
+        padding: 5px;
+        box-sizing: border-box;
+        text-align: center;
+        box-shadow: none !important; 
+        /* هام: منع انقسام الكارت بين صفحتين */
+        break-inside: avoid; 
+    }
+    
+    /* 4. إجبار المتصفح على بدء صفحة جديدة بعد كل 8 كروت */
+    /* (إذا كان لدينا 4 أعمدة، فإن 8n تعني صفين كاملين) */
+    .print-card:nth-child(8n) { 
+        page-break-after: always;
+    }
+    
+    /* 5. تعديل حجم حاوية الـ QR لتتناسب مع الـ 250px التي تم تعيينها في JS */
+    .print-card-qr {
+        /* يتم توسيط الـ QR Code حتى لو كان حجمه كبيراً */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* نلغي الأبعاد الثابتة هنا ليعتمد على الأبعاد في JS ومرونة الـ Grid */
+        width: auto;
+        height: auto;
+        padding: 0;
+        border: none;
+    }
+}
+/* 🛑🛑 الكود الإضافي: تثبيت الخطوط والأبعاد النهائية 🛑🛑 */
+
+/* 1. فرض خط واتجاه النص العربي */
+.print-card * {
+    font-family: Arial, Tahoma, sans-serif !important; 
+    color: #000 !important;
+    direction: rtl !important; /* 🔑 لضمان عرض النص العربي بشكل سليم */
+    unicode-bidi: embed !important; 
+}
+
+/* 2. تثبيت أبعاد الكارت */
+.print-card {
+    /* الارتفاع لمنع التقطيع */
+    height: 350px !important; 
+    /* التأكد من الـ padding و الـ margin الداخلي */
+    padding: 10px !important; 
+    margin: 0 !important;
+    box-sizing: border-box !important; /* هام جداً */
+}
+
+/* 3. تعديل حجم الـ QR لمنع التداخل */
+.print-card-qr {
+    width: auto !important;
+    height: auto !important;
+    max-width: 150px !important;
+    max-height: 150px !important;
 }
