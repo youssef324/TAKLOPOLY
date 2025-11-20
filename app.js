@@ -2206,16 +2206,13 @@ avatarUploadInput.addEventListener("change", async (event) => {
                             // 5. إضافة الكارت للحاوية الرئيسية
                             printableCardsContainer.appendChild(card);
 
-                            // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
-                            new QRCode(qrEl, {
-                                text: user.email,
-                                width: 120,
-                                height: 120,
-                                colorDark : "#000000",
-                                colorLight : "#ffffff",
-                                correctLevel : QRCode.CorrectLevel.M // M يكفي للإيميلات
-                            });
-
+                          // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
+new QRCode(qrEl, {
+    text: user.email,
+    width: 250, // 🚀 تم التعديل إلى 250
+    height: 250, // 🚀 تم التعديل إلى 250
+    colorDark : "#000000",
+// ...
                             count++;
                             i++;
                         }
@@ -2242,45 +2239,46 @@ avatarUploadInput.addEventListener("change", async (event) => {
             });
         }
         
-        // 🛑🛑 6. كود تحميل الكروت كصورة (جديد) 🛑🛑
-        if (downloadCardsAsImageBtn) {
-            downloadCardsAsImageBtn.addEventListener('click', () => {
-                const containerToCapture = printableCardsContainer; // The <div> with all the cards
-                if (containerToCapture.children.length === 0) {
-                    qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
+       // 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
+const downloadCardsAsPDFBtn = document.getElementById('admin-download-cards-as-image-btn'); 
+const printableCardsContainer = document.getElementById('admin-printable-cards-container');
+const qrListMessage = document.getElementById('admin-qr-list-message');
 
-                qrListMessage.textContent = "جاري تحويل الكروت إلى صورة... قد يستغرق هذا بعض الوقت...";
-                qrListMessage.style.color = "blue";
-                
-                // استخدام html2canvas (المكتبة التي أضفناها في index.html)
-                html2canvas(containerToCapture, {
-                    scrollX: 0,
-                    scrollY: -window.scrollY, // بدء الالتقاط من أعلى الحاوية
-                    scale: 2 // زيادة الدقة (Scale) لجودة طباعة أفضل
-                }).then(canvas => {
-                    // إنشاء لينك لتحميل الصورة
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'kiropay-qr-cards.png';
-                    
-                    // تفعيل التحميل
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    qrListMessage.textContent = "✅ تم تحميل الصورة بنجاح! يمكنك الآن طباعتها.";
-                    qrListMessage.style.color = "green";
-                    
-                }).catch(err => {
-                    qrListMessage.textContent = "❌ فشل تحويل الصورة. حاول مرة أخرى.";
-                    qrListMessage.style.color = "red";
-                    console.error("html2canvas error:", err);
-                });
-            });
+if (downloadCardsAsPDFBtn) { 
+    downloadCardsAsPDFBtn.addEventListener('click', () => {
+        const containerToCapture = printableCardsContainer;
+        if (containerToCapture.children.length === 0) {
+            qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
+            qrListMessage.style.color = "red";
+            return;
         }
+
+        qrListMessage.textContent = "جاري توليد ملف PDF عالي الجودة... قد يستغرق هذا بعض الوقت...";
+        qrListMessage.style.color = "blue";
+        
+        // التحقق من تحميل مكتبة jsPDF (مهم جداً)
+        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+            qrListMessage.textContent = "❌ خطأ: مكتبة jsPDF غير موجودة. تأكد من إضافة سطر المكتبة في HTML.";
+            qrListMessage.style.color = "red";
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        // إنشاء مستند PDF بحجم A4 وبتنسيق عمودي (P)
+        const doc = new jsPDF('p', 'mm', 'a4'); 
+
+        // تحويل محتوى الـ HTML إلى PDF
+        doc.html(containerToCapture, {
+            callback: function (doc) {
+                doc.save('kiropay-qr-cards.pdf');
+                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح! جودة عالية جاهزة للطباعة.";
+                qrListMessage.style.color = "green";
+            },
+            // هام: يتم ضبط المقياس والدقة هنا لـ jsPDF
+            html2canvas: { scale: 0.5 } 
+        });
+    });
+}
 
 
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
