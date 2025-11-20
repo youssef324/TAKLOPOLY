@@ -2253,8 +2253,8 @@ if (generatePrintCardsBtn) {
 // 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
 // تم حذف إعادة تعريف المتغيرات هنا لتجنب خطأ التعارض.
 
-if (downloadCardsAsPDFBtn) { 
-    downloadCardsAsPDFBtn.addEventListener('click', () => {
+if (downloadCardsAsImageBtn) { 
+    downloadCardsAsImageBtn('click', () => {
         const containerToCapture = printableCardsContainer;
         if (containerToCapture.children.length === 0) {
             qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
