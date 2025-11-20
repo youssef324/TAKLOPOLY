@@ -849,19 +849,17 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 🛑 حاوية كروت الطباعة 🛑 */
 #admin-printable-cards-container {
-    /* 🛑 التعديل هنا: نحدد العرض ليكون ضعف عرض A4 تقريباً 🛑 */
-    width: 794px !important; 
+    width: 794px !important; 
     
     display: grid;
-    /* 🛑 التعديل هنا: نحدد 4 أعمدة ثابتة (بدلاً من auto-fit) 🛑 */
-    grid-template-columns: repeat(4, 1fr); 
+    grid-template-columns: repeat(4, 1fr); 
     
-    gap: 15px; /* يمكن أن تبقى كما هي */
+    gap: 15px; 
     margin-top: 20px;
-    padding: 10px;
+    padding: 0 !important; /* 🛑 هام جداً: إزالة الهوامش الداخلية للحاوية */
     border: 1px dashed #007bff;
     background: #fff;
-    min-height: 0; 
+    min-height: 0; 
 }
 
 .print-card {
@@ -1460,30 +1458,30 @@ form#admin-add-item-form button[type="submit"]:hover {
         border: none;
     }
 }
-/* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF (الكود المُعدَّل والنهائي) 🛑🛑 */
+/* 🛑🛑 الكود الإضافي: تثبيت الخطوط والأبعاد النهائية 🛑🛑 */
 
-/* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت (لإظهار الإيميل والنص العربي) */
+/* 1. فرض خط واتجاه النص العربي */
 .print-card * {
-    /* الخط Arial مضمون الظهور في html2canvas */
-    font-family: Arial, Tahoma, sans-serif !important; 
-    color: #000 !important; /* لون أسود لضمان التباين */
-    
-    /* 🔑 الإضافة الحاسمة: لضمان اتجاه النص العربي (Direction) 🔑 */
-    direction: rtl !important; 
+    font-family: Arial, Tahoma, sans-serif !important; 
+    color: #000 !important;
+    direction: rtl !important; /* 🔑 لضمان عرض النص العربي بشكل سليم */
     unicode-bidi: embed !important; 
 }
 
-/* 2. تحديد ارتفاع ثابت للكارت لمنع تقطيع المحتوى أو سوء التنسيق */
+/* 2. تثبيت أبعاد الكارت */
 .print-card {
-    /* ارتفاع ثابت يضمن مساحة كافية للـ 4x2 ومنع التقطيع */
-    height: 350px !important; 
+    /* الارتفاع لمنع التقطيع */
+    height: 350px !important; 
+    /* التأكد من الـ padding و الـ margin الداخلي */
+    padding: 10px !important; 
+    margin: 0 !important;
+    box-sizing: border-box !important; /* هام جداً */
 }
 
-/* 3. تعديل حجم الـ QR لمنع التداخل مع النصوص (نلغي الأبعاد الثابتة) */
+/* 3. تعديل حجم الـ QR لمنع التداخل */
 .print-card-qr {
-    /* إزالة الأبعاد الثابتة (width/height: 120px) التي كانت موجودة سابقاً */
-    width: auto !important;
-    height: auto !important;
-    max-width: 150px !important; /* حجم أقصى معقول */
-    max-height: 150px !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 150px !important;
+    max-height: 150px !important;
 }
