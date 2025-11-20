@@ -1397,3 +1397,56 @@ form#admin-add-item-form button[type="submit"]:hover {
     display: block; 
     margin-top: 5px; 
 }
+
+/* 🛑🛑 تنسيقات خاصة بالطباعة والـ PDF (لترتيب 8 كروت في الصفحة) 🛑🛑 */
+@media print {
+
+    /* 1. إخفاء العناصر غير المرغوب فيها (الأزرار والرسائل) في ملف PDF */
+    #admin-qr-list-controls, 
+    #admin-qr-list-message {
+        display: none !important;
+    }
+
+    /* 2. تعديل تنسيق حاوية الكروت للطباعة */
+    #admin-printable-cards-container {
+        display: grid;
+        /* تقسيم الصفحة إلى 4 أعمدة متساوية للطباعة */
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 5mm; /* مسافة بسيطة بالملليمتر */
+        padding: 5mm;
+        border: none !important; /* إزالة الحدود المنقطة */
+        box-shadow: none !important;
+    }
+
+    /* 3. تعديل تنسيق الكارت ليلائم الترتيب في الشبكة */
+    .print-card {
+        width: 100%;
+        /* حافة بسيطة للمساعدة في القص بعد الطباعة */
+        border: 1px dashed #000; 
+        padding: 5px;
+        box-sizing: border-box;
+        text-align: center;
+        box-shadow: none !important; 
+        /* هام: منع انقسام الكارت بين صفحتين */
+        break-inside: avoid; 
+    }
+    
+    /* 4. إجبار المتصفح على بدء صفحة جديدة بعد كل 8 كروت */
+    /* (إذا كان لدينا 4 أعمدة، فإن 8n تعني صفين كاملين) */
+    .print-card:nth-child(8n) { 
+        page-break-after: always;
+    }
+    
+    /* 5. تعديل حجم حاوية الـ QR لتتناسب مع الـ 250px التي تم تعيينها في JS */
+    .print-card-qr {
+        /* يتم توسيط الـ QR Code حتى لو كان حجمه كبيراً */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* نلغي الأبعاد الثابتة هنا ليعتمد على الأبعاد في JS ومرونة الـ Grid */
+        width: auto;
+        height: auto;
+        padding: 0;
+        border: none;
+    }
+}
