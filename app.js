@@ -2251,44 +2251,36 @@ if (generatePrintCardsBtn) {
 // ----------------------------------------------------
 
 // 🛑🛑 6. كود تحميل الكروت كملف PDF عالي الجودة (مُعدَّل) 🛑🛑
-// تم حذف إعادة تعريف المتغيرات هنا لتجنب خطأ التعارض.
+// يجب استخدام اسم المتغير downloadCardsAsImageBtn كما اتفقنا
 
-if (downloadCardsAsImageBtn) { 
+if (downloadCardsAsImageBtn) { 
     downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
-        if (containerToCapture.children.length === 0) {
-            qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
-            qrListMessage.style.color = "red";
-            return;
-        }
-
-        qrListMessage.textContent = "جاري توليد ملف PDF عالي الجودة... قد يستغرق هذا بعض الوقت...";
-        qrListMessage.style.color = "blue";
         
-        // التحقق من تحميل مكتبة jsPDF (مهم جداً)
-        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-            qrListMessage.textContent = "❌ خطأ: مكتبة jsPDF غير موجودة. تأكد من إضافة سطر المكتبة في HTML.";
-            qrListMessage.style.color = "red";
-            return;
-        }
+        // ... (تأكد من وجود رسائل التنبيه والتحقق من المكتبة) ...
 
-        const { jsPDF } = window.jspdf;
-        // إنشاء مستند PDF بحجم A4 وبتنسيق عمودي (P)
-        const doc = new jsPDF('p', 'mm', 'a4'); 
+        const { jsPDF } = window.jspdf;
+        // إنشاء مستند PDF بحجم A4 وبتنسيق عمودي (P)
+        const doc = new jsPDF('p', 'mm', 'a4'); 
 
-        // تحويل محتوى الـ HTML إلى PDF
-        doc.html(containerToCapture, {
-            callback: function (doc) {
-                doc.save('kiropay-qr-cards.pdf');
-                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح! جودة عالية جاهزة للطباعة.";
-                qrListMessage.style.color = "green";
+        // تحويل محتوى الـ HTML إلى PDF
+        doc.html(containerToCapture, {
+            // 💡 الإعدادات المعدلة هنا:
+            html2canvas: { 
+                scale: 0.5, // 1. مقياس الضغط: نصف الحجم ليتناسب 8 كروت في صفحة A4
+                useCORS: true // 2. هام لتضمين الصور (الـ QR) بشكل صحيح
             },
-            // هام: يتم ضبط المقياس والدقة هنا لـ jsPDF
-            html2canvas: { scale: 0.5 } 
-        });
-    });
+            // 3. إضافة margin هام
+            margin: [5, 5, 5, 5], 
+            
+            callback: function (doc) {
+                doc.save('kiropay-qr-cards.pdf');
+                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح! جودة عالية جاهزة للطباعة.";
+                qrListMessage.style.color = "green";
+            },
+        });
+    });
 }
-
 
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
         if (adminQuizForm) {
