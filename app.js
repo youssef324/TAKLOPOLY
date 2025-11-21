@@ -2160,182 +2160,123 @@ if(fetchQrListBtn) {
 
 // ----------------------------------------------------
 
-// 🛑🛑 5. كود توليد كروت الطباعة (معدل: يستخدم DOM API + منطق تقسيم 8 كروت) 🛑🛑
+// 🛑🛑 5. كود توليد الكروت (عرض فقط للشاشة) 🛑🛑
 if (generatePrintCardsBtn) {
     generatePrintCardsBtn.addEventListener('click', () => {
         const jsonData = qrListResults.value;
-        if (!jsonData) {
-            qrListMessage.textContent = "الرجاء الضغط على 'الخطوة 1' أولاً لجلب البيانات.";
-            qrListMessage.style.color = "red";
-            return;
-        }
+        if (!jsonData) return alert("هات البيانات الأول!");
 
         try {
             const users = JSON.parse(jsonData);
             printableCardsContainer.innerHTML = ''; 
-            qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
+            qrListMessage.textContent = `تم توليد ${users.length} كارت.`;
+            qrListMessage.style.color = "green";
 
-            if (users.length === 0) {
-                qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
-                return;
-            }
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'print-card';
 
-            let currentPageGroup = null; 
-            let i = 0;
-            
-            function processBatch() {
-                let count = 0;
-                while(count < 50 && i < users.length) { 
-                    const user = users[i];
+                card.innerHTML = `
+                    <div class="print-card-name">${user.name || 'N/A'}</div>
+                    <div class="print-card-family">${user.family || 'N/A'}</div>
+                    <div class="print-card-qr"></div>
+                `;
+                
+                printableCardsContainer.appendChild(card);
 
-                    // 🛑 منطق تقسيم الصفحات: فتح مجموعة جديدة كل 8 كروت 🛑
-                    if (i % 8 === 0) {
-                        // إنشاء حاوية المجموعة الجديدة
-                        currentPageGroup = document.createElement('div');
-                        currentPageGroup.className = 'card-page-group';
-                        // إضافة الحاوية الجديدة إلى الحاوية الرئيسية
-                        printableCardsContainer.appendChild(currentPageGroup);
-                    }
-                    
-                    // 1. إنشاء الكارت
-                    const card = document.createElement('div');
-                    card.className = 'print-card';
-
-                    // 2. إنشاء الاسم والعائلة
-                    const nameEl = document.createElement('div');
-                    nameEl.className = 'print-card-name';
-                    nameEl.textContent = user.name || 'اسم غير معروف';
-                    
-                    const familyEl = document.createElement('div');
-                    familyEl.className = 'print-card-family';
-                    familyEl.textContent = user.family || 'أسرة غير معروفة';
-
-                    // 3. إنشاء حاوية الـ QR
-                    const qrEl = document.createElement('div');
-                    qrEl.className = 'print-card-qr';
-                    
-                    // 4. إضافة العناصر للكارت
-                    card.appendChild(nameEl);
-                    card.appendChild(familyEl);
-                    card.appendChild(qrEl);
-                    
-                    // 5. إضافة الكارت لحاوية المجموعة الحالية
-                    currentPageGroup.appendChild(card);
-
-                    // 6. توليد الـ QR Code 
-                    new QRCode(qrEl, {
-                        text: user.email,
-                        width: 250, 
-                        height: 250, 
-                        colorDark : "#000000",
-                        colorLight : "#ffffff", 
-                        correctLevel : QRCode.CorrectLevel.M 
-                    });
-                    
-                    count++;
-                    i++;
-                } 
-
-                if (i < users.length) {
-                    qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
-                    setTimeout(processBatch, 100);
-                } else {
-                    qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كـ PDF.`;
-                    qrListMessage.style.color = 'green';
-                    alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كملف PDF.");
-                }
-            } 
-            
-            processBatch(); 
+                // توليد الـ QR Code
+                new QRCode(card.querySelector('.print-card-qr'), {
+                    text: user.email,
+                    width: 180, 
+                    height: 180,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            });
 
         } catch (e) {
-            qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
-            qrListMessage.style.color = "red";
-            console.error("Failed to parse JSON for printing:", e);
+            console.error(e);
+            qrListMessage.textContent = "خطأ في البيانات";
         }
     });
 }
 // ----------------------------------------------------
-// 🛑🛑 6. الحل النهائي: تحميل الكروت كصورة عالية الدقة مع تقسيم الصفحات 🛑🛑
+// 🛑🛑 6. كود التحميل (الاستوديو الخفي - تقسيم 8 كروت) 🛑🛑
+if (downloadCardsAsImageBtn) {
+    downloadCardsAsImageBtn.addEventListener('click', async () => {
+        const allCards = Array.from(document.querySelectorAll('.print-card'));
+        if (allCards.length === 0) return alert("لا يوجد كروت!");
 
-if (downloadCardsAsImageBtn) { 
-    downloadCardsAsImageBtn.addEventListener('click', () => {
-        const containerToCapture = printableCardsContainer;
-        
-        // ... (رسائل التحقق) ...
-
-        qrListMessage.textContent = "جاري المعالجة والتحويل لـ PDF... (يرجى الانتظار)";
+        qrListMessage.textContent = "جاري إنشاء PDF... (لحظات)";
         qrListMessage.style.color = "blue";
 
-        // 1. حفظ التنسيقات الأصلية
-        const originalWidth = containerToCapture.style.width;
-        const originalGrid = containerToCapture.style.gridTemplateColumns;
-        const originalPadding = containerToCapture.style.padding;
-        const originalMargin = containerToCapture.style.margin;
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4'); // صفحة A4
+        const pdfWidth = 210; 
 
-        // 2. إجبار الحاوية على التنسيق المثالي للطباعة (لحظة التصوير فقط)
-        containerToCapture.style.width = '800px'; 
-        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        containerToCapture.style.padding = '0';
-        containerToCapture.style.margin = '0';
+        // إنشاء "حاوية خفية" بمقاسات مضبوطة للطباعة (4 كروت في السطر)
+        const studio = document.createElement('div');
+        studio.style.position = 'fixed';
+        studio.style.top = '-10000px'; // نخفيه بعيد عن العين
+        studio.style.left = '0';
+        studio.style.width = '800px'; // عرض مناسب لـ 4 كروت
+        studio.style.backgroundColor = '#ffffff';
+        studio.style.display = 'grid';
+        studio.style.gridTemplateColumns = 'repeat(4, 1fr)'; // 4 أعمدة إجباري
+        studio.style.gap = '10px';
+        studio.style.padding = '20px';
+        studio.style.direction = 'rtl'; // عشان العربي
+        document.body.appendChild(studio);
 
-        // 3. التقاط الحاوية كصورة عالية الجودة
-        html2canvas(containerToCapture, {
-            scale: 4, // جودة الطباعة
-            useCORS: true, 
-            backgroundColor: '#ffffff'
-        }).then(canvas => {
-            // 4. إرجاع التنسيقات الأصلية للموقع
-            containerToCapture.style.width = originalWidth;
-            containerToCapture.style.gridTemplateColumns = originalGrid;
-            containerToCapture.style.padding = originalPadding;
-            containerToCapture.style.margin = originalMargin;
+        // كل صفحة PDF هتشيل 8 كروت
+        const cardsPerPage = 8; 
 
-            // 5. إعداد ملف PDF
-            const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
-            const pdfPageHeight = pdf.internal.pageSize.getHeight(); // 297mm
-            
-            const imgProps = pdf.getImageProperties(imgData);
-            // حساب الارتفاع الكلي للصورة بعد تصغير عرضها ليناسب عرض الـ PDF
-            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width; 
-
-            // 🛑🛑 منطق تقسيم الصفحات 🛑🛑
-            let heightLeft = imgHeight; // الارتفاع المتبقي من الصورة
-            let position = 0; // موضع البداية (من أعلى) للصورة داخل الـ PDF
-
-            // 6. إضافة الصورة والتعامل مع الصفحات المتعددة
-            // إضافة الصفحة الأولى
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight); 
-            heightLeft -= pdfPageHeight; 
-
-            // إضافة الصفحات المتبقية (إذا كان هناك ارتفاع متبقي)
-            while (heightLeft > 0) {
-                // نضبط الموضع ليكون سالب (لتحريك الصورة لأعلى بمقدار ارتفاع الصفحة)
-                position -= pdfPageHeight; 
+        try {
+            for (let i = 0; i < allCards.length; i += cardsPerPage) {
+                // ناخد مجموعة (8 كروت)
+                const chunk = allCards.slice(i, i + cardsPerPage);
                 
-                pdf.addPage();
-                // إضافة جزء من الصورة في الصفحة الجديدة
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfPageHeight;
+                // نفضي الاستوديو ونحط فيه المجموعة دي بس
+                studio.innerHTML = '';
+                chunk.forEach(originalCard => {
+                    // ناخد نسخة من الكارت
+                    const clone = originalCard.cloneNode(true);
+                    // نظبط ستايل النسخة عشان تطلع مظبوطة في الطباعة
+                    clone.style.height = "340px"; // ارتفاع ثابت
+                    clone.style.width = "auto";
+                    clone.style.margin = "0";
+                    clone.style.border = "1px dashed #000"; // حدود للقص
+                    clone.style.boxShadow = "none";
+                    studio.appendChild(clone);
+                });
+
+                // نصور الاستوديو الخفي
+                const canvas = await html2canvas(studio, {
+                    scale: 2, // جودة عالية
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfImgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                // إضافة صفحة جديدة لو مش في الأول
+                if (i > 0) pdf.addPage();
+                
+                // وضع الصورة في الـ PDF
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfImgHeight);
             }
 
-            // 7. التحميل
-            pdf.save('kiropay-qr-cards.pdf');
-            
-            qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح (جاهز للطباعة)!";
+            pdf.save('kiropay_cards.pdf');
+            qrListMessage.textContent = "✅ تم التحميل بنجاح!";
             qrListMessage.style.color = "green";
 
-        }).catch(err => {
-            // ... (معالجة الخطأ) ...
-            qrListMessage.textContent = "❌ حدث خطأ أثناء التحويل. تحقق من أن المكتبات محملة.";
-            qrListMessage.style.color = "red";
-            containerToCapture.style.width = originalWidth;
-            containerToCapture.style.gridTemplateColumns = originalGrid;
-        });
+        } catch (err) {
+            console.error(err);
+            qrListMessage.textContent = "❌ حدث خطأ.";
+        } finally {
+            // تنظيف: نمسح الاستوديو
+            document.body.removeChild(studio);
+        }
     });
 }
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
