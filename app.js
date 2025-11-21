@@ -378,104 +378,85 @@ loadAnnouncement();
                 const user = data.user;
                 loggedInUserProfile = user;
 
-         // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) المُحدّث --- 🛑🛑🛑
+        
+                // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
+                if (user.role === 'admin') {
+                    // 1. عرض لوحة الأدمن (ADMIN VIEW)
+                    messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
+                    adminPanelDiv.style.display = "block";
+                    cardContainer.style.display = "flex"; // الأدمن يرى الكارت الخاص به
+                    avatarOverlayLabel.style.display = "flex";
+                    
+                    // ملء بيانات كارت الأدمن (نفس بيانات اليوزر العادي)
+                    userNameP.textContent = `الاسم: ${user.name}`;
+                    userFamilyP.textContent = `العائلة: ${user.family}`;
+                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
+                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
+                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+                    
+                    await loadTransactionHistory(user.email);
+                    await loadAnnouncement();
+                    await loadAdminStoreItems(); 
 
-if (user.role === 'admin') {
-    // 1. عرض لوحة الأدمن (ADMIN VIEW)
-    messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
-    if (adminPanelDiv) adminPanelDiv.style.display = "block";
-    if (cardContainer) cardContainer.style.display = "flex"; // الأدمن يرى الكارت الخاص به
-    if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
-    
-    // ملء بيانات كارت الأدمن (نفس بيانات اليوزر العادي)
-    userNameP.textContent = `الاسم: ${user.name}`;
-    userFamilyP.textContent = `العائلة: ${user.family}`;
-    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-    
-    await loadTransactionHistory(user.email);
-    await loadAnnouncement();
-    await loadAdminStoreItems(); 
-    
-    // إظهار جميع أقسام الأدمن (باستخدام كتل الحماية)
-    if (allAdminSections && allAdminSections.length > 0) {
-        allAdminSections.forEach(section => section.style.display = 'block');
-    }
+                    // إخفاء أشياء اليوزر العادي
+                    formContainer.style.display = "none";
+                    logoutBtn.style.display = "block";
+                    refreshDataBtn.style.display = "block";
+                    unlockedItemsBtn.style.display = "none";
+                    if (showQrBtn) showQrBtn.style.display = "none";
+                    hideUserSections();
 
-    // إخفاء أشياء اليوزر العادي
-    if (formContainer) formContainer.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (refreshDataBtn) refreshDataBtn.style.display = "block";
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-    if (showQrBtn) showQrBtn.style.display = "none";
-    hideUserSections();
+                } else if (user.role === 'guest') {
+                    // 2. عرض لوحة الزائر (GUEST VIEW)
+                    messageDiv.textContent = "مرحباً أيها الزائر!";
+                    guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
+                    logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
+                    
+                    // 🛑 إخفاء كل شيء آخر
+                    cardContainer.style.display = "none";
+                    formContainer.style.display = "none";
+                    avatarOverlayLabel.style.display = "none";
+                    refreshDataBtn.style.display = "none";
+                    unlockedItemsBtn.style.display = "none";
+                    if (showQrBtn) showQrBtn.style.display = "none";
+                    hideUserSections();
+                    leaderboardContainer.style.display = "none";
+                    adminPanelDiv.style.display = "none";
 
-// 🛑🛑 2. إضافة لوحة الماسح (SCANNER VIEW) 🛑🛑
-} else if (user.role === 'scanner') { 
-    messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
-    
-    // إظهار لوحة الأدمن (التي تحتوي على الماسح)
-    if (adminPanelDiv) adminPanelDiv.style.display = "block"; 
-    
-    // إخفاء جميع الأقسام الداخلية الأخرى للأدمن
-    if (allAdminSections && allAdminSections.length > 0) {
-        allAdminSections.forEach(section => section.style.display = 'none');
-    }
-    
-    // إظهار قسم المسح فقط
-    if (adminScanSection) adminScanSection.style.display = 'block'; 
+                } else {
+                    // 3. عرض لوحة المستخدم العادي (USER VIEW)
+                    userNameP.textContent = `الاسم: ${user.name}`;
+                    userFamilyP.textContent = `العائلة: ${user.family}`;
+                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
+                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
+                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+                    
+                    cardContainer.style.display = "flex";
+                    formContainer.style.display = "none";
+                    logoutBtn.style.display = "block";
+                    refreshDataBtn.style.display = "block";
+                    avatarOverlayLabel.style.display = "flex";
 
-    // إخفاء كل ما يخص المستخدم العادي والأدمن الكامل
-    if (cardContainer) cardContainer.style.display = "none";
-    if (formContainer) formContainer.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (refreshDataBtn) refreshDataBtn.style.display = "none";
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-    if (showQrBtn) showQrBtn.style.display = "none";
-    hideUserSections();
+                    await loadTransactionHistory(user.email);
+                    
+                    unlockedItemsBtn.style.display = "block"; 
+                    if (showQrBtn) showQrBtn.style.display = "block"; 
+                    await loadMainDashboard(); 
+                    await loadAnnouncement(); 
+                    leaderboardContainer.style.display = "block";
+                    adminPanelDiv.style.display = "none";
+                }
+                // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
-} else if (user.role === 'guest') {
-    // 3. عرض لوحة الزائر (GUEST VIEW)
-    messageDiv.textContent = "مرحباً أيها الزائر!";
-    if (guestContainer) guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
-    if (logoutBtnGuest) logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
-    
-    // 🛑 إخفاء كل شيء آخر
-    if (cardContainer) cardContainer.style.display = "none";
-    if (formContainer) formContainer.style.display = "none";
-    if (avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
-    if (refreshDataBtn) refreshDataBtn.style.display = "none";
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-    if (showQrBtn) showQrBtn.style.display = "none";
-    hideUserSections();
-    if (leaderboardContainer) leaderboardContainer.style.display = "none";
-    if (adminPanelDiv) adminPanelDiv.style.display = "none";
-
-} else {
-    // 4. عرض لوحة المستخدم العادي (USER VIEW)
-    userNameP.textContent = `الاسم: ${user.name}`;
-    userFamilyP.textContent = `العائلة: ${user.family}`;
-    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-    
-    if (cardContainer) cardContainer.style.display = "flex";
-    if (formContainer) formContainer.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (refreshDataBtn) refreshDataBtn.style.display = "block";
-    if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
-
-    await loadTransactionHistory(user.email);
-    
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "block"; 
-    if (showQrBtn) if (showQrBtn) showQrBtn.style.display = "block"; 
-    await loadMainDashboard(); 
-    await loadAnnouncement(); 
-    if (leaderboardContainer) leaderboardContainer.style.display = "block";
-    if (adminPanelDiv) adminPanelDiv.style.display = "none";
-}
-// 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
+            } else {
+                messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
+                messageDiv.style.color = "red";
+            }
+        } catch (err) {
+            messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
+            messageDiv.style.color = "red";
+        }
+    });
 
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     if (unlockedItemsBtn) unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
