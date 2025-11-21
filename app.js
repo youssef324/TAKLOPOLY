@@ -148,6 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const rewardReasonSelect = document.getElementById("reward-reason-select");
     const scanStatusMessage = document.getElementById("scan-status-message");
     let html5QrCode = null; // للمكتبة
+    const adminPanelDiv = document.getElementById("admin-panel");
+const allAdminSections = adminPanelDiv ? adminPanelDiv.querySelectorAll('.admin-section') : [];
 
     // 🛑🛑 عناصر طباعة الـ QR (مُعدلة) 🛑🛑
     const fetchQrListBtn = document.getElementById("admin-fetch-qr-list-btn");
