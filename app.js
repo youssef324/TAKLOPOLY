@@ -435,7 +435,6 @@ loadAnnouncement();
                     if (showQrBtn) showQrBtn.style.display = "none";
                     hideUserSections();
                     leaderboardContainer.style.display = "none";
-                    adminPanelDiv.style.display = "none";
                     
             } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
