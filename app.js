@@ -2251,7 +2251,7 @@ if (downloadCardsAsImageBtn) {
 
                 // نصور الاستوديو الخفي
                 const canvas = await html2canvas(studio, {
-                    scale: 2, // جودة عالية
+                    scale: 3, // جودة عالية
                     useCORS: true
                 });
 
