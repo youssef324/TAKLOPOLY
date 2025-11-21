@@ -421,8 +421,9 @@ loadAnnouncement();
                     adminPanelDiv.style.display = "none";
                 
                 } else if (user.role === 'scanner') {
-                    adminPanelDiv.style.display = "block";
-
+                    messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
+if (adminScanSection) adminScanSection.style.display = 'block'; 
+                if (batchScanContainer) batchScanContainer.style.display = "block";
             } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
