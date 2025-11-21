@@ -2172,7 +2172,7 @@ if (generatePrintCardsBtn) {
 
         try {
             const users = JSON.parse(jsonData);
-            printableCardsContainer.innerHTML = ''; // تفريغ الحاوية
+            printableCardsContainer.innerHTML = ''; 
             qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
 
             if (users.length === 0) {
@@ -2180,13 +2180,12 @@ if (generatePrintCardsBtn) {
                 return;
             }
 
-            // متغير لتتبع حاوية المجموعة الحالية
             let currentPageGroup = null; 
             let i = 0;
             
             function processBatch() {
                 let count = 0;
-                while(count < 50 && i < users.length) { // معالجة 50 كارت في المرة
+                while(count < 50 && i < users.length) { 
                     const user = users[i];
 
                     // 🛑 منطق تقسيم الصفحات: فتح مجموعة جديدة كل 8 كروت 🛑
@@ -2220,10 +2219,10 @@ if (generatePrintCardsBtn) {
                     card.appendChild(familyEl);
                     card.appendChild(qrEl);
                     
-                    // 5. إضافة الكارت لحاوية المجموعة الحالية (وليس الحاوية الرئيسية مباشرة)
+                    // 5. إضافة الكارت لحاوية المجموعة الحالية
                     currentPageGroup.appendChild(card);
 
-                    // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
+                    // 6. توليد الـ QR Code 
                     new QRCode(qrEl, {
                         text: user.email,
                         width: 250, 
@@ -2235,21 +2234,19 @@ if (generatePrintCardsBtn) {
                     
                     count++;
                     i++;
-                } // نهاية while
+                } 
 
                 if (i < users.length) {
-                    // لو لسه فيه تاني، كمل بعد 100 مللي ثانية
                     qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
                     setTimeout(processBatch, 100);
                 } else {
-                    // خلصنا
                     qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كـ PDF.`;
                     qrListMessage.style.color = 'green';
                     alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كملف PDF.");
                 }
-            } // نهاية processBatch()
+            } 
             
-            processBatch(); // بدء أول دفعة
+            processBatch(); 
 
         } catch (e) {
             qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
@@ -2259,7 +2256,6 @@ if (generatePrintCardsBtn) {
     });
 }
 // ----------------------------------------------------
-
 // 🛑🛑 6. الحل النهائي: تحميل الكروت كصورة عالية الدقة مع تقسيم الصفحات 🛑🛑
 
 if (downloadCardsAsImageBtn) { 
