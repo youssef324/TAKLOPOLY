@@ -402,32 +402,7 @@ loadAnnouncement();
                     unlockedItemsBtn.style.display = "none";
                     if (showQrBtn) showQrBtn.style.display = "none";
                     hideUserSections();
-// 🛑🛑 2. إضافة لوحة الماسح (SCANNER VIEW) 🛑🛑
-} else if (user.role === 'scanner') { 
-    messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
 
-    // 🔴 1. إظهار لوحة الأدمن الرئيسية (التي تحتوي على الماسح)
-    if (adminPanelDiv) adminPanelDiv.style.display = "block"; 
-    
-    // 🔴 2. إخفاء جميع أقسام الأدمن الداخلية الأخرى 
-    // (لتفادي رؤية الماسح لأقسام الإدارة والتحكم)
-    if (allAdminSections && allAdminSections.length > 0) {
-        allAdminSections.forEach(section => section.style.display = 'none');
-    }
-    
-    // 🔴 3. إظهار قسم الماسح المحدد وقائمة التجميع
-    if (adminScanSection) adminScanSection.style.display = 'block'; 
-    if (batchScanContainer) batchScanContainer.style.display = "block";
-
-    // 🔴 4. إخفاء كل ما يخص المستخدم العادي والأدمن الكامل
-    if (cardContainer) cardContainer.style.display = "none";
-    if (formContainer) formContainer.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (refreshDataBtn) refreshDataBtn.style.display = "none";
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-    if (showQrBtn) showQrBtn.style.display = "none";
-    hideUserSections(); 
-    if (leaderboardContainer) leaderboardContainer.style.display = "none";
                 } else if (user.role === 'guest') {
                     // 2. عرض لوحة الزائر (GUEST VIEW)
                     messageDiv.textContent = "مرحباً أيها الزائر!";
@@ -474,7 +449,7 @@ loadAnnouncement();
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
             }
-        catch (err) {
+        } catch (err) {
             messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
             messageDiv.style.color = "red";
         }
