@@ -1433,6 +1433,7 @@ form#admin-add-item-form button[type="submit"]:hover {
         box-shadow: none !important; 
         /* هام: منع انقسام الكارت بين صفحتين */
         break-inside: avoid; 
+        margin-bottom: 20px !important;
     }
     
     /* 4. إجبار المتصفح على بدء صفحة جديدة بعد كل 8 كروت */
