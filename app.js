@@ -2250,60 +2250,61 @@ if (generatePrintCardsBtn) {
     
 // ----------------------------------------------------
 
-// 🛑🛑 6. كود تحميل الكروت كملف PDF (الحل الجذري للقص واللغة) 🛑🛑
+// 🛑🛑 6. كود تحميل الكروت كملف PDF (تم إصلاح العربي) 🛑🛑
 
-if (downloadCardsAsImageBtn) { // تأكد من اسم المتغير الصحيح لديك
+if (downloadCardsAsImageBtn) { 
     downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
         
         if (containerToCapture.children.length === 0) {
-            qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
+            qrListMessage.textContent = "الرجاء توليد الكروت أولاً.";
             qrListMessage.style.color = "red";
             return;
         }
 
-        qrListMessage.textContent = "جاري توليد ملف PDF... يرجى الانتظار...";
+        qrListMessage.textContent = "جاري توليد ملف PDF...";
         qrListMessage.style.color = "blue";
 
-        // التحقق من المكتبة
         if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
             qrListMessage.textContent = "❌ خطأ: مكتبة jsPDF غير موجودة.";
-            qrListMessage.style.color = "red";
             return;
         }
 
         const { jsPDF } = window.jspdf;
-        // استخدام A4
         const doc = new jsPDF('p', 'mm', 'a4'); 
         
-        // 🛑 هنا الحل السحري: إجبار الحاوية على عرض ثابت أثناء التحويل فقط 🛑
+        // حفظ التنسيق الأصلي
         const originalWidth = containerToCapture.style.width;
         const originalGrid = containerToCapture.style.gridTemplateColumns;
-        
-        // تغيير مؤقت للتنسيق ليناسب PDF (800px لضمان عدم القص)
+        const originalPadding = containerToCapture.style.padding;
+        const originalMargin = containerToCapture.style.margin;
+
+        // تطبيق تنسيق الطباعة الإجباري (لحل مشكلة القص)
         containerToCapture.style.width = '800px'; 
-        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)'; // تثبيت 4 أعمدة
+        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)'; 
+        containerToCapture.style.padding = '0'; 
+        containerToCapture.style.margin = '0'; 
 
         doc.html(containerToCapture, {
             callback: function (doc) {
-                // إرجاع التنسيق لأصله بعد الانتهاء
+                // إرجاع التنسيق الأصلي
                 containerToCapture.style.width = originalWidth;
                 containerToCapture.style.gridTemplateColumns = originalGrid;
+                containerToCapture.style.padding = originalPadding;
+                containerToCapture.style.margin = originalMargin;
                 
                 doc.save('kiropay-qr-cards.pdf');
-                qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح!";
+                qrListMessage.textContent = "✅ تم التحميل بنجاح!";
                 qrListMessage.style.color = "green";
             },
             x: 0,
             y: 0,
             html2canvas: { 
-                scale: 0.24, // 🛑 تعديل المقياس ليتناسب مع عرض 800px داخل A4 (210mm)
-                useCORS: true, // للصور
-                // 🛑 محاولة لحل مشكلة العربي (تجريبية لكنها الأفضل المتاحة)
-                letterRendering: true 
+                scale: 0.24, 
+                useCORS: true,
+                // 🛑 حذفنا letterRendering: true لأنه كان بيبوظ العربي 🛑
             },
-            // هوامش بسيطة
-            margin: [5, 5, 5, 5],
+            margin: [10, 5, 5, 5],
             autoPaging: 'text'
         });
     });
