@@ -445,7 +445,7 @@ loadAnnouncement();
                     leaderboardContainer.style.display = "none";
                     adminPanelDiv.style.display = "none";
 
-                } else if{
+                } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
                     userFamilyP.textContent = `العائلة: ${user.family}`;
@@ -470,7 +470,7 @@ loadAnnouncement();
                 }
                 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
-            } else {
+            else {
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
             }
