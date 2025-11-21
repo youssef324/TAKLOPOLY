@@ -1457,10 +1457,15 @@ form#admin-add-item-form button[type="submit"]:hover {
 /* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF (يُضاف هذا الكود كاملاً) 🛑🛑 */
 
 /* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت (لإظهار الإيميل) */
+/* 1. فرض خط واتجاه النص العربي (مُعدل) */
 .print-card * {
-    /* الخط Arial مضمون الظهور في html2canvas */
-    font-family: Arial, Tahoma, sans-serif !important; 
-    color: #000 !important; /* لون أسود لضمان التباين */
+    /* استخدام sans-serif فقط بيحل مشاكل كتير في العربي مع html2canvas */
+    font-family: sans-serif !important; 
+    color: #000 !important;
+    direction: rtl !important; 
+    unicode-bidi: embed !important; 
+    /* إلغاء أي ظل للنصوص لأنه بيعمل غلغشة في التحويل */
+    text-shadow: none !important; 
 }
 
 /* 2. تحديد ارتفاع ثابت للكارت لمنع تقطيع المحتوى أو سوء التنسيق */
