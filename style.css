@@ -1346,74 +1346,82 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin-top: 5px; 
 }
 
-/* 🛑🛑 تنسيقات خاصة بالطباعة والـ PDF (مُعدل وموحد) 🛑🛑 */
+/* 🛑🛑 تنسيقات الطباعة الموحدة (4x2 = 8 كروت في الصفحة) 🛑🛑 */
 @media print {
     
-    /* 1. 🛠️ استراتيجية الإخفاء والإظهار الموحدة */
+    /* 1. استراتيجية الإخفاء والإظهار الموحدة */
     body * { 
         display: none !important; 
         visibility: hidden !important; 
     }
 
     #admin-printable-cards-container, 
-    #admin-printable-cards-container * {
+    #admin-printable-cards-container *,
+    .card-page-group, .card-page-group * { /* إضافة حاوية المجموعات هنا */
         visibility: visible !important; 
         display: block !important; 
     }
 
-    /* إخفاء العناصر غير المرغوب فيها (الأزرار والرسائل) */
-    #admin-qr-list-controls, 
-    #admin-qr-list-message {
+    #admin-qr-list-controls, 
+    #admin-qr-list-message {
         display: none !important;
     }
 
-    /* 2. 🧱 تنسيق حاوية الكروت وتفعيل الـ Grid */
+    /* 2. تنسيق الحاوية الرئيسية */
     #admin-printable-cards-container {
-        display: grid !important;
-        /* تقسيم الصفحة إلى 4 أعمدة متساوية للطباعة */
-        grid-template-columns: repeat(4, 1fr) !important; 
-        gap: 5mm !important; /* مسافة بسيطة بالملليمتر */
-        padding: 5mm !important;
-        border: none !important; /* إزالة الحدود المنقطة */
-        box-shadow: none !important;
-        /* لضمان ملء عرض الصفحة وتثبيت الموقع */
-        width: 100% !important;
+        /* إزالة قواعد الـ Grid من هنا ووضعها في .card-page-group */
+        display: block !important;
+        width: 100% !important;
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
+        padding: 5mm !important;
+        border: none !important; 
+        box-shadow: none !important;
     }
+    
+    /* 3. 🆕 إضافة تنسيق حاوية مجموعة الكروت (لتحقيق 4x2 ومنع التقطّع) */
+    .card-page-group {
+        /* تطبيق الـ Grid على المجموعة الفرعية */
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 5mm !important; 
+        
+        /* 🛑 هذا السطر هو مفتاح تقسيم كل 8 كروت في صفحة جديدة 🛑 */
+        page-break-after: always !important; 
+        
+        /* هذا لضمان أن الـ Grid يأخذ حجم الصفحة بشكل كامل */
+        width: 100% !important;
+        height: auto !important; 
+        margin-bottom: 20px !important; /* فاصل بسيط */
+    }
 
-    /* 3. ✂️ تعديل تنسيق الكارت ليلائم الترتيب في الشبكة ومنع تقطّعه */
+    /* 4. تنسيق الكارت ومنع تقطّعه */
     .print-card {
-        width: auto !important; /* هام ليعتمد على الـ Grid */
-        /* حافة بسيطة للمساعدة في القص بعد الطباعة */
+        width: auto !important; 
+        /* 🛑 منع انقسام الكارت الواحد بين صفحتين 🛑 */
+        break-inside: avoid !important; 
+        page-break-inside: avoid !important;
+        
         border: 1px dashed #000 !important; 
         padding: 5px !important;
         box-sizing: border-box !important;
         text-align: center !important;
         box-shadow: none !important; 
-        /* هام: منع انقسام الكارت بين صفحتين (حل مشكلة التقطّع) */
-        break-inside: avoid !important; 
-        page-break-inside: avoid !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 0 !important; /* نلغي المارجن لأنه قد يسبب تقطّع */
     }
         
-    /* 4. 📷 تعديل حجم حاوية الـ QR لتتناسب مع الـ Grid */
+    /* 5. تنسيق الـ QR Code (كما اتفقنا عليه سابقاً) */
     .print-card-qr {
-        /* يتم توسيط الـ QR Code حتى لو كان حجمه كبيراً */
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: auto !important;
         height: auto !important;
-        padding: 0 !important;
-        border: none !important;
-        /* تحديد حجم أقصى معقول لوحدة الطباعة */
         max-width: 60mm !important; 
         max-height: 60mm !important;
     }
 
-    /* التأكد من ظهور محتوى الـ QR (الصورة أو الـ Canvas) */
     .print-card-qr img,
     .print-card-qr canvas {
         width: 100% !important;
@@ -1422,16 +1430,12 @@ form#admin-add-item-form button[type="submit"]:hover {
         visibility: visible !important; 
     }
 }
-
 /* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF 🛑🛑 */
 
-/* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت */
 .print-card * {
-    /* استخدام sans-serif فقط بيحل مشاكل كتير في العربي مع html2canvas */
     font-family: sans-serif !important; 
     color: #000 !important;
     direction: rtl !important; 
     unicode-bidi: embed !important; 
-    /* إلغاء أي ظل للنصوص */
     text-shadow: none !important; 
 }
