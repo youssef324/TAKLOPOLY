@@ -2250,20 +2250,15 @@ if (generatePrintCardsBtn) {
     
 // ----------------------------------------------------
 
-// 🛑🛑 6. كود تحميل الكروت كملف PDF (الحل الجذري: طريقة الصورة) 🛑🛑
+// 🛑🛑 6. الحل النهائي: تحميل الكروت كصورة عالية الدقة مع تقسيم الصفحات 🛑🛑
 
 if (downloadCardsAsImageBtn) { 
     downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
         
-        // التحقق من وجود كروت
-        if (containerToCapture.children.length === 0) {
-            qrListMessage.textContent = "الرجاء توليد الكروت أولاً.";
-            qrListMessage.style.color = "red";
-            return;
-        }
+        // ... (رسائل التحقق) ...
 
-        qrListMessage.textContent = "جاري المعالجة والتحويل لـ PDF... (قد يستغرق ثواني)";
+        qrListMessage.textContent = "جاري المعالجة والتحويل لـ PDF... (يرجى الانتظار)";
         qrListMessage.style.color = "blue";
 
         // 1. حفظ التنسيقات الأصلية
@@ -2272,60 +2267,71 @@ if (downloadCardsAsImageBtn) {
         const originalPadding = containerToCapture.style.padding;
         const originalMargin = containerToCapture.style.margin;
 
-        // 2. إجبار الحاوية على التنسيق المثالي للطباعة (800px و 4 أعمدة)
-        // هذا يضمن أن الكروت تظهر مفرودة وغير مقصوصة قبل التقاط الصورة
+        // 2. إجبار الحاوية على التنسيق المثالي للطباعة (لحظة التصوير فقط)
         containerToCapture.style.width = '800px'; 
         containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)';
         containerToCapture.style.padding = '0';
         containerToCapture.style.margin = '0';
 
-        // 3. التقاط الحاوية كصورة عالية الجودة باستخدام html2canvas
+        // 3. التقاط الحاوية كصورة عالية الجودة
         html2canvas(containerToCapture, {
-            scale: 4, // دقة عالية (High Quality)
-            useCORS: true, // لضمان ظهور صور الـ QR
-            backgroundColor: '#ffffff' // خلفية بيضاء
+            scale: 4, // جودة الطباعة
+            useCORS: true, 
+            backgroundColor: '#ffffff'
         }).then(canvas => {
-            // 4. إرجاع التنسيقات الأصلية للموقع (عشان الشاشة متتبهدلش)
+            // 4. إرجاع التنسيقات الأصلية للموقع
             containerToCapture.style.width = originalWidth;
             containerToCapture.style.gridTemplateColumns = originalGrid;
             containerToCapture.style.padding = originalPadding;
             containerToCapture.style.margin = originalMargin;
 
-            // 5. إنشاء ملف PDF ووضع الصورة بداخله
+            // 5. إعداد ملف PDF
             const imgData = canvas.toDataURL('image/png');
             const { jsPDF } = window.jspdf;
             
-            // إنشاء ملف A4
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth(); // عرض الـ A4 (210mm)
-            const pdfHeight = pdf.internal.pageSize.getHeight(); // ارتفاع الـ A4
+            const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+            const pdfPageHeight = pdf.internal.pageSize.getHeight(); // 297mm
             
-            // حساب أبعاد الصورة لتناسب عرض الـ PDF
             const imgProps = pdf.getImageProperties(imgData);
-            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            // حساب الارتفاع الكلي للصورة بعد تصغير عرضها ليناسب عرض الـ PDF
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width; 
 
-            // إضافة الصورة للـ PDF
-            // (إذا كانت الصورة أطول من صفحة واحدة، يمكننا قصها، لكن حالياً سنضعها كما هي)
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
-            
-            // 6. التحميل
+            // 🛑🛑 منطق تقسيم الصفحات 🛑🛑
+            let heightLeft = imgHeight; // الارتفاع المتبقي من الصورة
+            let position = 0; // موضع البداية (من أعلى) للصورة داخل الـ PDF
+
+            // 6. إضافة الصورة والتعامل مع الصفحات المتعددة
+            // إضافة الصفحة الأولى
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight); 
+            heightLeft -= pdfPageHeight; 
+
+            // إضافة الصفحات المتبقية (إذا كان هناك ارتفاع متبقي)
+            while (heightLeft > 0) {
+                // نضبط الموضع ليكون سالب (لتحريك الصورة لأعلى بمقدار ارتفاع الصفحة)
+                position -= pdfPageHeight; 
+                
+                pdf.addPage();
+                // إضافة جزء من الصورة في الصفحة الجديدة
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                heightLeft -= pdfPageHeight;
+            }
+
+            // 7. التحميل
             pdf.save('kiropay-qr-cards.pdf');
             
-            qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح (صورة طبق الأصل)!";
+            qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح (جاهز للطباعة)!";
             qrListMessage.style.color = "green";
 
         }).catch(err => {
-            console.error("خطأ في التحويل:", err);
-            qrListMessage.textContent = "❌ حدث خطأ أثناء التحويل.";
+            // ... (معالجة الخطأ) ...
+            qrListMessage.textContent = "❌ حدث خطأ أثناء التحويل. تحقق من أن المكتبات محملة.";
             qrListMessage.style.color = "red";
-            
-            // إرجاع التنسيقات في حالة الخطأ أيضاً
             containerToCapture.style.width = originalWidth;
             containerToCapture.style.gridTemplateColumns = originalGrid;
         });
     });
 }
-
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
         if (adminQuizForm) {
             adminQuizForm.addEventListener("submit", async (event) => {
