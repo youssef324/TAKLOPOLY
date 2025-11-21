@@ -2110,179 +2110,175 @@ avatarUploadInput.addEventListener("change", async (event) => {
         }
 
         // 🛑🛑 4. كود جلب قائمة الـ QR للطباعة (مُعدل) 🛑🛑
-        if(fetchQrListBtn) {
-            fetchQrListBtn.addEventListener('click', async () => {
-                if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
-                    qrListMessage.textContent = "خطأ: غير مصرح لك.";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
+// يجب افتراض أن المتغيرات التالية مُعرفة في مكان أعلى في الملف:
+// const fetchQrListBtn, qrListResults, qrListMessage, loggedInUserProfile
+// const printableCardsContainer, generatePrintCardsBtn, downloadCardsAsPDFBtn
 
-                qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
-                qrListMessage.style.color = "blue";
-                qrListResults.value = ""; // تفريغ المربع
-                fetchQrListBtn.disabled = true;
-
-                try {
-                    const response = await fetch(`/admin-get-qr-list`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            adminEmail: loggedInUserProfile.email 
-                        })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (response.ok && data.success) {
-                        qrListMessage.textContent = `✅ نجاح! تم جلب ${data.users.length} مستخدم. اضغط "الخطوة 2" للتوليد.`;
-                        qrListMessage.style.color = 'green';
-                        // 🛑 تخزين الـ JSON في مربع النص (المخفي)
-                        qrListResults.value = JSON.stringify(data.users); 
-                    } else {
-                        qrListMessage.textContent = `❌ فشل: ${data.error || 'فشل في جلب القائمة.'}`;
-                        qrListMessage.style.color = 'red';
-                    }
-
-                } catch (err) {
-                     qrListMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
-                     qrListMessage.style.color = 'red';
-                     console.error("Fetch QR List Error:", err);
-                } finally {
-                    fetchQrListBtn.disabled = false;
-                }
-            });
+if(fetchQrListBtn) {
+    fetchQrListBtn.addEventListener('click', async () => {
+        if (!loggedInUserProfile || loggedInUserProfile.role !== 'admin') {
+            qrListMessage.textContent = "خطأ: غير مصرح لك.";
+            qrListMessage.style.color = "red";
+            return;
         }
 
-        // 🛑🛑 5. كود توليد كروت الطباعة (جديد) 🛑🛑
-        if (generatePrintCardsBtn) {
-            generatePrintCardsBtn.addEventListener('click', () => {
-                const jsonData = qrListResults.value;
-                if (!jsonData) {
-                    qrListMessage.textContent = "الرجاء الضغط على 'الخطوة 1' أولاً لجلب البيانات.";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
+        qrListMessage.textContent = "جاري جلب قائمة المستخدمين...";
+        qrListMessage.style.color = "blue";
+        qrListResults.value = ""; // تفريغ المربع
+        fetchQrListBtn.disabled = true;
 
-                try {
-                    const users = JSON.parse(jsonData);
-                    printableCardsContainer.innerHTML = ''; // تفريغ الحاوية
-                    qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
-
-                    if (users.length === 0) {
-                         qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
-                         return;
-                    }
-
-                    // استخدام setTimeout لتقسيم العمليات ومنع "تجمد" المتصفح
-                    let i = 0;
-                    function processBatch() {
-                        let count = 0;
-                        while(count < 50 && i < users.length) { // معالجة 50 كارت في المرة
-                            const user = users[i];
-                            
-                            // 1. إنشاء الكارت
-                            const card = document.createElement('div');
-                            card.className = 'print-card';
-
-                            // 2. إنشاء الاسم والعائلة
-                            const nameEl = document.createElement('div');
-                            nameEl.className = 'print-card-name';
-                            nameEl.textContent = user.name || 'اسم غير معروف';
-                            
-                            const familyEl = document.createElement('div');
-                            familyEl.className = 'print-card-family';
-                            familyEl.textContent = user.family || 'أسرة غير معروفة';
-
-                            // 3. إنشاء حاوية الـ QR
-                            const qrEl = document.createElement('div');
-                            qrEl.className = 'print-card-qr';
-                            
-                            // 4. إضافة العناصر للكارت
-                            card.appendChild(nameEl);
-                            card.appendChild(familyEl);
-                            card.appendChild(qrEl);
-                            
-                            // 5. إضافة الكارت للحاوية الرئيسية
-                            printableCardsContainer.appendChild(card);
-
-                            // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
-                            new QRCode(qrEl, {
-                                text: user.email,
-                                width: 120,
-                                height: 120,
-                                colorDark : "#000000",
-                                colorLight : "#ffffff",
-                                correctLevel : QRCode.CorrectLevel.M // M يكفي للإيميلات
-                            });
-
-                            count++;
-                            i++;
-                        }
-
-                        if (i < users.length) {
-                            // لو لسه فيه تاني، كمل بعد 100 مللي ثانية
-                            qrListMessage.textContent = `جاري توليد الكروت... (${i}/${users.length})`;
-                            setTimeout(processBatch, 100);
-                        } else {
-                            // خلصنا
-                            qrListMessage.textContent = `✅ اكتمل! تم توليد ${users.length} كارت. الصفحة جاهزة للتحميل كصورة أو للطباعة.`;
-                            qrListMessage.style.color = 'green';
-                            alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كصورة أو استخدام (Ctrl+P) لطباعتها.");
-                        }
-                    }
-                    
-                    processBatch(); // بدء أول دفعة
-
-                } catch (e) {
-                    qrListMessage.textContent = "خطأ في تحليل بيانات الـ JSON. حاول الجلب مرة أخرى.";
-                    qrListMessage.style.color = "red";
-                    console.error("Failed to parse JSON for printing:", e);
-                }
+        try {
+            const response = await fetch(`/admin-get-qr-list`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    adminEmail: loggedInUserProfile.email 
+                })
             });
-        }
-        
-        // 🛑🛑 6. كود تحميل الكروت كصورة (جديد) 🛑🛑
-        if (downloadCardsAsImageBtn) {
-            downloadCardsAsImageBtn.addEventListener('click', () => {
-                const containerToCapture = printableCardsContainer; // The <div> with all the cards
-                if (containerToCapture.children.length === 0) {
-                    qrListMessage.textContent = "الرجاء توليد الكروت أولاً (الخطوة 2).";
-                    qrListMessage.style.color = "red";
-                    return;
-                }
 
-                qrListMessage.textContent = "جاري تحويل الكروت إلى صورة... قد يستغرق هذا بعض الوقت...";
-                qrListMessage.style.color = "blue";
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                qrListMessage.textContent = `✅ نجاح! تم جلب ${data.users.length} مستخدم. اضغط "الخطوة 2" للتوليد.`;
+                qrListMessage.style.color = 'green';
+                // 🛑 تخزين الـ JSON في مربع النص (المخفي)
+                qrListResults.value = JSON.stringify(data.users); 
+            } else {
+                qrListMessage.textContent = `❌ فشل: ${data.error || 'فشل في جلب القائمة.'}`;
+                qrListMessage.style.color = 'red';
+            }
+
+        } catch (err) {
+             qrListMessage.textContent = 'خطأ في الاتصال بالسيرفر.';
+             qrListMessage.style.color = 'red';
+             console.error("Fetch QR List Error:", err);
+        } finally {
+            fetchQrListBtn.disabled = false;
+        }
+    });
+}
+
+// ----------------------------------------------------
+
+// 🛑🛑 5. كود توليد الكروت (عرض فقط للشاشة) 🛑🛑
+if (generatePrintCardsBtn) {
+    generatePrintCardsBtn.addEventListener('click', () => {
+        const jsonData = qrListResults.value;
+        if (!jsonData) return alert("هات البيانات الأول!");
+
+        try {
+            const users = JSON.parse(jsonData);
+            printableCardsContainer.innerHTML = ''; 
+            qrListMessage.textContent = `تم توليد ${users.length} كارت.`;
+            qrListMessage.style.color = "green";
+
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'print-card';
+
+                card.innerHTML = `
+                    <div class="print-card-name">${user.name || 'N/A'}</div>
+                    <div class="print-card-family">${user.family || 'N/A'}</div>
+                    <div class="print-card-qr"></div>
+                `;
                 
-                // استخدام html2canvas (المكتبة التي أضفناها في index.html)
-                html2canvas(containerToCapture, {
-                    scrollX: 0,
-                    scrollY: -window.scrollY, // بدء الالتقاط من أعلى الحاوية
-                    scale: 2 // زيادة الدقة (Scale) لجودة طباعة أفضل
-                }).then(canvas => {
-                    // إنشاء لينك لتحميل الصورة
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'kiropay-qr-cards.png';
-                    
-                    // تفعيل التحميل
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    qrListMessage.textContent = "✅ تم تحميل الصورة بنجاح! يمكنك الآن طباعتها.";
-                    qrListMessage.style.color = "green";
-                    
-                }).catch(err => {
-                    qrListMessage.textContent = "❌ فشل تحويل الصورة. حاول مرة أخرى.";
-                    qrListMessage.style.color = "red";
-                    console.error("html2canvas error:", err);
+                printableCardsContainer.appendChild(card);
+
+                // توليد الـ QR Code
+                new QRCode(card.querySelector('.print-card-qr'), {
+                    text: user.email,
+                    width: 180, 
+                    height: 180,
+                    correctLevel: QRCode.CorrectLevel.M
                 });
             });
+
+        } catch (e) {
+            console.error(e);
+            qrListMessage.textContent = "خطأ في البيانات";
         }
+    });
+}
+// ----------------------------------------------------
+// 🛑🛑 6. كود التحميل (الاستوديو الخفي - تقسيم 8 كروت) 🛑🛑
+if (downloadCardsAsImageBtn) {
+    downloadCardsAsImageBtn.addEventListener('click', async () => {
+        const allCards = Array.from(document.querySelectorAll('.print-card'));
+        if (allCards.length === 0) return alert("لا يوجد كروت!");
 
+        qrListMessage.textContent = "جاري إنشاء PDF... (لحظات)";
+        qrListMessage.style.color = "blue";
 
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4'); // صفحة A4
+        const pdfWidth = 210; 
+
+        // إنشاء "حاوية خفية" بمقاسات مضبوطة للطباعة (4 كروت في السطر)
+        const studio = document.createElement('div');
+        studio.style.position = 'fixed';
+        studio.style.top = '-10000px'; // نخفيه بعيد عن العين
+        studio.style.left = '0';
+        studio.style.width = '800px'; // عرض مناسب لـ 4 كروت
+        studio.style.backgroundColor = '#ffffff';
+        studio.style.display = 'grid';
+        studio.style.gridTemplateColumns = 'repeat(4, 1fr)'; // 4 أعمدة إجباري
+        studio.style.gap = '10px';
+        studio.style.padding = '20px';
+        studio.style.direction = 'rtl'; // عشان العربي
+        document.body.appendChild(studio);
+
+        // كل صفحة PDF هتشيل 8 كروت
+        const cardsPerPage = 12; 
+
+        try {
+            for (let i = 0; i < allCards.length; i += cardsPerPage) {
+                // ناخد مجموعة (8 كروت)
+                const chunk = allCards.slice(i, i + cardsPerPage);
+                
+                // نفضي الاستوديو ونحط فيه المجموعة دي بس
+                studio.innerHTML = '';
+                chunk.forEach(originalCard => {
+                    // ناخد نسخة من الكارت
+                    const clone = originalCard.cloneNode(true);
+                    // نظبط ستايل النسخة عشان تطلع مظبوطة في الطباعة
+                    clone.style.height = "340px"; // ارتفاع ثابت
+                    clone.style.width = "auto";
+                    clone.style.margin = "0";
+                    clone.style.border = "1px dashed #000"; // حدود للقص
+                    clone.style.boxShadow = "none";
+                    studio.appendChild(clone);
+                });
+
+                // نصور الاستوديو الخفي
+                const canvas = await html2canvas(studio, {
+                    scale: 4, // جودة عالية
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfImgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                // إضافة صفحة جديدة لو مش في الأول
+                if (i > 0) pdf.addPage();
+                
+                // وضع الصورة في الـ PDF
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfImgHeight);
+            }
+
+            pdf.save('kiropay_cards.pdf');
+            qrListMessage.textContent = "✅ تم التحميل بنجاح!";
+            qrListMessage.style.color = "green";
+
+        } catch (err) {
+            console.error(err);
+            qrListMessage.textContent = "❌ حدث خطأ.";
+        } finally {
+            // تنظيف: نمسح الاستوديو
+            document.body.removeChild(studio);
+        }
+    });
+}
         // 🛑🛑 7. إصلاح "إضافة سؤال جديد (Quiz)" 🛑🛑
         if (adminQuizForm) {
             adminQuizForm.addEventListener("submit", async (event) => {
