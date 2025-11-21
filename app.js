@@ -423,8 +423,9 @@ loadAnnouncement();
                 
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
-                    adminScanSection.style.display = 'block';
                     logoutBtn.style.display = "block"; // 🛑 إظهار زر خروج 
+                    adminPanelDiv.style.display = 'none';
+                    adminScanSection.style.display = 'block';
 
                     
                     // 🛑 إخفاء كل شيء آخر
