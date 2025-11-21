@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const readerDiv = document.getElementById("reader");
     const rewardReasonSelect = document.getElementById("reward-reason-select");
     const scanStatusMessage = document.getElementById("scan-status-message");
+   const adminScanSection = document.getElementById("admin-scan-section");
     let html5QrCode = null; // للمكتبة
 
     // 🛑🛑 عناصر طباعة الـ QR (مُعدلة) 🛑🛑
@@ -159,6 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
     const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
+
+    const adminSections = document.querySelectorAll('.admin-section');
 loadAnnouncement();
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
@@ -419,8 +422,28 @@ loadAnnouncement();
                     hideUserSections();
                     leaderboardContainer.style.display = "none";
                     adminPanelDiv.style.display = "none";
+                
+                } else if (user.role === 'scanner') {
+                    messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
+                    logoutBtn.style.display = "block"; // 🛑 إظهار زر خروج 
+                    adminPanelDiv.style.display = "block";
+                    adminSections.forEach(div => {
+                        div.style.display = "none";
+                    });
+                    adminScanSection.style.display = "block";
 
-                } else {
+                    
+                    // 🛑 إخفاء كل شيء آخر
+                    cardContainer.style.display = "none";
+                    formContainer.style.display = "none";
+                    avatarOverlayLabel.style.display = "none";
+                    refreshDataBtn.style.display = "none";
+                    unlockedItemsBtn.style.display = "none";
+                    if (showQrBtn) showQrBtn.style.display = "none";
+                    hideUserSections();
+                    leaderboardContainer.style.display = "none";
+                    
+            } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
                     userFamilyP.textContent = `العائلة: ${user.family}`;
@@ -441,7 +464,7 @@ loadAnnouncement();
                     await loadMainDashboard(); 
                     await loadAnnouncement(); 
                     leaderboardContainer.style.display = "block";
-                    adminPanelDiv.style.display = "none";
+                    adminPanelDiv.remove();
                 }
                 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
