@@ -160,6 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑
     const adminShowUserQrBtn = document.getElementById("admin-show-user-qr-btn");
+
+    const adminSections = document.querySelectorAll('.admin-section');
 loadAnnouncement();
 
     // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
@@ -424,8 +426,9 @@ loadAnnouncement();
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
                     logoutBtn.style.display = "block"; // 🛑 إظهار زر خروج 
-                    adminPanelDiv.style.display = 'none';
-                    adminScanSection.style.display = 'block';
+                    adminPanelDiv.style.display = "block";
+                    adminSections.style.display = "none";
+                    adminScanSection.style.display = "block";
 
                     
                     // 🛑 إخفاء كل شيء آخر
