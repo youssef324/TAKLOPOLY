@@ -427,7 +427,9 @@ loadAnnouncement();
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
                     logoutBtn.style.display = "block"; // 🛑 إظهار زر خروج 
                     adminPanelDiv.style.display = "block";
-                    adminSections.style.display = "none";
+                    adminSections.forEach(div => {
+                        div.style.display = "none";
+                    });
                     adminScanSection.style.display = "block";
 
                     
