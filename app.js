@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const readerDiv = document.getElementById("reader");
     const rewardReasonSelect = document.getElementById("reward-reason-select");
     const scanStatusMessage = document.getElementById("scan-status-message");
+   const adminScanSection = document.getElementById("admin-scan-section");
     let html5QrCode = null; // للمكتبة
 
     // 🛑🛑 عناصر طباعة الـ QR (مُعدلة) 🛑🛑
@@ -422,6 +423,28 @@ loadAnnouncement();
                 
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
+                    if (adminPanelDiv) adminPanelDiv.style.display = "block"; 
+    
+    // 🔴 2. إخفاء جميع أقسام الأدمن الداخلية الأخرى 
+    if (allAdminSections && allAdminSections.length > 0) {
+        allAdminSections.forEach(section => section.style.display = 'none');
+    }
+    
+    // 🔴 3. إظهار قسم الماسح المحدد وقائمة التجميع (الآن سيعمل adminScanSection)
+    // لاحظ: إذا كان batchScanContainer بداخل adminScanSection، فقد لا تحتاج لظهوره بشكل منفصل.
+    if (adminScanSection) adminScanSection.style.display = 'block'; 
+    if (batchScanContainer) batchScanContainer.style.display = "block";
+
+    // 🔴 4. إخفاء كل ما يخص المستخدم العادي والأدمن الكامل
+    if (cardContainer) cardContainer.style.display = "none";
+    if (formContainer) formContainer.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "block";
+    if (refreshDataBtn) refreshDataBtn.style.display = "none";
+    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+    if (showQrBtn) showQrBtn.style.display = "none";
+    if (leaderboardContainer) leaderboardContainer.style.display = "none";
+    
+}
             } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
