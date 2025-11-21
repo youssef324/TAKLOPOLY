@@ -423,28 +423,20 @@ loadAnnouncement();
                 
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
-                    if (adminPanelDiv) adminPanelDiv.style.display = "block"; 
-    
-    // 🔴 2. إخفاء جميع أقسام الأدمن الداخلية الأخرى 
-    if (allAdminSections && allAdminSections.length > 0) {
-        allAdminSections.forEach(section => section.style.display = 'none');
-    }
-    
-    // 🔴 3. إظهار قسم الماسح المحدد وقائمة التجميع (الآن سيعمل adminScanSection)
-    // لاحظ: إذا كان batchScanContainer بداخل adminScanSection، فقد لا تحتاج لظهوره بشكل منفصل.
-    if (adminScanSection) adminScanSection.style.display = 'block'; 
-    if (batchScanContainer) batchScanContainer.style.display = "block";
+                    (adminScanSection) adminScanSection.style.display = 'block';
+                    (batchScanContainer) batchScanContainer.style.display = "block";
 
-    // 🔴 4. إخفاء كل ما يخص المستخدم العادي والأدمن الكامل
-    if (cardContainer) cardContainer.style.display = "none";
-    if (formContainer) formContainer.style.display = "none";
-    if (logoutBtn) logoutBtn.style.display = "block";
-    if (refreshDataBtn) refreshDataBtn.style.display = "none";
-    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
-    if (showQrBtn) showQrBtn.style.display = "none";
-    if (leaderboardContainer) leaderboardContainer.style.display = "none";
-    
-}
+                    // 🛑 إخفاء كل شيء آخر
+                    cardContainer.style.display = "none";
+                    formContainer.style.display = "none";
+                    avatarOverlayLabel.style.display = "none";
+                    refreshDataBtn.style.display = "none";
+                    unlockedItemsBtn.style.display = "none";
+                    if (showQrBtn) showQrBtn.style.display = "none";
+                    hideUserSections();
+                    leaderboardContainer.style.display = "none";
+                    adminPanelDiv.style.display = "none";
+                    
             } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
