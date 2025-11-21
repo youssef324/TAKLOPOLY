@@ -1063,65 +1063,6 @@ form#admin-add-item-form button[type="submit"]:hover {
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
 }
 
-/* 🛑🛑 ستايلات خاصة بالطباعة (معدلة لتجنب الصفحة البيضاء) 🛑🛑 */
-@media print {
-    /* إخفاء كل شيء افتراضياً */
-    body > * {
-        display: none !important;
-    }
-    
-    /* * إظهار حاوية الكروت فقط. 
-     * يجب أن تكون الحاوية هي "ابن" مباشر للـ body لضمان عمل هذا الكود.
-     * بما أنها ليست كذلك (هي داخل .admin-panel-container)، سنغير الاستراتيجية.
-     */
-    
-    /* استراتيجية بديلة: إخفاء كل شيء ما عدا الحاوية المطلوبة */
-    body * {
-        visibility: hidden; /* إخفاء كل العناصر */
-    }
-
-    #admin-printable-cards-container, 
-    #admin-printable-cards-container * {
-        visibility: visible; /* إظهار حاوية الطباعة وكل ما بداخلها */
-    }
-
-    #admin-printable-cards-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        border: none !important;
-       /* display: grid !important;
-        /* grid-template-columns: 1fr 1fr 1fr; /* 3 كروت في العرض */
-        /*gap: 10px;
-    }
-
-    .print-card {
-        display: block !important;
-        page-break-inside: avoid; /* منع الكارت من الانقسام بين صفحتين */
-        border: 1px solid #000;
-        box-shadow: none;
-        padding: 10px;
-        text-align: center;
-    }
-
-    /* التأكد من ظهور الـ QR */
-    .print-card-qr {
-        width: 100px; 
-        height: 100px;
-        margin: 5px auto;
-    }
-    .print-card-qr img,
-    .print-card-qr canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block !important;
-        visibility: visible !important; /* تأكيد إظهارها */
-    }
-}
-
 /* =========================================
    ⬇️⬇️⬇️ إضافات الهيدر والشريط والمربعات ⬇️⬇️⬇️
    ========================================= */
@@ -1405,73 +1346,92 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin-top: 5px; 
 }
 
-/* 🛑🛑 تنسيقات خاصة بالطباعة والـ PDF (لترتيب 8 كروت في الصفحة) 🛑🛑 */
+/* 🛑🛑 تنسيقات خاصة بالطباعة والـ PDF (مُعدل وموحد) 🛑🛑 */
 @media print {
-
-    /* 1. إخفاء العناصر غير المرغوب فيها (الأزرار والرسائل) في ملف PDF */
-    #admin-qr-list-controls, 
-    #admin-qr-list-message {
-        display: none !important;
+    
+    /* 1. 🛠️ استراتيجية الإخفاء والإظهار الموحدة */
+    body * { 
+        display: none !important; 
+        visibility: hidden !important; 
     }
 
-    /* 2. تعديل تنسيق حاوية الكروت للطباعة */
-    #admin-printable-cards-container {
-        display: grid;
-        /* تقسيم الصفحة إلى 4 أعمدة متساوية للطباعة */
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 5mm; /* مسافة بسيطة بالملليمتر */
-        padding: 5mm;
-        border: none !important; /* إزالة الحدود المنقطة */
-        box-shadow: none !important;
+    #admin-printable-cards-container, 
+    #admin-printable-cards-container * {
+        visibility: visible !important; 
+        display: block !important; 
     }
 
-    /* 3. تعديل تنسيق الكارت ليلائم الترتيب في الشبكة */
-    .print-card {
-        width: 100%;
-        /* حافة بسيطة للمساعدة في القص بعد الطباعة */
-        border: 1px dashed #000; 
-        padding: 5px;
-        box-sizing: border-box;
-        text-align: center;
-        box-shadow: none !important; 
-        /* هام: منع انقسام الكارت بين صفحتين */
-        break-inside: avoid; 
-        margin-bottom: 20px !important;
-    }
-        
-    /* 5. تعديل حجم حاوية الـ QR لتتناسب مع الـ 250px التي تم تعيينها في JS */
-    .print-card-qr {
-        /* يتم توسيط الـ QR Code حتى لو كان حجمه كبيراً */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* نلغي الأبعاد الثابتة هنا ليعتمد على الأبعاد في JS ومرونة الـ Grid */
-        width: auto;
-        height: auto;
-        padding: 0;
-        border: none;
-    }
+    /* إخفاء العناصر غير المرغوب فيها (الأزرار والرسائل) */
+    #admin-qr-list-controls, 
+    #admin-qr-list-message {
+        display: none !important;
+    }
+
+    /* 2. 🧱 تنسيق حاوية الكروت وتفعيل الـ Grid */
+    #admin-printable-cards-container {
+        display: grid !important;
+        /* تقسيم الصفحة إلى 4 أعمدة متساوية للطباعة */
+        grid-template-columns: repeat(4, 1fr) !important; 
+        gap: 5mm !important; /* مسافة بسيطة بالملليمتر */
+        padding: 5mm !important;
+        border: none !important; /* إزالة الحدود المنقطة */
+        box-shadow: none !important;
+        /* لضمان ملء عرض الصفحة وتثبيت الموقع */
+        width: 100% !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+    }
+
+    /* 3. ✂️ تعديل تنسيق الكارت ليلائم الترتيب في الشبكة ومنع تقطّعه */
+    .print-card {
+        width: auto !important; /* هام ليعتمد على الـ Grid */
+        /* حافة بسيطة للمساعدة في القص بعد الطباعة */
+        border: 1px dashed #000 !important; 
+        padding: 5px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        box-shadow: none !important; 
+        /* هام: منع انقسام الكارت بين صفحتين (حل مشكلة التقطّع) */
+        break-inside: avoid !important; 
+        page-break-inside: avoid !important;
+        margin-bottom: 20px !important;
+    }
+        
+    /* 4. 📷 تعديل حجم حاوية الـ QR لتتناسب مع الـ Grid */
+    .print-card-qr {
+        /* يتم توسيط الـ QR Code حتى لو كان حجمه كبيراً */
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        /* تحديد حجم أقصى معقول لوحدة الطباعة */
+        max-width: 60mm !important; 
+        max-height: 60mm !important;
+    }
+
+    /* التأكد من ظهور محتوى الـ QR (الصورة أو الـ Canvas) */
+    .print-card-qr img,
+    .print-card-qr canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+        visibility: visible !important; 
+    }
 }
-/* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF (يُضاف هذا الكود كاملاً) 🛑🛑 */
 
-/* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت (لإظهار الإيميل) */
-/* 1. فرض خط واتجاه النص العربي (مُعدل) */
+/* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF 🛑🛑 */
+
+/* 1. فرض خط نظام موثوق لجميع النصوص داخل الكارت */
 .print-card * {
-    /* استخدام sans-serif فقط بيحل مشاكل كتير في العربي مع html2canvas */
-    font-family: sans-serif !important; 
-    color: #000 !important;
-    direction: rtl !important; 
-    unicode-bidi: embed !important; 
-    /* إلغاء أي ظل للنصوص لأنه بيعمل غلغشة في التحويل */
-    text-shadow: none !important; 
-}
-
-
-/* 3. تعديل حجم الـ QR لمنع التداخل مع النصوص (نلغي الأبعاد الثابتة) */
-.print-card-qr {
-    /* إزالة الأبعاد الثابتة (width/height: 120px) التي كانت موجودة سابقاً */
-    width: auto !important;
-    height: auto !important;
-    max-width: 150px !important; /* حجم أقصى معقول */
-    max-height: 150px !important;
+    /* استخدام sans-serif فقط بيحل مشاكل كتير في العربي مع html2canvas */
+    font-family: sans-serif !important; 
+    color: #000 !important;
+    direction: rtl !important; 
+    unicode-bidi: embed !important; 
+    /* إلغاء أي ظل للنصوص */
+    text-shadow: none !important; 
 }
