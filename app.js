@@ -423,8 +423,8 @@ loadAnnouncement();
                 
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
-                    (adminScanSection) adminScanSection.style.display = 'block';
-                    (batchScanContainer) batchScanContainer.style.display = "block";
+                     adminScanSection.style.display = 'block';
+                     batchScanContainer.style.display = "block";
 
                     // 🛑 إخفاء كل شيء آخر
                     cardContainer.style.display = "none";
