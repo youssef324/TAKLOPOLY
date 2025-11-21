@@ -2160,7 +2160,7 @@ if(fetchQrListBtn) {
 
 // ----------------------------------------------------
 
-// 🛑🛑 5. كود توليد كروت الطباعة (تم تصحيح الـ Syntax) 🛑🛑
+// 🛑🛑 5. كود توليد كروت الطباعة (معدل: يستخدم DOM API + منطق تقسيم 8 كروت) 🛑🛑
 if (generatePrintCardsBtn) {
     generatePrintCardsBtn.addEventListener('click', () => {
         const jsonData = qrListResults.value;
@@ -2176,16 +2176,27 @@ if (generatePrintCardsBtn) {
             qrListMessage.textContent = `جاري توليد ${users.length} كارت...`;
 
             if (users.length === 0) {
-                 qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
-                 return;
+                qrListMessage.textContent = "لا يوجد مستخدمين لتوليد الكروت.";
+                return;
             }
 
-            // استخدام setTimeout لتقسيم العمليات ومنع "تجمد" المتصفح
+            // متغير لتتبع حاوية المجموعة الحالية
+            let currentPageGroup = null; 
             let i = 0;
+            
             function processBatch() {
                 let count = 0;
                 while(count < 50 && i < users.length) { // معالجة 50 كارت في المرة
                     const user = users[i];
+
+                    // 🛑 منطق تقسيم الصفحات: فتح مجموعة جديدة كل 8 كروت 🛑
+                    if (i % 8 === 0) {
+                        // إنشاء حاوية المجموعة الجديدة
+                        currentPageGroup = document.createElement('div');
+                        currentPageGroup.className = 'card-page-group';
+                        // إضافة الحاوية الجديدة إلى الحاوية الرئيسية
+                        printableCardsContainer.appendChild(currentPageGroup);
+                    }
                     
                     // 1. إنشاء الكارت
                     const card = document.createElement('div');
@@ -2209,19 +2220,19 @@ if (generatePrintCardsBtn) {
                     card.appendChild(familyEl);
                     card.appendChild(qrEl);
                     
-                    // 5. إضافة الكارت للحاوية الرئيسية
-                    printableCardsContainer.appendChild(card);
+                    // 5. إضافة الكارت لحاوية المجموعة الحالية (وليس الحاوية الرئيسية مباشرة)
+                    currentPageGroup.appendChild(card);
 
                     // 6. توليد الـ QR Code داخل حاويته (باستخدام الإيميل)
                     new QRCode(qrEl, {
                         text: user.email,
-                        width: 250, // 🚀 تم التعديل إلى 250
-                        height: 250, // 🚀 تم التعديل إلى 250
+                        width: 250, 
+                        height: 250, 
                         colorDark : "#000000",
-                        colorLight : "#ffffff", // أضيفت الخيارات المفقودة
-                        correctLevel : QRCode.CorrectLevel.M // أضيفت الخيارات المفقودة
-                    }); // ⬅️⬅️ تم تصحيح خطأ بناء الجملة هنا 
-
+                        colorLight : "#ffffff", 
+                        correctLevel : QRCode.CorrectLevel.M 
+                    });
+                    
                     count++;
                     i++;
                 } // نهاية while
@@ -2236,7 +2247,7 @@ if (generatePrintCardsBtn) {
                     qrListMessage.style.color = 'green';
                     alert("اكتمل توليد الكروت. يمكنك الآن تحميل الكروت كملف PDF.");
                 }
-            }
+            } // نهاية processBatch()
             
             processBatch(); // بدء أول دفعة
 
@@ -2247,7 +2258,6 @@ if (generatePrintCardsBtn) {
         }
     });
 }
-    
 // ----------------------------------------------------
 
 // 🛑🛑 6. الحل النهائي: تحميل الكروت كصورة عالية الدقة مع تقسيم الصفحات 🛑🛑
