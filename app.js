@@ -470,7 +470,7 @@ loadAnnouncement();
                 }
                 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
-            else {
+            } else {
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
             }
