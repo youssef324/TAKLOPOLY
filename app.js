@@ -464,7 +464,7 @@ loadAnnouncement();
                     await loadMainDashboard(); 
                     await loadAnnouncement(); 
                     leaderboardContainer.style.display = "block";
-                    adminPanelDiv.style.display = "none";
+                    adminPanelDiv.remove();
                 }
                 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
