@@ -2250,62 +2250,78 @@ if (generatePrintCardsBtn) {
     
 // ----------------------------------------------------
 
-// 🛑🛑 6. كود تحميل الكروت كملف PDF (تم إصلاح العربي) 🛑🛑
+// 🛑🛑 6. كود تحميل الكروت كملف PDF (الحل الجذري: طريقة الصورة) 🛑🛑
 
 if (downloadCardsAsImageBtn) { 
     downloadCardsAsImageBtn.addEventListener('click', () => {
         const containerToCapture = printableCardsContainer;
         
+        // التحقق من وجود كروت
         if (containerToCapture.children.length === 0) {
             qrListMessage.textContent = "الرجاء توليد الكروت أولاً.";
             qrListMessage.style.color = "red";
             return;
         }
 
-        qrListMessage.textContent = "جاري توليد ملف PDF...";
+        qrListMessage.textContent = "جاري المعالجة والتحويل لـ PDF... (قد يستغرق ثواني)";
         qrListMessage.style.color = "blue";
 
-        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-            qrListMessage.textContent = "❌ خطأ: مكتبة jsPDF غير موجودة.";
-            return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4'); 
-        
-        // حفظ التنسيق الأصلي
+        // 1. حفظ التنسيقات الأصلية
         const originalWidth = containerToCapture.style.width;
         const originalGrid = containerToCapture.style.gridTemplateColumns;
         const originalPadding = containerToCapture.style.padding;
         const originalMargin = containerToCapture.style.margin;
 
-        // تطبيق تنسيق الطباعة الإجباري (لحل مشكلة القص)
+        // 2. إجبار الحاوية على التنسيق المثالي للطباعة (800px و 4 أعمدة)
+        // هذا يضمن أن الكروت تظهر مفرودة وغير مقصوصة قبل التقاط الصورة
         containerToCapture.style.width = '800px'; 
-        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)'; 
-        containerToCapture.style.padding = '0'; 
-        containerToCapture.style.margin = '0'; 
+        containerToCapture.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        containerToCapture.style.padding = '0';
+        containerToCapture.style.margin = '0';
 
-        doc.html(containerToCapture, {
-            callback: function (doc) {
-                // إرجاع التنسيق الأصلي
-                containerToCapture.style.width = originalWidth;
-                containerToCapture.style.gridTemplateColumns = originalGrid;
-                containerToCapture.style.padding = originalPadding;
-                containerToCapture.style.margin = originalMargin;
-                
-                doc.save('kiropay-qr-cards.pdf');
-                qrListMessage.textContent = "✅ تم التحميل بنجاح!";
-                qrListMessage.style.color = "green";
-            },
-            x: 0,
-            y: 0,
-            html2canvas: { 
-                scale: 0.24, 
-                useCORS: true,
-                // 🛑 حذفنا letterRendering: true لأنه كان بيبوظ العربي 🛑
-            },
-            margin: [10, 5, 5, 5],
-            autoPaging: 'text'
+        // 3. التقاط الحاوية كصورة عالية الجودة باستخدام html2canvas
+        html2canvas(containerToCapture, {
+            scale: 4, // دقة عالية (High Quality)
+            useCORS: true, // لضمان ظهور صور الـ QR
+            backgroundColor: '#ffffff' // خلفية بيضاء
+        }).then(canvas => {
+            // 4. إرجاع التنسيقات الأصلية للموقع (عشان الشاشة متتبهدلش)
+            containerToCapture.style.width = originalWidth;
+            containerToCapture.style.gridTemplateColumns = originalGrid;
+            containerToCapture.style.padding = originalPadding;
+            containerToCapture.style.margin = originalMargin;
+
+            // 5. إنشاء ملف PDF ووضع الصورة بداخله
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            
+            // إنشاء ملف A4
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth(); // عرض الـ A4 (210mm)
+            const pdfHeight = pdf.internal.pageSize.getHeight(); // ارتفاع الـ A4
+            
+            // حساب أبعاد الصورة لتناسب عرض الـ PDF
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            // إضافة الصورة للـ PDF
+            // (إذا كانت الصورة أطول من صفحة واحدة، يمكننا قصها، لكن حالياً سنضعها كما هي)
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+            
+            // 6. التحميل
+            pdf.save('kiropay-qr-cards.pdf');
+            
+            qrListMessage.textContent = "✅ تم تحميل ملف PDF بنجاح (صورة طبق الأصل)!";
+            qrListMessage.style.color = "green";
+
+        }).catch(err => {
+            console.error("خطأ في التحويل:", err);
+            qrListMessage.textContent = "❌ حدث خطأ أثناء التحويل.";
+            qrListMessage.style.color = "red";
+            
+            // إرجاع التنسيقات في حالة الخطأ أيضاً
+            containerToCapture.style.width = originalWidth;
+            containerToCapture.style.gridTemplateColumns = originalGrid;
         });
     });
 }
