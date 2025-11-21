@@ -2228,7 +2228,7 @@ if (downloadCardsAsImageBtn) {
         document.body.appendChild(studio);
 
         // كل صفحة PDF هتشيل 8 كروت
-        const cardsPerPage = 8; 
+        const cardsPerPage = 12; 
 
         try {
             for (let i = 0; i < allCards.length; i += cardsPerPage) {
@@ -2251,7 +2251,7 @@ if (downloadCardsAsImageBtn) {
 
                 // نصور الاستوديو الخفي
                 const canvas = await html2canvas(studio, {
-                    scale: 3, // جودة عالية
+                    scale: 4, // جودة عالية
                     useCORS: true
                 });
 
