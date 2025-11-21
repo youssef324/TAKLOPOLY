@@ -474,7 +474,7 @@ loadAnnouncement();
                 messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
                 messageDiv.style.color = "red";
             }
-        } catch (err) {
+        catch (err) {
             messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
             messageDiv.style.color = "red";
         }
