@@ -419,8 +419,11 @@ loadAnnouncement();
                     hideUserSections();
                     leaderboardContainer.style.display = "none";
                     adminPanelDiv.style.display = "none";
+                
+                }} else if (user.role === 'scanner') {
+                    adminPanelDiv.style.display = "block";
 
-                } else {
+            } else {
                     // 3. عرض لوحة المستخدم العادي (USER VIEW)
                     userNameP.textContent = `الاسم: ${user.name}`;
                     userFamilyP.textContent = `العائلة: ${user.family}`;
