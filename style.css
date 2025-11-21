@@ -847,9 +847,12 @@ form#admin-add-item-form button[type="submit"]:hover {
     display: none; /* 🛑 مخفي افتراضياً، سنستخدمه للتخزين فقط 🛑 */
 }
 
-/* 🛑 حاوية كروت الطباعة (للعرض العادي) 🛑 */
+
+/*
+
+/* 🛑 حاوية كروت الطباعة (للعرض العادي - Grid) 🛑 */
 #admin-printable-cards-container {
-    /* هذا الجزء لتنسيق العرض العادي، وليس الطباعة */
+    /* هذا الجزء لتنسيق العرض العادي، وهو يستخدم Grid */
     width: 794px !important; 
     display: grid;
     grid-template-columns: repeat(4, 1fr); 
@@ -886,7 +889,7 @@ form#admin-add-item-form button[type="submit"]:hover {
     background: white;
     border: 1px solid #eee;
 }
-/* 🛑 ضمان أن الـ QR يملأ الحاوية المخصصة له */
+/* ضمان أن الـ QR يملأ الحاوية المخصصة له */
 .print-card-qr img,
 .print-card-qr canvas {
     width: 100% !important;
@@ -908,14 +911,14 @@ form#admin-add-item-form button[type="submit"]:hover {
     border: 1px solid #ccc;
 }
 #start-scan-btn {
-    background-color: #db2777; /* وردي غامق */
+    background-color: #db2777; 
     color: white;
     font-weight: bold;
     border: none;
     cursor: pointer;
 }
 #reader {
-    /* 🛑 التأكد من أن منطقة القارئ لا تنضغط */
+    /* التأكد من أن منطقة القارئ لا تنضغط */
     min-height: 250px; 
 }
 
@@ -1057,17 +1060,19 @@ form#admin-add-item-form button[type="submit"]:hover {
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
 }
 
-/* 🛑🛑 الهيدر والشريط والمربعات (كما هي) 🛑🛑 */
+/* =========================================
+   ⬇️⬇️⬇️ إضافات الهيدر والشريط والمربعات ⬇️⬇️⬇️
+   ========================================= */
 
 /* 1. الهيدر الأزرق (Top Banner) */
 .top-banner {
-    background-color: #003366; 
+    background-color: #003366; /* أزرق كحلي */
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-right: 8px solid #dc3545; 
+    border-right: 8px solid #dc3545; /* الشريط الأحمر */
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -1085,7 +1090,7 @@ form#admin-add-item-form button[type="submit"]:hover {
 
 /* 2. شريط الأخبار المتحرك (News Ticker) */
 .news-ticker-bar {
-    background-color: #111; 
+    background-color: #111; /* أسود */
     color: white;
     height: 40px;
     display: flex;
@@ -1343,18 +1348,23 @@ form#admin-add-item-form button[type="submit"]:hover {
     /* ************************************************* */
     /* 1. إخفاء وإظهار العناصر (الاستراتيجية الأساسية) */
     /* ************************************************* */
+    /* إخفاء كل شيء بشكل افتراضي */
+    body > * {
+        display: none !important;
+    }
     body * {
         visibility: hidden !important; 
         display: none !important; 
     }
     
+    /* إظهار حاوية الطباعة ومحتوياتها */
     #admin-printable-cards-container, 
     #admin-printable-cards-container * {
         visibility: visible !important; 
         display: block !important; 
     }
 
-    /* إخفاء الأزرار والتحكمات */
+    /* إخفاء الأزرار والتحكمات داخل الحاوية */
     #admin-qr-list-controls, 
     #admin-qr-list-message {
         display: none !important;
@@ -1410,6 +1420,7 @@ form#admin-add-item-form button[type="submit"]:hover {
         display: flex;
         justify-content: center;
         align-items: center;
+        /* نستخدم الأبعاد المرنة للـ PDF */
         width: auto !important; 
         height: auto !important;
         max-width: 150px !important; 
@@ -1422,6 +1433,8 @@ form#admin-add-item-form button[type="submit"]:hover {
         width: 100% !important;
         height: 100% !important;
         display: block !important;
+        /* تأكيد الإظهار في الـ media print */
+        visibility: visible !important; 
     }
     
     /* ************************************************* */
