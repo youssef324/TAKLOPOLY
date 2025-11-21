@@ -1367,49 +1367,34 @@ form#admin-add-item-form button[type="submit"]:hover {
         display: none !important;
     }
 
-    /* 2. تنسيق الحاوية الرئيسية */
-    #admin-printable-cards-container {
-        /* إزالة قواعد الـ Grid من هنا ووضعها في .card-page-group */
-        display: block !important;
-        width: 100% !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        padding: 5mm !important;
-        border: none !important; 
-        box-shadow: none !important;
-    }
-    
-    /* 3. 🆕 إضافة تنسيق حاوية مجموعة الكروت (لتحقيق 4x2 ومنع التقطّع) */
-    .card-page-group {
-        /* تطبيق الـ Grid على المجموعة الفرعية */
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important; 
-        gap: 5mm !important; 
-        
-        /* 🛑 هذا السطر هو مفتاح تقسيم كل 8 كروت في صفحة جديدة 🛑 */
-        page-break-after: always !important; 
-        
-        /* هذا لضمان أن الـ Grid يأخذ حجم الصفحة بشكل كامل */
-        width: 100% !important;
-        height: auto !important; 
-        margin-bottom: 20px !important; /* فاصل بسيط */
-    }
+   /* 🛑 تعديل CSS للحاوية الرئيسية لضمان تنسيق 4x2 🛑 */
+#admin-printable-cards-container {
+    display: grid;
+    /* إجبار الحاوية على عرض ثابت يناسب أربع كروت */
+    width: 800px; /* أو 850px إذا كانت الكروت متلاصقة جدًا */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 10px; /* مسافة بسيطة بين الكروت */
+    padding: 10px;
+    margin: 0 auto;
+    /* هذا التنسيق مهم لكي تظهر الكروت 4 في الصف الواحد */
+}
 
-    /* 4. تنسيق الكارت ومنع تقطّعه */
-    .print-card {
-        width: auto !important; 
-        /* 🛑 منع انقسام الكارت الواحد بين صفحتين 🛑 */
-        break-inside: avoid !important; 
-        page-break-inside: avoid !important;
-        
-        border: 1px dashed #000 !important; 
-        padding: 5px !important;
-        box-sizing: border-box !important;
-        text-align: center !important;
-        box-shadow: none !important; 
-        margin-bottom: 0 !important; /* نلغي المارجن لأنه قد يسبب تقطّع */
-    }
+/* 🛑 تعديل CSS لمجموعة الصفحة (المسؤولة عن منع التقطيع الأفقي) 🛑 */
+.card-page-group {
+    /* هذا الكلاس يمثل صفحة A4 كاملة (8 كروت) */
+    width: 100%; /* يجب أن تملأ عرض الحاوية الأب */
+    display: contents; /* مهم جداً لتتجاهل الـ DIV وتسمح للكروت بالبقاء في الـ Grid */
+}
+
+/* 🛑 تعديل الكارت نفسه 🛑 */
+.print-card {
+    /* تأكد أن الكارت لا يحتوي على ارتفاع ثابت يسبب مشاكل */
+    height: auto; 
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin: 0;
+    text-align: center;
+}
         
     /* 5. تنسيق الـ QR Code (كما اتفقنا عليه سابقاً) */
     .print-card-qr {
