@@ -420,7 +420,7 @@ loadAnnouncement();
                     leaderboardContainer.style.display = "none";
                     adminPanelDiv.style.display = "none";
                 
-                }} else if (user.role === 'scanner') {
+                } else if (user.role === 'scanner') {
                     adminPanelDiv.style.display = "block";
 
             } else {
