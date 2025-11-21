@@ -378,20 +378,27 @@ loadAnnouncement();
                 const user = data.user;
                 loggedInUserProfile = user;
 
-            // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
-// يجب التأكد من أن 'user' هنا هو data.user من استجابة الـ API
-const user = data.user; 
+         // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) المُحدّث --- 🛑🛑🛑
 
 if (user.role === 'admin') {
     // 1. عرض لوحة الأدمن (ADMIN VIEW)
     messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
     if (adminPanelDiv) adminPanelDiv.style.display = "block";
-    if (cardContainer) cardContainer.style.display = "flex";
+    if (cardContainer) cardContainer.style.display = "flex"; // الأدمن يرى الكارت الخاص به
     if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
-
-    // ... (باقي ملء بيانات كارت الأدمن) ...
     
-    // 🛑 تغيير هام: التأكد من أن المتغير مُعرّف قبل استخدامه 🛑
+    // ملء بيانات كارت الأدمن (نفس بيانات اليوزر العادي)
+    userNameP.textContent = `الاسم: ${user.name}`;
+    userFamilyP.textContent = `العائلة: ${user.family}`;
+    userBalanceP.textContent = `الرصيد: $${user.balance}`;
+    userLevelP.textContent = `المستوى: ${user.level || 1}`;
+    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+    
+    await loadTransactionHistory(user.email);
+    await loadAnnouncement();
+    await loadAdminStoreItems(); 
+    
+    // إظهار جميع أقسام الأدمن (باستخدام كتل الحماية)
     if (allAdminSections && allAdminSections.length > 0) {
         allAdminSections.forEach(section => section.style.display = 'block');
     }
@@ -404,39 +411,69 @@ if (user.role === 'admin') {
     if (showQrBtn) showQrBtn.style.display = "none";
     hideUserSections();
 
-} else if (user.role === 'scanner') { // 🛑🛑🛑 حالة الدور الجديد: الماسح 🛑🛑🛑
-    // 2. عرض لوحة الماسح (SCANNER VIEW)
+// 🛑🛑 2. إضافة لوحة الماسح (SCANNER VIEW) 🛑🛑
+} else if (user.role === 'scanner') { 
     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
+    
+    // إظهار لوحة الأدمن (التي تحتوي على الماسح)
     if (adminPanelDiv) adminPanelDiv.style.display = "block"; 
     
-    // 🛑 نخفي جميع أقسام الأدمن أولاً
+    // إخفاء جميع الأقسام الداخلية الأخرى للأدمن
     if (allAdminSections && allAdminSections.length > 0) {
         allAdminSections.forEach(section => section.style.display = 'none');
     }
     
-    // 🛑 ونظهر قسم المسح فقط
+    // إظهار قسم المسح فقط
     if (adminScanSection) adminScanSection.style.display = 'block'; 
 
-    // إخفاء كارت المستخدم
+    // إخفاء كل ما يخص المستخدم العادي والأدمن الكامل
     if (cardContainer) cardContainer.style.display = "none";
-    
-    // إخفاء كل شيء آخر
     if (formContainer) formContainer.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "block";
     if (refreshDataBtn) refreshDataBtn.style.display = "none";
     if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
     if (showQrBtn) showQrBtn.style.display = "none";
     hideUserSections();
-    
+
 } else if (user.role === 'guest') {
     // 3. عرض لوحة الزائر (GUEST VIEW)
-    // ... (الكود الأصلي هنا) ...
+    messageDiv.textContent = "مرحباً أيها الزائر!";
+    if (guestContainer) guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
+    if (logoutBtnGuest) logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
     
+    // 🛑 إخفاء كل شيء آخر
+    if (cardContainer) cardContainer.style.display = "none";
+    if (formContainer) formContainer.style.display = "none";
+    if (avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
+    if (refreshDataBtn) refreshDataBtn.style.display = "none";
+    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+    if (showQrBtn) showQrBtn.style.display = "none";
+    hideUserSections();
+    if (leaderboardContainer) leaderboardContainer.style.display = "none";
+    if (adminPanelDiv) adminPanelDiv.style.display = "none";
+
 } else {
     // 4. عرض لوحة المستخدم العادي (USER VIEW)
-    // ... (الكود الأصلي هنا) ...
+    userNameP.textContent = `الاسم: ${user.name}`;
+    userFamilyP.textContent = `العائلة: ${user.family}`;
+    userBalanceP.textContent = `الرصيد: $${user.balance}`;
+    userLevelP.textContent = `المستوى: ${user.level || 1}`;
+    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
     
-    if (adminPanelDiv) adminPanelDiv.style.display = "none"; // لضمان إخفائه لليوزر العادي
+    if (cardContainer) cardContainer.style.display = "flex";
+    if (formContainer) formContainer.style.display = "none";
+    if (logoutBtn) logoutBtn.style.display = "block";
+    if (refreshDataBtn) refreshDataBtn.style.display = "block";
+    if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
+
+    await loadTransactionHistory(user.email);
+    
+    if (unlockedItemsBtn) unlockedItemsBtn.style.display = "block"; 
+    if (showQrBtn) if (showQrBtn) showQrBtn.style.display = "block"; 
+    await loadMainDashboard(); 
+    await loadAnnouncement(); 
+    if (leaderboardContainer) leaderboardContainer.style.display = "block";
+    if (adminPanelDiv) adminPanelDiv.style.display = "none";
 }
 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
