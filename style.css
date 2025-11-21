@@ -1346,81 +1346,102 @@ form#admin-add-item-form button[type="submit"]:hover {
     margin-top: 5px; 
 }
 
-/* 🛑🛑 تنسيقات الطباعة الموحدة (4x2 = 8 كروت في الصفحة) 🛑🛑 */
+/* 🛑🛑 تنسيقات الطباعة الموحدة المصححة (4x2 = 8 كروت في الصفحة) 🛑🛑 */
 @media print {
     
     /* 1. استراتيجية الإخفاء والإظهار الموحدة */
-    body * { 
-        display: none !important; 
-        visibility: hidden !important; 
+    body * {
+        display: none !important;
+        visibility: hidden !important;
     }
 
+    /* 🛑 التصحيح الأول 🛑: لا نضع display: block! هنا، بل نعتمد على display: grid في الخطوة التالية. */
     #admin-printable-cards-container, 
-    #admin-printable-cards-container *,
-    .card-page-group, .card-page-group * { /* إضافة حاوية المجموعات هنا */
-        visibility: visible !important; 
-        display: block !important; 
+    #admin-printable-cards-container * {
+        visibility: visible !important;
     }
 
-    #admin-qr-list-controls, 
+    /* إخفاء أدوات التحكم والرسائل */
+    #admin-qr-list-controls,
     #admin-qr-list-message {
-        display: none !important;
-    }
+        display: none !important;
+    }
 
-   /* 🛑 تعديل CSS للحاوية الرئيسية لضمان تنسيق 4x2 🛑 */
-#admin-printable-cards-container {
-    display: grid;
-    /* إجبار الحاوية على عرض ثابت يناسب أربع كروت */
-    width: 800px; /* أو 850px إذا كانت الكروت متلاصقة جدًا */
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 10px; /* مسافة بسيطة بين الكروت */
-    padding: 10px;
-    margin: 0 auto;
-    /* هذا التنسيق مهم لكي تظهر الكروت 4 في الصف الواحد */
-}
+    /* 🛑 التصحيح الثاني: إجبار تنسيق 4x2 للـ GRID 🛑 */
+    #admin-printable-cards-container {
+        display: grid !important; /* إجبار استخدام Grid */
+        width: 800px !important; /* عرض ثابت لـ 4 كروت */
+        grid-template-columns: repeat(4, 1fr) !important; /* 4 أعمدة متساوية */
+        gap: 10px !important; 
+        padding: 10px !important;
+        margin: 0 auto !important;
+        position: relative !important;
+        page-break-after: avoid !important;
+    }
 
-/* 🛑 تعديل CSS لمجموعة الصفحة (المسؤولة عن منع التقطيع الأفقي) 🛑 */
-.card-page-group {
-    /* هذا الكلاس يمثل صفحة A4 كاملة (8 كروت) */
-    width: 100%; /* يجب أن تملأ عرض الحاوية الأب */
-    display: contents; /* مهم جداً لتتجاهل الـ DIV وتسمح للكروت بالبقاء في الـ Grid */
-}
+    /* 🛑 التصحيح الثالث: حاوية تقسيم الـ 8 كروت 🛑 */
+    .card-page-group {
+        display: contents !important; /* مهم جداً للسماح للـ Grid بالعمل */
+    }
+    
+    /* 🛑 التصحيح الرابع: تنسيق الكارت نفسه (مهم جداً للترتيب الداخلي) 🛑 */
+    .print-card {
+        display: block !important; /* يمكن إبقاءه block ليناسب الـ Grid */
+        height: auto !important; 
+        border: 1px solid #ccc !important;
+        padding: 5px !important;
+        margin: 0 !important;
+        text-align: center !important;
+        page-break-inside: avoid !important; /* لمنع تقطيع الكارت/الـ QR */
+        break-inside: avoid !important; 
+    }
 
-/* 🛑 تعديل الكارت نفسه 🛑 */
-.print-card {
-    /* تأكد أن الكارت لا يحتوي على ارتفاع ثابت يسبب مشاكل */
-    height: auto; 
-    border: 1px solid #ccc;
-    padding: 5px;
-    margin: 0;
-    text-align: center;
-}
-        
-    /* 5. تنسيق الـ QR Code (كما اتفقنا عليه سابقاً) */
-    .print-card-qr {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: auto !important;
-        height: auto !important;
-        max-width: 60mm !important; 
-        max-height: 60mm !important;
-    }
+    /* 🛑 التصحيح الخامس: تنسيق العناصر الداخلية المفقودة (الاسم والعائلة) 🛑 */
+    .print-card-name, 
+    .print-card-family, 
+    .print-card-qr {
+        display: block !important; 
+        visibility: visible !important;
+    }
 
-    .print-card-qr img,
-    .print-card-qr canvas {
-        width: 100% !important;
-        height: 100% !important;
-        display: block !important;
-        visibility: visible !important; 
-    }
-}
-/* 🛑🛑 قواعد إضافية لضمان التوافق مع PDF 🛑🛑 */
+    /* تنسيق الاسماء */
+    .print-card-name {
+        font-size: 18px !important; 
+        font-weight: bold !important;
+        margin-bottom: 3px !important;
+        line-height: 1.2 !important;
+    }
 
-.print-card * {
-    font-family: sans-serif !important; 
-    color: #000 !important;
-    direction: rtl !important; 
-    unicode-bidi: embed !important; 
-    text-shadow: none !important; 
+    /* تنسيق الاسرة */
+    .print-card-family {
+        font-size: 14px !important;
+        color: #555 !important;
+        margin-bottom: 5px !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* تنسيق حاوية الـ QR وتوسيطه */
+    .print-card-qr {
+        display: flex !important; 
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 250px !important;
+        width: auto !important; /* إلغاء التحديدات القاسية */
+        height: auto !important;
+    }
+
+    /* إجبار توسيط الـ QR Code نفسه */
+    .print-card-qr table {
+        margin: 0 auto !important; 
+        border-collapse: collapse !important; 
+    }
+    
+    /* 🛑 قواعد إضافية لضمان التوافق مع PDF 🛑 */
+    .print-card * {
+        font-family: sans-serif !important;
+        color: #000 !important;
+        direction: rtl !important;
+        unicode-bidi: embed !important;
+        text-shadow: none !important;
+    }
 }
