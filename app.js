@@ -180,7 +180,7 @@ loadAnnouncement();
         storeContainer.style.display = "none";
         unlockedItemsContainer.style.display = "none"; 
         avatarOverlayLabel.style.display = "none";
-        massUpdateControls.style.display = "none";
+        if(massUpdateControls) massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
         loggedInUserProfile = null; 
         transactionList.innerHTML = "";
