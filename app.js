@@ -174,13 +174,13 @@ loadAnnouncement();
         refreshDataBtn.style.display = "none";
         unlockedItemsBtn.style.display = "none"; 
         if (showQrBtn) showQrBtn.style.display = "none";
-        adminPanelDiv.style.display = "none";
+        if(adminPanelDiv) adminPanelDiv.style.display = "none";
         leaderboardContainer.style.display = "none";
         quizContainer.style.display = "none";
         storeContainer.style.display = "none";
         unlockedItemsContainer.style.display = "none"; 
         avatarOverlayLabel.style.display = "none";
-        massUpdateControls.style.display = "none";
+        if(massUpdateControls) massUpdateControls.style.display = "none";
         userAnnouncementBox.style.display = "none";
         loggedInUserProfile = null; 
         transactionList.innerHTML = "";
@@ -357,7 +357,7 @@ loadAnnouncement();
         messageDiv.style.color = "blue";
         
         // إخفاء الأقسام
-        adminPanelDiv.style.display = "none";
+        if(adminPanelDiv) adminPanelDiv.style.display = "none";
         transactionList.innerHTML = "";
         hideUserSections();
         userAnnouncementBox.style.display = "none";
@@ -421,7 +421,7 @@ loadAnnouncement();
                     if (showQrBtn) showQrBtn.style.display = "none";
                     hideUserSections();
                     leaderboardContainer.style.display = "none";
-                    adminPanelDiv.style.display = "none";
+                    if(adminPanelDiv) adminPanelDiv.style.display = "none";
                 
                 } else if (user.role === 'scanner') {
                     messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
@@ -464,7 +464,6 @@ loadAnnouncement();
                     await loadMainDashboard(); 
                     await loadAnnouncement(); 
                     leaderboardContainer.style.display = "block";
-                    adminPanelDiv.remove();
                 }
                 // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
 
