@@ -41,8 +41,8 @@ export async function onRequestPost(context) {
                  else if (r.includes("اعتراف")) stats["اعتراف"]++;
                 else if (r.includes("مسابقة")) stats["مسابقة"]++;
                 else if (r.includes("تسميع مزمور") || r.includes("مزمور")) stats["تسميع مزمور"]++;
-                else if (r.includes("قداس اضافي")) stats["قداس اضافي"]++;
                 else if (r.includes("قداس اضافي بدون تونية")) stats["قداس اضافي بدون تونية"]++;
+                else if (r.includes("قداس اضافي")) stats["قداس اضافي"]++;
                 else if (r.includes("قداس بدون تونية")) stats["قداس بدون تونية"]++;
                 else if (r.includes("عشية او تسبحة") || r.includes("زيادة")) stats["عشية او تسبحة(زيادة)"]++;
                 else stats["اخرى"]++;
