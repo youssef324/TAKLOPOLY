@@ -1314,6 +1314,7 @@ avatarUploadInput.addEventListener("change", async (event) => {
     const guestModalUserName = document.getElementById("guest-modal-user-name");
     const statsGridContainer = document.getElementById("stats-grid-container");
     const loadingSpinner = document.getElementById("loading-spinner");
+    const guestModalCitiesList = document.getElementById("guest-modal-cities-list");
 
     // 1. التعامل مع أزرار الأسر (جلب القائمة)
     guestFamilyButtons.forEach(button => {
@@ -1393,6 +1394,19 @@ avatarUploadInput.addEventListener("change", async (event) => {
                     // ارسم المربع (حتى لو القيمة صفر عشان الشكل يكمل)
                     createStatBox(key, value);
                 }
+
+             guestModalCitiesList.innerHTML = ''; // تصفير القائمة أولاً
+            if (data.cities && data.cities.length > 0) {
+                data.cities.forEach(city => {
+                    const cityTag = document.createElement('span');
+                    cityTag.classList.add('city-tag'); // استخدام الكلاس من CSS
+                    cityTag.textContent = city;
+                    guestModalCitiesList.appendChild(cityTag);
+                });
+            } else {
+                guestModalCitiesList.innerHTML = '<span style="color: #aaa;">لم يقم بشراء أي مدن بعد</span>';
+            }
+
             } else {
                 statsGridContainer.innerHTML = '<p style="width:100%; text-align:center;">لا يوجد بيانات حضور مسجلة.</p>';
             }

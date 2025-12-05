@@ -976,7 +976,16 @@ form#admin-add-item-form button[type="submit"]:hover {
 .guest-results-container .leaderboard-list {
     margin: 0;
 }
-
+/* 🛑🛑 كلاس جديد لعرض المدن كـ "تاجز" (Tags) 🛑🛑 */
+.city-tag {
+    background-color: #007bff; /* نفس لون التطبيق الأساسي */
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    margin: 3px; /* مسافة صغيرة بين التاجز وبعض */
+    display: inline-block; /* عشان الـ padding و margin يشتغلوا صح */
+}
 /* 🛑🛑 ستايلات قائمة المسح الجماعي 🛑🛑 */
 #batch-scan-list {
     list-style: none;
