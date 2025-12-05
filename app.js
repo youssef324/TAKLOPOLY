@@ -1395,6 +1395,12 @@ avatarUploadInput.addEventListener("change", async (event) => {
                     createStatBox(key, value);
                 }
 
+                            // 🛑🛑 الكود الجديد: عرض المستوى 🛑🛑
+            const levelElement = document.getElementById('guest-modal-user-level');
+            if (levelElement) {
+                levelElement.textContent = `المستوى: ${data.currentLevel || 1}`;
+            }
+
              guestModalCitiesList.innerHTML = ''; // تصفير القائمة أولاً
             if (data.cities && data.cities.length > 0) {
                 data.cities.forEach(city => {
