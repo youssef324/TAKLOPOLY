@@ -55,7 +55,7 @@ export async function onRequestPost(context) {
             const citiesQuery = `
                 SELECT 
                     si.name,
-                    sti.required_level,
+                    sti.required_level
                 FROM user_unlocked_items uui
                 JOIN store_items si ON uui.item_id = si.id
                 WHERE uui.user_email = ?
