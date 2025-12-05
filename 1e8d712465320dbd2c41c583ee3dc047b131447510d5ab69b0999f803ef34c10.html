@@ -234,6 +234,256 @@
     </div>
     <!-- 🛑🛑 نهاية حاوية الزائر 🛑🛑 -->
 
+
+    <div class="admin-panel-container">
+        
+        <div id="admin-panel" style="display: none;">
+            
+            <h2>لوحة تحكم الأدمن</h2>
+            
+            <div class="admin-section">
+                <h4>البحث عن مستخدم (بالاسم)</h4>
+                <form id="admin-search-form">
+                    <input type="text" id="admin-search-name" placeholder="أدخل اسم المستخدم" required>
+                    <button type="submit">بحث</button>
+                </form>
+                
+                <div id="admin-results-list" style="display: none; margin-top: 15px;">
+                    <label for="admin-select-user" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                        تم العثور على عدة مستخدمين، اختر واحد:
+                    </label>
+                    <select id="admin-select-user" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white;">
+                    </select>
+                </div>
+
+                <p id="admin-search-message" style="color: red; margin-top: 10px;"></p>
+
+                <div id="admin-searched-user-card" style="display: none;">
+                    <p><strong>الاسم:</strong> <span id="searched-user-name"></span></p>
+                    <p><strong>العائلة:</strong> <span id="searched-user-family"></span></p>
+                    <p><strong>الإيميل:</strong> <span id="searched-user-email"></span></p>
+                    <p><strong>الرصيد الحالي:</strong> <span id="searched-user-balance"></span></p>
+                    <!-- 🛑🛑 حقل المستوى الجديد في كارت الأدمن 🛑🛑 -->
+                    <p><strong>المستوى الحالي:</strong> <span id="searched-user-level"></span></p>
+                    
+                    <!-- 🛑🛑 زر عرض QR للأدمن (جديد) 🛑🛑 -->
+                    <button id="admin-show-user-qr-btn">
+                        عرض كود QR لهذا المستخدم
+                    </button>
+                    
+                    <hr style="margin: 1rem 0;">
+
+                    <h4>تعديل الرصيد</h4>
+                    <div id="admin-balance-controls">
+                        <input type="number" id="admin-balance-amount" placeholder="الكمية" required>
+                        <button id="admin-add-balance-btn">إضافة (+)</button>
+                        <button id="admin-subtract-balance-btn">خصم (-)</button>
+                    </div>
+                    <p id="admin-balance-message" style="color: green;"></p>
+                    
+                    <!-- 🛑🛑 قسم تعديل المستوى الجديد 🛑🛑 -->
+                    <hr style="margin: 1rem 0;">
+                    <h4>تعديل مستوى المستخدم</h4>
+                    <div id="admin-level-controls">
+                        <input type="number" id="admin-level-amount" placeholder="المستوى الجديد" required min="1">
+                        <button id="admin-update-level-btn">تحديث المستوى</button>
+                    </div>
+                    <p id="admin-level-message" style="color: green;"></p>
+                    
+                    <hr style="margin: 1rem 0;">
+
+                    <h4 style="color: #dc3545; margin-top: 1.5rem;">حذف المستخدم (خطر)</h4>
+                    <button id="admin-delete-user-btn">
+                        حذف هذا المستخدم نهائياً
+                    </button>
+                    <p id="admin-delete-message"></p>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h4>عرض المستخدمين حسب الأسرة</h4>
+                <div class="family-buttons-container">
+                    <button class="family-btn" data-family="اسرة الانبا موسي الاسود">
+                        اسرة الانبا موسي الاسود
+                    </button>
+                    <button class="family-btn" data-family="اسرة مارجرس">
+                        اسرة مارجرس
+                    </button>
+                    <button class="family-btn" data-family="اسرة الانبا كاراس">
+                        اسرة الانبا كاراس
+                    </button>
+                </div>
+                
+                <p id="admin-family-message" style="color: blue; margin-top: 10px;"></p>
+                
+                <div class="mass-update-controls" id="mass-update-controls">
+                    <h5>تعديل رصيد (<span id="selected-users-count">0</span>) مستخدم:</h5>
+                    <input type="number" id="mass-update-amount" placeholder="الكمية (اكتب سالب للخصم)" required>
+                    <div class="mass-update-buttons">
+                        <button id="mass-update-add-btn">إضافة (+)</button>
+                        <button id="mass-update-subtract-btn">خصم (-)</button>
+                    </div>
+                    <p id="mass-update-message" style="color: green; margin-top: 10px; text-align: center;"></p>
+                </div>
+                
+                <div id="admin-family-results" style="margin-top: 1rem;">
+                    </div>
+            </div>
+
+            <!-- 🛑🛑 قسم مسح الحضور والمكافآت (جديد) 🛑🛑 -->
+          <div class="admin-section scan-section" id="admin-scan-section">
+    <h4>📷 مسح كود الحضور والمكافأة (تجميعي)</h4>
+    <p style="font-size: 0.9em; color: #555;">
+        امسح الأكواد المتتالية. ستظهر في القائمة بالأسفل. اضغط "تنفيذ المكافآت" عند الانتهاء.
+    </p>
+    
+    <div id="admin-scan-controls">
+        <label for="reward-reason-select">نوع المكافأة:</label>
+        <select id="reward-reason-select">
+            <option value="300:القداس">القداس (300 نقطة)</option>
+            <option value="300:مدارس الاحد">مدارس الاحد (300 نقطة)</option>
+            <option value="200:مدرسة شمامسة">مدرسة شمامسة (200 نقطة)</option>
+            <option value="200:عشية">عشية (200 نقطة)</option>
+            <option value="200:درس كتاب">درس كتاب (200 نقطة)</option>
+            <option value="200:تسبحة">تسبحة (200 نقطة)</option>
+            <option value="500:اعتراف">اعتراف (500 نقطة)</option>
+            <option value="150:مسابقة">مسابقة (150 نقطة)</option>
+            <option value="250:تسميع مزمور">تسميع مزمور (250 نقطة)</option>
+            <option value="200:قداس اضافي">قداس اضافي (200 نقطة)</option>
+            <option value="100:قداس اضافي بدون تونية">قداس اضافي بدون تونية (100 نقطة)</option>
+            <option value="150:قداس بدون تونية">قداس بدون تونية (150 نقطة)</option>
+            <option value="50:عشية او تسبحة(زيادة)">عشية او تسبحة(زيادة) (50 نقطة)</option>
+        </select>
+
+        <button id="start-scan-btn" style="background-color: #db2777; margin-bottom: 10px;">
+            تشغيل الكاميرا والمسح
+        </button>
+
+        <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+    </div>
+
+    <div id="batch-scan-container" style="margin-top: 20px; display: none;">
+        <h5 style="border-bottom: 2px solid #ddd; padding-bottom: 5px;">
+            القائمة الحالية (<span id="batch-count">0</span>):
+        </h5>
+        <ul id="batch-scan-list">
+            </ul>
+        
+        <button id="submit-batch-rewards-btn" class="pulse-button">
+            ✅ تنفيذ المكافآت للجميع
+        </button>
+    </div>
+
+    <p id="scan-status-message" style="margin-top: 10px; font-weight: bold; white-space: pre-line;"></p>
+</div>
+            <!-- 🛑🛑 نهاية قسم مسح الحضور 🛑🛑 -->
+            
+            <!-- 🛑🛑 قسم طباعة الـ QR لجميع المستخدمين (مُعدل) 🛑🛑 -->
+            <div class="admin-section">
+                <h4>🖨️ طباعة أكواد الحضور (QR)</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    الخطوة 1: جلب قائمة المستخدمين. الخطوة 2: توليد الكروت. الخطوة 3: تحميل الكروت كصورة للطباعة.
+                </p>
+                <div id="admin-qr-list-controls">
+                    <button id="admin-fetch-qr-list-btn">
+                        الخطوة 1: جلب قائمة المستخدمين
+                    </button>
+                    <!-- مربع نص لعرض النتائج (مخفي، يستخدم للتخزين فقط) -->
+                    <textarea id="admin-qr-list-results" readonly placeholder="ستظهر قائمة الـ JSON هنا..."></textarea>
+                    
+                    <button id="admin-generate-print-cards-btn" style="background-color: #28a745; margin-top: 10px;">
+                        الخطوة 2: توليد بطاقات الطباعة
+                    </button>
+                    
+                    <!-- 🛑🛑 الزر الجديد للتحميل كصورة 🛑🛑 -->
+                    <button id="admin-download-cards-as-image-btn" style="background-color: #ffc107; color: #333; margin-top: 10px;">
+                        الخطوة 3: تحميل الكروت كصورة (PNG)
+                    </button>
+                </div>
+                <p id="admin-qr-list-message" style="margin-top: 10px; font-weight: bold;"></p>
+
+                <!-- 🛑🛑 الحاوية الجديدة للطباعة 🛑🛑 -->
+                <div id="admin-printable-cards-container">
+                    <!-- سيتم ملء الكروت هنا بواسطة الجافاسكريبت -->
+                </div>
+            </div>
+            <!-- 🛑🛑 نهاية قسم طباعة الـ QR 🛑🛑 -->
+
+
+            <div class="admin-section">
+                <h4>إضافة سؤال جديد (Quiz)</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    ملحوظة: إضافة سؤال جديد سيقوم بإلغاء تنشيط السؤال القديم أوتوماتيكياً.
+                </p>
+                <form id="admin-quiz-form">
+                    <input type="text" id="quiz-question" placeholder="نص السؤال" required>
+                    <input type="text" id="quiz-opt-a" placeholder="الاختيار الأول (أ)" required>
+                    <input type="text" id="quiz-opt-b" placeholder="الاختيار الثاني (ب)" required>
+                    <input type="text" id="quiz-opt-c" placeholder="الاختيار الثالث (ج)" required>
+                    
+                    <label for="quiz-correct-opt">الإجابة الصحيحة:</label>
+                    <select id="quiz-correct-opt" required>
+                        <option value="" disabled selected>-- اختر الإجابة --</option>
+                        <option value="option_a">الاختيار الأول (أ)</option>
+                        <option value="option_b">الاختيار الثاني (ب)</option>
+                        <option value="option_c">الاختيار الثالث (ج)</option>
+                    </select>
+                    
+                    <label for="quiz-points">عدد النقاط:</label>
+                    <input type="number" id="quiz-points" placeholder="النقاط (مثال: 10)" required>
+                    
+                    <button type="submit">إضافة السؤال</button>
+                </form>
+                <p id="admin-quiz-message" style="color: green; margin-top: 10px;"></p>
+            </div>
+
+            <div class="admin-section">
+                <h4>نشر إعلان عام</h4>
+<form id="admin-announcement-form">
+    <label style="font-weight:bold; display:block; margin-top:10px;">1. إعلان المربع الأصفر (الثابت):</label>
+    <textarea id="admin-box-text" placeholder="اكتب هنا الإعلان الطويل..." style="width:100%; height:60px; padding:5px;"></textarea>
+    
+    <label style="font-weight:bold; display:block; margin-top:10px;">2. شريط الأخبار المتحرك (تحت الهيدر):</label>
+    <input type="text" id="admin-ticker-text" placeholder="اكتب هنا الخبر العاجل..." style="width:100%; padding:10px;">
+    
+    <button type="submit" style="margin-top:15px; background-color: #ffc107; color: #333; font-weight:bold;">حفظ وتحديث الإعلانات</button>
+</form>
+<p id="admin-announcement-message" style="color: green; margin-top: 10px;"></p>
+            </div>
+            
+            <div class="admin-section">
+                <h4>إدارة عناصر المتجر</h4>
+                <p style="font-size: 0.9em; color: #555;">
+                    أضف أو احذف العناصر المتاحة للشراء في المتجر.
+                </p>
+                <form id="admin-add-item-form" style="margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                    <h5>إضافة عنصر جديد</h5>
+                    <input type="text" id="store-item-name" placeholder="اسم العنصر (مثال: كارت شحن)" required>
+                    <input type="number" id="store-item-price" placeholder="سعر العنصر بالنقاط (مثال: 50)" required>
+                    
+                    <!-- 🛑🛑 حقل المستوى المطلوب للمنتج 🛑🛑 -->
+                    <label for="store-item-required-level" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">المستوى المطلوب (افتراضي: 1):</label>
+                    <input type="number" id="store-item-required-level" placeholder="المستوى المطلوب (مثال: 1)" required min="1" value="1">
+
+                    <label style="font-weight:bold; display:block; margin-top:10px;">نوع الشراء:</label>
+                    <select id="store-item-multiple" style="width:100%; padding:10px; margin-bottom:10px;">
+                    <option value="0">مرة واحدة فقط (مثل الرتب)</option>
+                    <option value="1">شراء متعدد (مثل الكروت)</option>
+                    </select>
+                    
+                    <label for="store-item-image-file" style="text-align: right; font-size: 0.9em; color: #555; margin-top: 5px;">صورة المنتج (اختياري):</label>
+                    <input type="file" id="store-item-image-file" accept="image/png, image/jpeg">
+                    
+                    <button type="submit" style="background-color: #007bff; margin-top: 10px;">إضافة العنصر للمتجر</button>
+                </form>
+                <p id="admin-store-message" style="color: green; margin-top: 10px;"></p>
+                
+                <h5>العناصر الحالية في المتجر:</h5>
+                <ul id="admin-store-items-list" style="list-style: none; padding: 0;">
+                    <li>جاري تحميل العناصر...</li>
+                </ul>
+            </div>
+            </div>
     </div>
     <div class="leaderboard-container" id="leaderboard-container">
         <h2>🏆 أبطال الأسر 🏆</h2>
@@ -324,7 +574,8 @@
             
             <div class="stats-grid" id="stats-grid-container">
                 </div>
-                                    <!-- 🛑🛑 قسم الإنجازات (المستوى + المدن) 🛑🛑 -->
+    
+                  <!-- 🛑🛑 قسم الإنجازات (المستوى + المدن) 🛑🛑 -->
             <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
                 
                 <!-- 🛑 هنا هيظهر المستوى 🛑 -->
@@ -337,6 +588,7 @@
                 </div>
             </div>
             <!-- 🛑🛑 نهاية قسم الإنجازات 🛑🛑 -->
+
             <div id="loading-spinner" style="text-align: center; display: none; color: #007bff; font-weight: bold;">جاري التحميل...</div>
         </div>
     </div>
