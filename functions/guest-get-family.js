@@ -26,6 +26,8 @@ export async function onRequestPost(context) {
                 "قداس اضافي بدون تونية": 0,                
                 "قداس بدون تونية": 0,
                 "عشية او تسبحة(زيادة)": 0,
+                "عشية (زيادة)": 0,
+                "تسبحة (زيادة)": 0,
                 "اخرى": 0
             };
 
@@ -38,17 +40,39 @@ export async function onRequestPost(context) {
                 else if (r.includes("عشية") && !r.includes("زيادة")) stats["عشية"]++;
                 else if (r.includes("درس كتاب")) stats["درس كتاب"]++;
                 else if (r.includes("تسبحة") && !r.includes("زيادة")) stats["تسبحة"]++;
-                 else if (r.includes("اعتراف")) stats["اعتراف"]++;
+                else if (r.includes("اعتراف")) stats["اعتراف"]++;
                 else if (r.includes("مسابقة")) stats["مسابقة"]++;
                 else if (r.includes("تسميع مزمور") || r.includes("مزمور")) stats["تسميع مزمور"]++;
                 else if (r.includes("قداس اضافي بدون تونية")) stats["قداس اضافي بدون تونية"]++;
                 else if (r.includes("قداس اضافي")) stats["قداس اضافي"]++;
                 else if (r.includes("قداس بدون تونية")) stats["قداس بدون تونية"]++;
-                else if (r.includes("عشية او تسبحة") || r.includes("زيادة")) stats["عشية او تسبحة(زيادة)"]++;
+                else if (r.includes("عشية او تسبحة(زيادة)")) stats["عشية او تسبحة(زيادة)"]++;
+                else if (r.includes("عشية (زيادة)")) stats["عشية (زيادة)"]++;
+                else if (r.includes("تسبحة (زيادة)")) stats["تسبحة (زيادة)"]++;
                 else stats["اخرى"]++;
             });
 
-            return new Response(JSON.stringify({ success: true, mode: 'stats', stats }), {
+            const citiesQuery = `
+                SELECT 
+                    si.name,
+                    sti.required_level,
+                FROM user_unlocked_items uui
+                JOIN store_items si ON uui.item_id = si.id
+                WHERE uui.user_email = ?
+                ORDER BY uui.purchased_at DESC
+                `;
+
+            const citiesResults = await db.prepare(citiesQuery).bind(targetEmail).all();
+
+            const currentLevel = citiesResults.reduce((max, item) => {
+                return Math.max(max, item.required_level);
+            }, 1);
+
+            const cities = citiesResults.map(item => ({
+                name: item.name,
+            }));
+
+            return new Response(JSON.stringify({ success: true, mode: 'stats', stats, currentLevel, cities }), {
                 status: 200, headers: { "Content-Type": "application/json" }
             });
         }
