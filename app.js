@@ -2147,7 +2147,7 @@ avatarUploadInput.addEventListener("change", async (event) => {
                 submitBatchBtn.disabled = false;
                 
                 // تحديث بيانات الأدمن لو كان بينهم
-                refreshUserData();
+                // refreshUserData();
             });
         }
 
