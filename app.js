@@ -574,8 +574,7 @@ loadAnnouncement();
                         data.users.forEach((user, index) => {
                             const li = document.createElement('li');
                             const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
-                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>
-                                            <strong>${unlockedItems} مدن</strong>`;
+                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${unlockedItems} مدن | ${user.balance} نقطة</strong>`
                             item.list.appendChild(li);
                         });
                     } else {
