@@ -542,11 +542,14 @@ loadAnnouncement();
                     championsData.champions.forEach((user, index) => {
                         const card = document.createElement('div');
                         card.className = 'champion-card';
+                        const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
                         card.innerHTML = `
                             <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
                             <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
                             <span class="name">${user.name}</span>
-                            <small style="display: block; color: #555;">${user.balance} نقطة | ${user.unlocked_count} مدن</small> `;                        
+                            <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                            <small style="display: block; color: #555;">${unlockedItems} مدن</small>
+                        `;
                         topChampionsList.appendChild(card);
                     });
                 } else {
@@ -570,8 +573,9 @@ loadAnnouncement();
                     if (data.users && data.users.length > 0) {
                         data.users.forEach((user, index) => {
                             const li = document.createElement('li');
+                            const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
                             li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>
-                                            <strong>${user.unlocked_count} مدن</strong>`;
+                                            <strong>${unlockedItems} مدن</strong>`;
                             item.list.appendChild(li);
                         });
                     } else {
@@ -1349,8 +1353,9 @@ avatarUploadInput.addEventListener("change", async (event) => {
                         // تأثير بسيط عند المرور بالماوس
                         li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
                         li.onmouseout = () => li.style.backgroundColor = "transparent";
+                        const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
 
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة | ${user.unlocked_count} مدن</strong>`;
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة | ${unlockedItems} مدن</strong>`;
                         
                         // 🛑 هنا السحر: لما يدوس على الاسم، تفتح لوحة الإحصائيات
                         li.addEventListener('click', () => {

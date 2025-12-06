@@ -85,7 +85,7 @@ export async function onRequestPost(context) {
             const { results } = await db.prepare(`
                 SELECT u.name, u.balance, u.email, COUNT(uui.item_id) AS unlocked_count
                 FROM users u
-                JOIN user_unlocked_items uui on uui.user_email = u.email
+                LEFT JOIN user_unlocked_items uui on uui.user_email = u.email
                 WHERE u.family = ? AND u.role = 'user' 
                 GROUP BY u.email
                 ORDER BY unlocked_count DESC, u.balance DESC`
