@@ -53,26 +53,26 @@ export async function onRequestPost(context) {
             });
 
             const citiesQuery = `
-                SELECT 
-                    si.name,
-                    si.required_level
+                SELECT si.name
                 FROM user_unlocked_items uui
                 JOIN store_items si ON uui.item_id = si.id
                 WHERE uui.user_email = ?
-                ORDER BY uui.purchased_at DESC
-                `;
+                ORDER BY si.required_level ASC, si.name ASC
+            `;
 
             const citiesResults = await db.prepare(citiesQuery).bind(targetEmail).all();
 
-            let currentLevel = 1;
-            let cities = [];
+            // get the ctities array
+            let cities = citiesResults.results.map(item => item.name);
 
-            citiesResults.results.forEach(item => {
-                if (item.required_level > currentLevel) {
-                    currentLevel = item.required_level;
-                }
-                cities.push(item.name);
-            });
+            const currentLevelQuery = `
+                SELECT u.level
+                FROM users u
+                WHERE u.email = ?
+            `;
+
+            const currentLevelResult = await db.prepare(currentLevelQuery).bind(targetEmail).first();
+            let currentLevel = currentLevelResult.level;
 
             return new Response(JSON.stringify({ success: true, mode: 'stats', stats, currentLevel, cities }), {
                 status: 200, headers: { "Content-Type": "application/json" }
