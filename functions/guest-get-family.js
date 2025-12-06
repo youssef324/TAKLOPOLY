@@ -82,8 +82,13 @@ export async function onRequestPost(context) {
         // 🛑 السيناريو الثاني: طلب قائمة الأسرة (لو مبعوت اسم الأسرة)
         if (family) {
             // 🛑🛑 مهم جداً: لازم نجيب الإيميل هنا عشان نعرف نطلبه في السيناريو الأول
-            const { results } = await db.prepare(
-                "SELECT name, email, balance FROM users WHERE family = ? AND role = 'user' ORDER BY balance DESC"
+            const { results } = await db.prepare(`
+                SELECT u.name, u.balance, u.email, COUNT(uui.item_id) AS unlocked_count
+                FROM users u
+                JOIN user_unlocked_items uui on uui.user_email = u.email
+                WHERE u.family = ? AND u.role = 'user' 
+                GROUP BY u.email
+                ORDER BY unlocked_count DESC, u.balance DESC`
             ).bind(family).all();
 
             return new Response(JSON.stringify({ success: true, mode: 'list', users: results }), {

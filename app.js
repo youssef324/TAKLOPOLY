@@ -546,9 +546,7 @@ loadAnnouncement();
                             <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
                             <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
                             <span class="name">${user.name}</span>
-                            <small style="display: block; color: #555;">${user.balance} نقطة</small>
-                            <small style="display: block; color: #555;">${user.unlocked_count} مدن</small>
-                        `;
+                            <small style="display: block; color: #555;">${user.balance} نقطة | ${user.unlocked_count} مدن</small> `;                        
                         topChampionsList.appendChild(card);
                     });
                 } else {
@@ -1352,7 +1350,7 @@ avatarUploadInput.addEventListener("change", async (event) => {
                         li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
                         li.onmouseout = () => li.style.backgroundColor = "transparent";
 
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة | ${user.unlocked_count} مدن</strong>`;
                         
                         // 🛑 هنا السحر: لما يدوس على الاسم، تفتح لوحة الإحصائيات
                         li.addEventListener('click', () => {
