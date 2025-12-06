@@ -547,6 +547,7 @@ loadAnnouncement();
                             <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
                             <span class="name">${user.name}</span>
                             <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                            <small style="display: block; color: #555;">${user.unlocked_count} نقطة</small>
                         `;
                         topChampionsList.appendChild(card);
                     });
@@ -571,7 +572,8 @@ loadAnnouncement();
                     if (data.users && data.users.length > 0) {
                         data.users.forEach((user, index) => {
                             const li = document.createElement('li');
-                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>`;
+                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة</strong>
+                                            <strong>${user.unlocked_count} نقطة</strong>`;
                             item.list.appendChild(li);
                         });
                     } else {

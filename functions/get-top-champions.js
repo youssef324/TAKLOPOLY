@@ -9,7 +9,13 @@ export async function onRequestPost(context) {
         // 🛑🛑 التعديل هنا 🛑🛑
         // أضفنا "WHERE role = 'user'" للـ query
         const { results } = await db.prepare(
-            "SELECT name, balance, profile_image_url FROM users WHERE role = 'user' ORDER BY balance DESC LIMIT 3"
+            `SELECT u.name, u.balance, u.profile_image_url, COUNT(uui.item_id) AS unlocked_count
+             FROM users u
+             JOIN user_unlocked_items uui on uui.user_email = u.email
+             WHERE u.role = 'user' 
+             GROUP BY u.email
+             ORDER BY unlocked_count DESC, u.balance DESC
+             LIMIT 3`
         ).all();
 
         return new Response(JSON.stringify({ champions: results }), {

@@ -14,7 +14,13 @@ export async function onRequestPost(context) {
         // 🛑🛑 التعديل هنا 🛑🛑
         // أضفنا "AND role = 'user'" للـ query
         const { results } = await db.prepare(
-            "SELECT name, balance FROM users WHERE family = ? AND role = 'user' ORDER BY balance DESC LIMIT 10"
+            `SELECT u.name, u.balance, COUNT(uui.item_id) AS unlocked_count
+             FROM users u
+             JOIN user_unlocked_items uui on uui.user_email = u.email
+             WHERE u.family = ? AND u.role = 'user' 
+             GROUP BY u.email
+             ORDER BY unlocked_count DESC, u.balance DESC
+             LIMIT 10`
         ).bind(family).all();
 
         return new Response(JSON.stringify({ users: results }), {
