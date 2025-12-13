@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
 
     // جلب كل الحقول الضرورية
     const ps = db.prepare(
-      "SELECT name, email, balance, family, profile_image_url FROM users WHERE family = ?"
+      "SELECT name, email, balance, family, profile_image_url, level FROM users WHERE family = ?"
     );
     
     // 🛑 التعديل الأكثر أهمية: التأكد من التعامل مع الـ results بشكل سليم
