@@ -28,6 +28,7 @@ export async function onRequestPost(context) {
                 "عشية او تسبحة(زيادة)": 0,
                 "عشية (زيادة)": 0,
                 "تسبحة (زيادة)": 0,
+                 "السهرة كاملة": 0,
                 "اخرى": 0
             };
 
@@ -49,6 +50,8 @@ export async function onRequestPost(context) {
                 else if (r.includes("عشية او تسبحة(زيادة)")) stats["عشية او تسبحة(زيادة)"]++;
                 else if (r.includes("عشية (زيادة)")) stats["عشية (زيادة)"]++;
                 else if (r.includes("تسبحة (زيادة)")) stats["تسبحة (زيادة)"]++;
+                else if (r.includes("السهرة كاملة")) stats["السهرة كاملة"]++;
+
                 else stats["اخرى"]++;
             });
 
