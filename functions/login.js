@@ -1,7 +1,9 @@
 /*
  * API Endpoint: /login
- * (مُعدلة لإضافة "المستوى")
+ * Sets secure HttpOnly session cookie and returns user profile
  */
+import { createSessionToken, buildSessionCookie } from "./_session.js";
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -15,13 +17,10 @@ export async function onRequestPost(context) {
       });
     }
 
-    // 🛑 SELECT * ستجلب المستوى أوتوماتيكياً (level)
     const ps = db.prepare("SELECT * FROM users WHERE email = ?");
     const user = await ps.bind(email).first();
 
-    // (دي مقارنة غير آمنة بس للتجربة)
     if (user && user.password === password) {
-      
       const userData = {
         name: user.name,
         family: user.family,
@@ -29,15 +28,20 @@ export async function onRequestPost(context) {
         balance: user.balance,
         role: user.role, 
         profile_image_url: user.profile_image_url,
-        level: user.level || 1 // 🛑🛑 التعديل: إضافة المستوى هنا 🛑🛑
+        level: user.level || 1
       };
+
+      const sessionToken = await createSessionToken(user.email, context.env.SESSION_SECRET);
+      const headers = new Headers({
+        "Content-Type": "application/json",
+      });
+      headers.append("Set-Cookie", buildSessionCookie(sessionToken));
       
       return new Response(JSON.stringify({ success: true, user: userData }), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
       });
     } else {
-      // لو البيانات غلط
       return new Response(JSON.stringify({ error: "الإيميل أو الباسورد خطأ" }), {
         status: 401, 
         headers: { "Content-Type": "application/json" },

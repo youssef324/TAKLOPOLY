@@ -164,30 +164,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const adminSections = document.querySelectorAll('.admin-section');
 loadAnnouncement();
 
-    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة 🛑
+    // 🛑 فرض الحالة الأولية الصحيحة عند فتح الصفحة (محمية ضد أخطاء العناصر غير الموجودة) 🛑
     const resetUI = () => {
-        cardContainer.style.display = "none";
-        formContainer.style.display = "flex";
-        logoutBtn.style.display = "none";
-        logoutBtnGuest.style.display = "none"; // 🛑 إخفاء زر خروج الزائر
-        guestContainer.style.display = "none"; // 🛑 إخفاء واجهة الزائر
-        refreshDataBtn.style.display = "none";
-        unlockedItemsBtn.style.display = "none"; 
+        if (cardContainer) cardContainer.style.display = "none";
+        if (formContainer) formContainer.style.display = "none";
+        if (logoutBtn) logoutBtn.style.display = "none";
+        if (logoutBtnGuest) logoutBtnGuest.style.display = "none";
+        if (guestContainer) guestContainer.style.display = "none";
+        if (refreshDataBtn) refreshDataBtn.style.display = "none";
+        if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none"; 
         if (showQrBtn) showQrBtn.style.display = "none";
-        if(adminPanelDiv) adminPanelDiv.style.display = "none";
-        leaderboardContainer.style.display = "none";
-        quizContainer.style.display = "none";
-        storeContainer.style.display = "none";
-        unlockedItemsContainer.style.display = "none"; 
-        avatarOverlayLabel.style.display = "none";
-        if(massUpdateControls) massUpdateControls.style.display = "none";
-        userAnnouncementBox.style.display = "none";
+        if (adminPanelDiv) adminPanelDiv.style.display = "none";
+        if (leaderboardContainer) leaderboardContainer.style.display = "none";
+        if (quizContainer) quizContainer.style.display = "none";
+        if (storeContainer) storeContainer.style.display = "none";
+        if (unlockedItemsContainer) unlockedItemsContainer.style.display = "none"; 
+        if (avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
+        if (massUpdateControls) massUpdateControls.style.display = "none";
+        if (userAnnouncementBox) userAnnouncementBox.style.display = "none";
         loggedInUserProfile = null; 
-        transactionList.innerHTML = "";
+        if (transactionList) transactionList.innerHTML = "";
         if (userLevelP) userLevelP.textContent = ""; 
         if (editModalOverlay) editModalOverlay.style.display = "none"; 
-        if (qrModalOverlay) qrModalOverlay.style.display = "none"; // 🛑 إخفاء مودال الـ QR
-        // 🛑 إيقاف الماسح إذا كان يعمل عند تسجيل الخروج
+        if (qrModalOverlay) qrModalOverlay.style.display = "none";
         if (html5QrCode && html5QrCode.isScanning) {
             try {
                 html5QrCode.stop().catch(err => console.error("Error stopping scanner:", err));
@@ -349,133 +348,170 @@ loadAnnouncement();
         }
     }
 
-    // --- فورم اللوجن ---
-    loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        messageDiv.textContent = "جاري تسجيل الدخول...";
-        messageDiv.style.color = "blue";
-        
-        // إخفاء الأقسام
-        if(adminPanelDiv) adminPanelDiv.style.display = "none";
-        transactionList.innerHTML = "";
-        hideUserSections();
-        userAnnouncementBox.style.display = "none";
+    // 🛑 دالة تطبيق صلاحيات وواجهة المستخدم الموثقة من السيرفر 🛑
+    async function applyUserProfile(user) {
+        if (!user) return;
+        loggedInUserProfile = user;
 
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        try {
-            const response = await fetch(`/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
-            if (response.ok) {
-                messageDiv.textContent = "تم تسجيل الدخول بنجاح!";
+        // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
+        if (user.role === 'admin') {
+            if (messageDiv) {
+                messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
                 messageDiv.style.color = "green";
-                const user = data.user;
-                loggedInUserProfile = user;
-
-                // 🛑🛑🛑 --- التحقق من نوع المستخدم (Role) --- 🛑🛑🛑
-                if (user.role === 'admin') {
-                    // 1. عرض لوحة الأدمن (ADMIN VIEW)
-                    messageDiv.textContent = "مرحباً أيها الأدمن! تم تسجيل الدخول بنجاح.";
-                    adminPanelDiv.style.display = "block";
-                    cardContainer.style.display = "flex"; // الأدمن يرى الكارت الخاص به
-                    avatarOverlayLabel.style.display = "flex";
-                    
-                    // ملء بيانات كارت الأدمن (نفس بيانات اليوزر العادي)
-                    userNameP.textContent = `الاسم: ${user.name}`;
-                    userFamilyP.textContent = `العائلة: ${user.family}`;
-                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-                    
-                    await loadTransactionHistory(user.email);
-                    await loadAnnouncement();
-                    await loadAdminStoreItems(); 
-
-                    // إخفاء أشياء اليوزر العادي
-                    formContainer.style.display = "none";
-                    logoutBtn.style.display = "block";
-                    refreshDataBtn.style.display = "block";
-                    unlockedItemsBtn.style.display = "none";
-                    if (showQrBtn) showQrBtn.style.display = "none";
-                    hideUserSections();
-
-                } else if (user.role === 'guest') {
-                    // 2. عرض لوحة الزائر (GUEST VIEW)
-                    messageDiv.textContent = "مرحباً أيها الزائر!";
-                    guestContainer.style.display = "block"; // 🛑 إظهار واجهة الزائر
-                    logoutBtnGuest.style.display = "block"; // 🛑 إظهار زر خروج الزائر
-                    
-                    // 🛑 إخفاء كل شيء آخر
-                    cardContainer.style.display = "none";
-                    formContainer.style.display = "none";
-                    avatarOverlayLabel.style.display = "none";
-                    refreshDataBtn.style.display = "none";
-                    unlockedItemsBtn.style.display = "none";
-                    if (showQrBtn) showQrBtn.style.display = "none";
-                    hideUserSections();
-                    leaderboardContainer.style.display = "none";
-                    if(adminPanelDiv) adminPanelDiv.style.display = "none";
-                
-                } else if (user.role === 'scanner') {
-                    messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
-                    logoutBtn.style.display = "block"; // 🛑 إظهار زر خروج 
-                    adminPanelDiv.style.display = "block";
-                    adminSections.forEach(div => {
-                        div.style.display = "none";
-                    });
-                    adminScanSection.style.display = "block";
-
-                    
-                    // 🛑 إخفاء كل شيء آخر
-                    cardContainer.style.display = "none";
-                    formContainer.style.display = "none";
-                    avatarOverlayLabel.style.display = "none";
-                    refreshDataBtn.style.display = "none";
-                    unlockedItemsBtn.style.display = "none";
-                    if (showQrBtn) showQrBtn.style.display = "none";
-                    hideUserSections();
-                    leaderboardContainer.style.display = "none";
-                    
-            } else {
-                    // 3. عرض لوحة المستخدم العادي (USER VIEW)
-                    userNameP.textContent = `الاسم: ${user.name}`;
-                    userFamilyP.textContent = `العائلة: ${user.family}`;
-                    userBalanceP.textContent = `الرصيد: $${user.balance}`;
-                    userLevelP.textContent = `المستوى: ${user.level || 1}`;
-                    userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
-                    
-                    cardContainer.style.display = "flex";
-                    formContainer.style.display = "none";
-                    logoutBtn.style.display = "block";
-                    refreshDataBtn.style.display = "block";
-                    avatarOverlayLabel.style.display = "flex";
-
-                    await loadTransactionHistory(user.email);
-                    
-                    unlockedItemsBtn.style.display = "block"; 
-                    if (showQrBtn) showQrBtn.style.display = "block"; 
-                    await loadMainDashboard(); 
-                    await loadAnnouncement(); 
-                    leaderboardContainer.style.display = "block";
-                }
-                // 🛑🛑🛑 --- نهاية التحقق من نوع المستخدم --- 🛑🛑🛑
-
-            } else {
-                messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
-                messageDiv.style.color = "red";
             }
-        } catch (err) {
-            messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة أو فشل غير متوقع.";
-            messageDiv.style.color = "red";
+            if (adminPanelDiv) adminPanelDiv.style.display = "block";
+            if (cardContainer) cardContainer.style.display = "flex";
+            if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
+            
+            if (userNameP) userNameP.textContent = `الاسم: ${user.name}`;
+            if (userFamilyP) userFamilyP.textContent = `العائلة: ${user.family}`;
+            if (userBalanceP) userBalanceP.textContent = `الرصيد: $${user.balance}`;
+            if (userLevelP) userLevelP.textContent = `المستوى: ${user.level || 1}`;
+            if (userAvatarImg) userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+            
+            await loadTransactionHistory(user.email);
+            await loadAnnouncement();
+            await loadAdminStoreItems(); 
+
+            if (formContainer) formContainer.style.display = "none";
+            if (logoutBtn) logoutBtn.style.display = "block";
+            if (refreshDataBtn) refreshDataBtn.style.display = "block";
+            if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+            if (showQrBtn) showQrBtn.style.display = "none";
+            hideUserSections();
+
+        } else if (user.role === 'guest') {
+            if (messageDiv) {
+                messageDiv.textContent = "مرحباً أيها الزائر!";
+                messageDiv.style.color = "blue";
+            }
+            if (guestContainer) guestContainer.style.display = "block";
+            if (logoutBtnGuest) logoutBtnGuest.style.display = "block";
+            
+            if (cardContainer) cardContainer.style.display = "none";
+            if (formContainer) formContainer.style.display = "none";
+            if (avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
+            if (refreshDataBtn) refreshDataBtn.style.display = "none";
+            if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+            if (showQrBtn) showQrBtn.style.display = "none";
+            hideUserSections();
+            if (leaderboardContainer) leaderboardContainer.style.display = "none";
+            if (adminPanelDiv) adminPanelDiv.style.display = "none";
+        
+        } else if (user.role === 'scanner') {
+            if (messageDiv) {
+                messageDiv.textContent = "مرحباً! تم تسجيل الدخول بصلاحية الماسح.";
+                messageDiv.style.color = "blue";
+            }
+            if (logoutBtn) logoutBtn.style.display = "block";
+            if (adminPanelDiv) adminPanelDiv.style.display = "block";
+            if (adminSections) {
+                adminSections.forEach(div => {
+                    div.style.display = "none";
+                });
+            }
+            if (adminScanSection) adminScanSection.style.display = "block";
+
+            if (cardContainer) cardContainer.style.display = "none";
+            if (formContainer) formContainer.style.display = "none";
+            if (avatarOverlayLabel) avatarOverlayLabel.style.display = "none";
+            if (refreshDataBtn) refreshDataBtn.style.display = "none";
+            if (unlockedItemsBtn) unlockedItemsBtn.style.display = "none";
+            if (showQrBtn) showQrBtn.style.display = "none";
+            hideUserSections();
+            if (leaderboardContainer) leaderboardContainer.style.display = "none";
+            
+        } else {
+            // 3. عرض لوحة المستخدم العادي (USER VIEW)
+            if (userNameP) userNameP.textContent = `الاسم: ${user.name}`;
+            if (userFamilyP) userFamilyP.textContent = `العائلة: ${user.family}`;
+            if (userBalanceP) userBalanceP.textContent = `الرصيد: $${user.balance}`;
+            if (userLevelP) userLevelP.textContent = `المستوى: ${user.level || 1}`;
+            if (userAvatarImg) userAvatarImg.src = user.profile_image_url ? user.profile_image_url : DEFAULT_AVATAR_URL;
+            
+            if (cardContainer) cardContainer.style.display = "flex";
+            if (formContainer) formContainer.style.display = "none";
+            if (logoutBtn) logoutBtn.style.display = "block";
+            if (refreshDataBtn) refreshDataBtn.style.display = "block";
+            if (avatarOverlayLabel) avatarOverlayLabel.style.display = "flex";
+
+            await loadTransactionHistory(user.email);
+            
+            if (unlockedItemsBtn) unlockedItemsBtn.style.display = "block"; 
+            if (showQrBtn) showQrBtn.style.display = "block"; 
+            await loadMainDashboard(); 
+            await loadAnnouncement(); 
+            if (leaderboardContainer) leaderboardContainer.style.display = "block";
         }
-    });
+    }
+
+    // 🛑 التحقق التلقائي الآمن من الجلسة من خلال السيرفر وقاعدة البيانات 🛑
+    async function initAuthenticatedSession() {
+        try {
+            const res = await fetch("/get-session", { credentials: "same-origin" });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    await applyUserProfile(data.user);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Session check error or offline:", e);
+        }
+
+        // لو لم تكن هناك جلسة نشطة، التوجيه لصفحة تسجيل الدخول
+        window.location.href = "login.html";
+    }
+
+    // استدعاء فحص الجلسة عند تحميل index.html
+    initAuthenticatedSession();
+
+    // --- فورم اللوجن الاحتياطي في حال وجوده ---
+    if (loginForm) {
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (messageDiv) {
+                messageDiv.textContent = "جاري تسجيل الدخول...";
+                messageDiv.style.color = "blue";
+            }
+            
+            if (adminPanelDiv) adminPanelDiv.style.display = "none";
+            if (transactionList) transactionList.innerHTML = "";
+            hideUserSections();
+            if (userAnnouncementBox) userAnnouncementBox.style.display = "none";
+
+            const emailEl = document.getElementById("email");
+            const passEl = document.getElementById("password");
+            const email = emailEl ? emailEl.value : "";
+            const password = passEl ? passEl.value : "";
+
+            try {
+                const response = await fetch(`/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                    credentials: "same-origin"
+                });
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok && data.user) {
+                    await applyUserProfile(data.user);
+                } else {
+                    if (messageDiv) {
+                        messageDiv.textContent = `فشل: ${data.error || "خطأ في بيانات الدخول"}`;
+                        messageDiv.style.color = "red";
+                    }
+                }
+            } catch (err) {
+                if (messageDiv) {
+                    messageDiv.textContent = "حدث خطأ في الاتصال بالشبكة.";
+                    messageDiv.style.color = "red";
+                }
+            }
+        });
+    }
 
     // 🛑🛑 معالجة ضغط زر مشترياتي 🛑🛑
     if (unlockedItemsBtn) unlockedItemsBtn.addEventListener('click', loadUserUnlockedItems);
@@ -514,80 +550,140 @@ loadAnnouncement();
     }
 
 
-    // 🛑🛑 فانكشن لوحة الصدارة (مُصححة نهائياً) 🛑🛑
+    // 🛑 إعداد وتخزين الأسر المعتمدة ديناميكياً من السيرفر 🛑
+    let competitionFamilies = [
+        "اسرة الانبا موسي الاسود",
+        "اسرة مارجرس",
+        "اسرة الانبا كاراس"
+    ];
+
+    async function fetchConfiguredFamilies() {
+        try {
+            const res = await fetch('/get-families');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.families && Array.isArray(data.families) && data.families.length > 0) {
+                    competitionFamilies = data.families;
+                }
+            }
+        } catch (e) {
+            console.log("Using default competition families config:", e.message);
+        }
+        renderGuestFamilyButtons();
+        renderAdminFamilyButtons();
+    }
+
+    // توليد أزرار الأسر لواجهة الزائر ديناميكياً
+    function renderGuestFamilyButtons() {
+        const container = document.getElementById("guest-family-buttons-container");
+        if (!container) return;
+        container.innerHTML = "";
+        competitionFamilies.forEach(familyName => {
+            const btn = document.createElement("button");
+            btn.className = "guest-family-btn";
+            btn.dataset.family = familyName;
+            btn.textContent = familyName;
+            btn.addEventListener("click", () => loadGuestFamily(familyName));
+            container.appendChild(btn);
+        });
+    }
+
+    // توليد أزرار الأسر للوحة الأدمن ديناميكياً
+    function renderAdminFamilyButtons() {
+        const container = document.getElementById("admin-family-buttons-container");
+        if (!container) return;
+        container.innerHTML = "";
+        competitionFamilies.forEach(familyName => {
+            const btn = document.createElement("button");
+            btn.className = "family-btn";
+            btn.dataset.family = familyName;
+            btn.textContent = familyName;
+            btn.addEventListener("click", () => loadAdminFamily(familyName));
+            container.appendChild(btn);
+        });
+    }
+
+    // 🛑🛑 فانكشن لوحة الصدارة الديناميكية الداعمة لأي عدد وأي أسماء للأسر 🛑🛑
     async function loadLeaderboards() {
+        if (!leaderboardContainer) return;
         leaderboardContainer.style.display = "block"; // 🛑 الإظهار أولاً
-        topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
-        familyAnbaMoussaList.innerHTML = "<li>جاري التحميل...</li>";
-        familyMargergesList.innerHTML = "<li>جاري التحميل...</li>";
-        familyAnbaKarasList.innerHTML = "<li>جاري التحميل...</li>";
+        if (topChampionsList) topChampionsList.innerHTML = '<p style="text-align: center;">جاري التحميل...</p>';
+        
+        const columnsContainer = document.getElementById("leaderboard-columns-container");
+        if (columnsContainer) {
+            columnsContainer.innerHTML = '<p style="text-align: center; color: var(--muted, #888);">جاري تحميل لوحات الأسر...</p>';
+        }
         const rankEmojis = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
         try {
-            // 🛑🛑 استخدام Promise.allSettled لضمان أن فشل طلب واحد لا يوقف البقية 🛑🛑
-            const results = await Promise.allSettled([
-                fetch('/get-top-champions', { method: "POST" }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا موسي الاسود" }) }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة مارجرس" }) }),
-                fetch('/get-family-top-10', { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ family: "اسرة الانبا كاراس" }) }),
-            ]);
-
-            const [championsResponse, anbaMoussaResponse, margergesResponse, karasResponse] = results;
-
             // 1. الأبطال (Top 3)
-            if (championsResponse.status === 'fulfilled' && championsResponse.value.ok) {
-                const championsData = await championsResponse.value.json();
-                topChampionsList.innerHTML = ""; 
-                if (championsData.champions && championsData.champions.length > 0) {
-                    championsData.champions.forEach((user, index) => {
-                        const card = document.createElement('div');
-                        card.className = 'champion-card';
-                        const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
-                        card.innerHTML = `
-                            <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
-                            <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
-                            <span class="name">${user.name}</span>
-                            <small style="display: block; color: #555;">${user.balance} نقطة</small>
-                            <small style="display: block; color: #555;">${unlockedItems} مدن</small>
-                        `;
-                        topChampionsList.appendChild(card);
-                    });
-                } else {
-                    topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
+            try {
+                const championsResponse = await fetch('/get-top-champions', { method: "POST" });
+                if (championsResponse.ok) {
+                    const championsData = await championsResponse.json();
+                    if (topChampionsList) {
+                        topChampionsList.innerHTML = ""; 
+                        if (championsData.champions && championsData.champions.length > 0) {
+                            championsData.champions.forEach((user, index) => {
+                                const card = document.createElement('div');
+                                card.className = 'champion-card';
+                                const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
+                                card.innerHTML = `
+                                    <div class="rank">${rankEmojis[index + 1] || (index + 1)}</div>
+                                    <img src="${user.profile_image_url || DEFAULT_AVATAR_URL}" alt="${user.name}" class="card-img" style="width: 100px; height: 100px; border-radius: 50%;">
+                                    <span class="name">${user.name}</span>
+                                    <small style="display: block; color: #555;">${user.balance} نقطة</small>
+                                    <small style="display: block; color: #555;">${unlockedItems} مدن</small>
+                                `;
+                                topChampionsList.appendChild(card);
+                            });
+                        } else {
+                            topChampionsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد بيانات كافية لعرض الأبطال.</p>';
+                        }
+                    }
                 }
-            } else {
-                topChampionsList.innerHTML = '<p style="text-align: center; color: orange;">فشل تحميل أبطال الصدارة.</p>';
+            } catch (champErr) {
+                console.error("Champions load error:", champErr);
+                if (topChampionsList) topChampionsList.innerHTML = '<p style="text-align: center; color: orange;">فشل تحميل أبطال الصدارة.</p>';
             }
 
-            // 2. القوائم التفصيلية (Top 10 لكل عائلة)
-            const familyResponses = [
-                { list: familyAnbaMoussaList, response: anbaMoussaResponse, name: "اسرة الانبا موسي الاسود" },
-                { list: familyMargergesList, response: margergesResponse, name: "اسرة مارجرس" },
-                { list: familyAnbaKarasList, response: karasResponse, name: "اسرة الانبا كاراس" }
-            ];
-            
-            for (const item of familyResponses) {
-                if (item.response.status === 'fulfilled' && item.response.value.ok) {
-                    const data = await item.response.value.json();
-                    item.list.innerHTML = '';
-                    if (data.users && data.users.length > 0) {
+            // 2. القوائم التفصيلية (Top 10 لكل عائلة) يتم جلبها ديناميكياً بحسب إعدادات الأسر
+            const familyRequests = competitionFamilies.map(fam =>
+                fetch('/get-family-top-10', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ family: fam })
+                }).then(r => r.ok ? r.json() : { users: [] }).catch(() => ({ users: [] }))
+            );
+
+            const familyResults = await Promise.all(familyRequests);
+
+            if (columnsContainer) {
+                columnsContainer.innerHTML = '';
+                competitionFamilies.forEach((familyName, idx) => {
+                    const col = document.createElement('div');
+                    col.className = 'leaderboard-column';
+                    col.innerHTML = `<h3>${familyName}</h3><ul class="leaderboard-list"></ul>`;
+                    columnsContainer.appendChild(col);
+
+                    const list = col.querySelector('.leaderboard-list');
+                    const data = familyResults[idx];
+                    if (data && data.users && data.users.length > 0) {
                         data.users.forEach((user, index) => {
                             const li = document.createElement('li');
                             const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
-                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${unlockedItems} مدن | ${user.balance} نقطة</strong>`
-                            item.list.appendChild(li);
+                            li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${unlockedItems} مدن | ${user.balance} نقطة</strong>`;
+                            list.appendChild(li);
                         });
                     } else {
-                        item.list.innerHTML = `<li><small>لا يوجد مستخدمين.</small></li>`;
+                        list.innerHTML = `<li><small>لا يوجد مستخدمين مسجلين بعد.</small></li>`;
                     }
-                } else {
-                    item.list.innerHTML = `<li style="color: orange;">فشل في تحميل القائمة.</li>`;
-                }
+                });
             }
 
         } catch (err) {
             console.error("Leaderboard Major Error:", err);
-            topChampionsList.innerHTML = '<p style="text-align: center; color: red;">خطأ كارثي في تحميل لوحة الصدارة.</p>';
+            if (topChampionsList) topChampionsList.innerHTML = '<p style="text-align: center; color: red;">خطأ كارثي في تحميل لوحة الصدارة.</p>';
         }
     }
 
@@ -1058,91 +1154,114 @@ async function loadAdminStoreItems() {
 
 
     // 🛑🛑 فورم التسجيل (Signup) 🛑🛑
-    signupForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        messageDiv.textContent = "جاري إنشاء الحساب...";
-        messageDiv.style.color = "blue";
+    if (signupForm) {
+        signupForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            if (messageDiv) {
+                messageDiv.textContent = "جاري إنشاء الحساب...";
+                messageDiv.style.color = "blue";
+            }
 
-        const name = document.getElementById("name").value;
-        const family = document.getElementById("family").value;
-        const email = document.getElementById("signup-email").value;
-        const password = document.getElementById("signup-password").value;
-        const avatarFile = document.getElementById("signup-avatar-file").files[0];
+            const nameEl = document.getElementById("name");
+            const familyEl = document.getElementById("family");
+            const emailEl = document.getElementById("signup-email");
+            const passEl = document.getElementById("signup-password");
+            const avatarFileEl = document.getElementById("signup-avatar-file");
 
-        if (!name || !family || !email || !password) {
-            messageDiv.textContent = "الرجاء ملء جميع الحقول المطلوبة.";
-            messageDiv.style.color = "red";
-            return;
-        }
+            const name = nameEl ? nameEl.value : "";
+            const family = familyEl ? familyEl.value : "";
+            const email = emailEl ? emailEl.value : "";
+            const password = passEl ? passEl.value : "";
+            const avatarFile = (avatarFileEl && avatarFileEl.files) ? avatarFileEl.files[0] : null;
 
-        let profile_image_url = DEFAULT_AVATAR_URL;
+            if (!name || !family || !email || !password) {
+                if (messageDiv) {
+                    messageDiv.textContent = "الرجاء ملء جميع الحقول المطلوبة.";
+                    messageDiv.style.color = "red";
+                }
+                return;
+            }
 
-        try {
-            if (avatarFile) {
-                messageDiv.textContent = "جاري ضغط ورفع الصورة...";
-                const resizedBlob = await resizeImage(avatarFile, 250, 250, 0.7); 
-                const formData = new FormData();
-                formData.append('file', resizedBlob);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            let profile_image_url = DEFAULT_AVATAR_URL;
+
+            try {
+                if (avatarFile) {
+                    if (messageDiv) messageDiv.textContent = "جاري ضغط ورفع الصورة...";
+                    const resizedBlob = await resizeImage(avatarFile, 250, 250, 0.7); 
+                    const formData = new FormData();
+                    formData.append('file', resizedBlob);
+                    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                    
+                    const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
+                    
+                    const cloudinaryData = await cloudinaryResponse.json();
+                    profile_image_url = cloudinaryData.secure_url;
+                }
+
+                if (messageDiv) messageDiv.textContent = "جاري إرسال بيانات التسجيل...";
                 
-                const cloudinaryResponse = await fetch(CLOUDINARY_URL, {
-                    method: 'POST',
-                    body: formData
+                const dataToFunctions = new FormData();
+                dataToFunctions.append('name', name);
+                dataToFunctions.append('family', family);
+                dataToFunctions.append('email', email);
+                dataToFunctions.append('password', password);
+                dataToFunctions.append('profile_image_url', profile_image_url);
+
+                const response = await fetch(`/signup`, {
+                    method: "POST",
+                    body: dataToFunctions, 
                 });
 
-                if (!cloudinaryResponse.ok) throw new Error("فشل رفع الصورة لـ Cloudinary");
-                
-                const cloudinaryData = await cloudinaryResponse.json();
-                    profile_image_url = cloudinaryData.secure_url;
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+
+                if (response.ok) {
+                    if (messageDiv) {
+                        messageDiv.textContent = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
+                        messageDiv.style.color = "green";
+                    }
+                    signupForm.reset(); 
+                    if (loginForm) loginForm.scrollIntoView({ behavior: 'smooth' }); 
+                } else {
+                    if (messageDiv) {
+                        messageDiv.textContent = `فشل التسجيل: ${data.error || "خطأ غير محدد"}`;
+                        messageDiv.style.color = "red";
+                    }
+                }
+            } catch (err) {
+                if (messageDiv) {
+                    messageDiv.textContent = `حدث خطأ: ${err.message || "فشل غير متوقع."}`;
+                    messageDiv.style.color = "red";
+                }
+                console.error("Signup Error:", err);
             }
-
-            messageDiv.textContent = "جاري إرسال بيانات التسجيل...";
-            
-            const dataToFunctions = new FormData();
-            dataToFunctions.append('name', name);
-            dataToFunctions.append('family', family);
-            dataToFunctions.append('email', email);
-            dataToFunctions.append('password', password);
-            dataToFunctions.append('profile_image_url', profile_image_url);
-
-            const response = await fetch(`/signup`, {
-                method: "POST",
-                body: dataToFunctions, 
-            });
-
-            const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-
-            if (response.ok) {
-                messageDiv.textContent = "تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.";
-                messageDiv.style.color = "green";
-                signupForm.reset(); 
-                loginForm.scrollIntoView({ behavior: 'smooth' }); 
-            } else {
-                messageDiv.textContent = `فشل التسجيل: ${data.error || "خطأ غير محدد"}`;
-                messageDiv.style.color = "red";
-            }
-        } catch (err) {
-            messageDiv.textContent = `حدث خطأ: ${err.message || "فشل غير متوقع."}`;
-            messageDiv.style.color = "red";
-            console.error("Signup Error:", err);
-        }
-    });
-
-
-    // 🛑🛑 زرار تسجيل الخروج (مُصحح ليشمل الزر الجديد) 🛑🛑
-    function handleLogout() {
-        resetUI();
-        loginForm.reset();
-        messageDiv.textContent = "تم تسجيل الخروج.";
-        messageDiv.style.color = "blue";
+        });
     }
-    logoutBtn.addEventListener("click", handleLogout);
-    logoutBtnGuest.addEventListener("click", handleLogout); // 🛑 ربط الزر الجديد
 
-// --- كود "تغيير الصورة" ---
-avatarUploadInput.addEventListener("change", async (event) => {
+
+    // 🛑🛑 زرار تسجيل الخروج (مُصحح لمسح الكوكي والعودة لـ login.html) 🛑🛑
+    async function handleLogout() {
+        try {
+            await fetch("/logout", { method: "POST", credentials: "same-origin" });
+        } catch (e) {
+            console.warn("Logout request error:", e);
+        }
+        resetUI();
+        if (loginForm) loginForm.reset();
+        window.location.href = "login.html";
+    }
+    if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+    if (logoutBtnGuest) logoutBtnGuest.addEventListener("click", handleLogout);
+
+    // --- كود "تغيير الصورة" ---
+    if (avatarUploadInput) {
+        avatarUploadInput.addEventListener("change", async (event) => {
     const file = event.target.files[0];
     // شرط التوقف: تأكد من وجود ملف والمستخدم مسجل الدخول
     if (!file || !loggedInUserProfile) return; 
@@ -1209,64 +1328,81 @@ avatarUploadInput.addEventListener("change", async (event) => {
     if (closeAdminModal) {
         closeAdminModal.click();
     }
-});
+    });
+    }
 
     // 🛑🛑 أكواد الكويز (تمت استعادتها بالكامل) 🛑🛑
-    quizOptionButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            quizOptionButtons.forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            selectedOption = button.dataset.value; 
-        });
-    });
-
-    quizSubmitBtn.addEventListener("click", async () => {
-        if (!selectedOption) {
-            quizMessage.textContent = "الرجاء اختيار إجابة أولاً";
-            quizMessage.style.color = "red";
-            return;
-        }
-
-        quizMessage.textContent = "جاري التأكد من الإجابة...";
-        quizMessage.style.color = "blue";
-        quizSubmitBtn.disabled = true; 
-
-        try {
-            const response = await fetch(`/submit-quiz-answer`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: loggedInUserProfile.email,
-                  quizId: currentQuizId,
-                  selectedOption: selectedOption
-                })
+    if (quizOptionButtons) {
+        quizOptionButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                quizOptionButtons.forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedOption = button.dataset.value; 
             });
+        });
+    }
 
-            const data = await response.json();
-
-            if (data.success) {
-                quizMessage.textContent = data.message;
-                quizMessage.style.color = "green";
-                await refreshUserData(); // 🛑 تحديث الرصيد والسجل
-            } else {
-                quizMessage.textContent = data.message;
-                quizMessage.style.color = "red";
+    if (quizSubmitBtn) {
+        quizSubmitBtn.addEventListener("click", async () => {
+            if (!selectedOption) {
+                if (quizMessage) {
+                    quizMessage.textContent = "الرجاء اختيار إجابة أولاً";
+                    quizMessage.style.color = "red";
+                }
+                return;
             }
 
-            setTimeout(() => {
-                quizContainer.style.display = "block"; 
-                loadActiveQuiz(loggedInUserProfile.email); // تحميل السؤال التالي
-            }, 3000);
+            if (quizMessage) {
+                quizMessage.textContent = "جاري التأكد من الإجابة...";
+                quizMessage.style.color = "blue";
+            }
+            quizSubmitBtn.disabled = true; 
 
-        } catch (err) {
-            quizMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
-            quizMessage.style.color = "red";
-            quizSubmitBtn.disabled = false; 
-        }
-    });
+            try {
+                const response = await fetch(`/submit-quiz-answer`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      email: loggedInUserProfile.email,
+                      quizId: currentQuizId,
+                      selectedOption: selectedOption
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (quizMessage) {
+                        quizMessage.textContent = data.message;
+                        quizMessage.style.color = "green";
+                    }
+                    await refreshUserData(); // 🛑 تحديث الرصيد والسجل
+                } else {
+                    if (quizMessage) {
+                        quizMessage.textContent = data.message;
+                        quizMessage.style.color = "red";
+                    }
+                }
+
+                setTimeout(() => {
+                    if (quizContainer) quizContainer.style.display = "block"; 
+                    if (loggedInUserProfile) loadActiveQuiz(loggedInUserProfile.email); // تحميل السؤال التالي
+                }, 3000);
+
+            } catch (err) {
+                if (quizMessage) {
+                    quizMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                    quizMessage.style.color = "red";
+                }
+                quizSubmitBtn.disabled = false; 
+            }
+        });
+    }
 
     // 🛑 ربط زرار الريفرش 🛑
-    refreshDataBtn.addEventListener('click', refreshUserData);
+    if (refreshDataBtn) {
+        refreshDataBtn.addEventListener('click', refreshUserData);
+    }
 
     // 
     // -----------------------------------------------------
@@ -1320,59 +1456,61 @@ avatarUploadInput.addEventListener("change", async (event) => {
     const guestModalCitiesList = document.getElementById("guest-modal-cities-list");
 
     // 1. التعامل مع أزرار الأسر (جلب القائمة)
-    guestFamilyButtons.forEach(button => {
-        button.addEventListener('click', async () => {
-            const familyName = button.dataset.family;
-            guestMessage.textContent = `جاري تحميل أسرة ${familyName}...`;
-            guestMessage.style.color = 'blue';
-            guestResultsList.innerHTML = '';
+    async function loadGuestFamily(familyName) {
+        if (!guestMessage || !guestResultsList) return;
+        guestMessage.textContent = `جاري تحميل أسرة ${familyName}...`;
+        guestMessage.style.color = 'blue';
+        guestResultsList.innerHTML = '';
 
-            try {
-                // طلب قائمة الأسرة
-                const response = await fetch('/guest-get-family', { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ family: familyName }) 
-                });
+        try {
+            // طلب قائمة الأسرة
+            const response = await fetch('/guest-get-family', { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ family: familyName }) 
+            });
 
-                if (!response.ok) throw new Error('فشل الاتصال');
+            if (!response.ok) throw new Error('فشل الاتصال');
+            
+            const data = await response.json();
+            
+            if (data.success && data.users && data.users.length > 0) {
+                guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
+                guestMessage.style.color = 'green';
                 
-                const data = await response.json();
-                
-                if (data.success && data.users && data.users.length > 0) {
-                    guestMessage.textContent = `عرض ${data.users.length} مستخدم في: ${familyName}`;
-                    guestMessage.style.color = 'green';
-                    
-                    data.users.forEach((user, index) => {
-                        const li = document.createElement('li');
-                        li.style.cursor = "pointer"; // شكل اليد عشان يعرفوا إنه قابل للضغط
-                        li.style.padding = "10px";
-                        li.style.borderBottom = "1px solid #eee";
-                        
-                        // تأثير بسيط عند المرور بالماوس
-                        li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
-                        li.onmouseout = () => li.style.backgroundColor = "transparent";
-                        const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
+                data.users.forEach((user, index) => {
+                    const li = document.createElement('li');
+                    li.style.cursor = "pointer";
+                    li.style.padding = "10px";
+                    li.style.borderBottom = "1px solid #eee";
+                    li.onmouseover = () => li.style.backgroundColor = "#f8f9fa";
+                    li.onmouseout = () => li.style.backgroundColor = "transparent";
+                    const unlockedItems = !!user.unlocked_count ? user.unlocked_count : 0;
 
-                        li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة | ${unlockedItems} مدن</strong>`;
-                        
-                        // 🛑 هنا السحر: لما يدوس على الاسم، تفتح لوحة الإحصائيات
-                        li.addEventListener('click', () => {
-                            showGuestUserStats(user.email, user.name);
-                        });
-
-                        guestResultsList.appendChild(li);
+                    li.innerHTML = `<span>${index + 1}. ${user.name}</span> <strong>${user.balance} نقطة | ${unlockedItems} مدن</strong>`;
+                    li.addEventListener('click', () => {
+                        showGuestUserStats(user.email, user.name);
                     });
-                } else {
-                    guestMessage.textContent = 'لا يوجد مستخدمين.';
-                    guestMessage.style.color = 'black';
-                }
-            } catch (err) {
-                guestMessage.textContent = `خطأ: ${err.message}`;
-                guestMessage.style.color = 'red';
+
+                    guestResultsList.appendChild(li);
+                });
+            } else {
+                guestMessage.textContent = `لا يوجد مستخدمين مسجلين في أسرة ${familyName}.`;
+                guestMessage.style.color = 'orange';
             }
+        } catch (err) {
+            guestMessage.textContent = `خطأ: ${err.message}`;
+            guestMessage.style.color = 'red';
+        }
+    }
+
+    if (guestFamilyButtons) {
+        guestFamilyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.dataset.family) loadGuestFamily(button.dataset.family);
+            });
         });
-    });
+    }
 
     // 2. دالة عرض الإحصائيات (جلب الأرقام ورسم المربعات)
     async function showGuestUserStats(email, name) {
@@ -1783,72 +1921,75 @@ avatarUploadInput.addEventListener("change", async (event) => {
             });
         }
         
-        // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (تشغيل زراير الأسر) 🛑🛑
-        document.querySelectorAll(".family-btn").forEach(button => {
-            button.addEventListener("click", async (event) => {
-                const familyName = button.dataset.family;
-                
-                adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
-                adminFamilyMessage.style.color = "blue";
-                adminFamilyResultsDiv.innerHTML = '';
-                massUpdateControls.style.display = 'none';
-                selectedUsersForMassUpdate = [];
-                selectedUsersCount.textContent = '0';
+        // 🛑🛑 2. إصلاح "عرض المستخدمين حسب الأسرة" (دعم ديناميكي للأسر) 🛑🛑
+        async function loadAdminFamily(familyName) {
+            if (!adminFamilyMessage || !adminFamilyResultsDiv) return;
+            adminFamilyMessage.textContent = `جاري تحميل مستخدمي أسرة ${familyName}...`;
+            adminFamilyMessage.style.color = "blue";
+            adminFamilyResultsDiv.innerHTML = '';
+            if (massUpdateControls) massUpdateControls.style.display = 'none';
+            selectedUsersForMassUpdate = [];
+            if (selectedUsersCount) selectedUsersCount.textContent = '0';
 
-                try {
-                    const response = await fetch(`/admin-get-family`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ family: familyName }),
-                    });
-                    const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
-                    if (!response.ok) {
-                        adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
-                        adminFamilyMessage.style.color = "red";
-                        massUpdateControls.style.display = "none";
-                        return;
-                    }
-                    const users = data.users;
-
-                    if (!users || users.length === 0) {
-                        adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
-                        adminFamilyMessage.style.color = "black";
-                        massUpdateControls.style.display = "none";
-                    } else {
-                        adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
-                        massUpdateControls.style.display = "block";
-                        users.forEach(user => {
-                            const userItem = document.createElement("div");
-                            userItem.className = "family-user-item";
-                            const checkbox = document.createElement("input");
-                            checkbox.type = "checkbox";
-                            checkbox.className = "mass-update-checkbox";
-                            checkbox.dataset.email = user.email;
-                            if (selectedUsersForMassUpdate.includes(user.email)) {
-                                checkbox.checked = true;
-                            }
-                            const userInfo = document.createElement("div");
-                            userInfo.className = "user-info";
-                            userInfo.innerHTML = `
-                                <span>${user.name} (${user.email})</span>
-                                <strong>الرصيد: $${user.balance}</strong>
-                            `;
-                            userInfo.addEventListener('click', () => {
-                                user.family = familyName;
-                                populateAdminCard(user);
-                                searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            });
-                            userItem.appendChild(checkbox);
-                            userItem.appendChild(userInfo);
-                            adminFamilyResultsDiv.appendChild(userItem);
-                        });
-                        selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
-                    }
-                } catch (err) {
-                    adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+            try {
+                const response = await fetch(`/admin-get-family`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ family: familyName }),
+                });
+                const data = await response.json().catch(() => ({error: 'رد سيرفر غير صالح'}));
+                if (!response.ok) {
+                    adminFamilyMessage.textContent = `فشل تحميل الأسرة: ${data.error || "خطأ غير محدد"}`;
                     adminFamilyMessage.style.color = "red";
-                    massUpdateControls.style.display = "none";
+                    if (massUpdateControls) massUpdateControls.style.display = "none";
+                    return;
                 }
+                const users = data.users;
+
+                if (!users || users.length === 0) {
+                    adminFamilyMessage.textContent = `لا يوجد مستخدمين مسجلين في "${familyName}".`;
+                    adminFamilyMessage.style.color = "black";
+                    if (massUpdateControls) massUpdateControls.style.display = "none";
+                } else {
+                    adminFamilyMessage.textContent = `تم العثور على ${users.length} مستخدم في "${familyName}":`;
+                    if (massUpdateControls) massUpdateControls.style.display = "block";
+                    users.forEach(user => {
+                        const userItem = document.createElement("div");
+                        userItem.className = "family-user-item";
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.className = "mass-update-checkbox";
+                        checkbox.dataset.email = user.email;
+                        if (selectedUsersForMassUpdate.includes(user.email)) {
+                            checkbox.checked = true;
+                        }
+                        const userInfo = document.createElement("div");
+                        userInfo.className = "user-info";
+                        userInfo.innerHTML = `
+                            <span>${user.name} (${user.email})</span>
+                            <strong>الرصيد: $${user.balance}</strong>
+                        `;
+                        userInfo.addEventListener('click', () => {
+                            user.family = familyName;
+                            populateAdminCard(user);
+                            searchedUserCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
+                        userItem.appendChild(checkbox);
+                        userItem.appendChild(userInfo);
+                        adminFamilyResultsDiv.appendChild(userItem);
+                    });
+                    if (selectedUsersCount) selectedUsersCount.textContent = selectedUsersForMassUpdate.length;
+                }
+            } catch (err) {
+                adminFamilyMessage.textContent = "حدث خطأ في الاتصال بالـ API.";
+                adminFamilyMessage.style.color = "red";
+                if (massUpdateControls) massUpdateControls.style.display = "none";
+            }
+        }
+
+        document.querySelectorAll(".family-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                if (button.dataset.family) loadAdminFamily(button.dataset.family);
             });
         });
 

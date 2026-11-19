@@ -1,7 +1,9 @@
 /*
  * API Endpoint: /signup
- * (النسخة الجديدة - بتستقبل لينك الصورة جاهز)
+ * Validates against central family configuration and creates user account
  */
+import { COMPETITION_FAMILIES } from "./_config.js";
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -14,18 +16,24 @@ export async function onRequestPost(context) {
     const family = formData.get("family");
     const email = formData.get("email");
     const password = formData.get("password");
-    // 🛑 بقينا بنستقبل لينك جاهز
     const profileImageUrl = formData.get("profile_image_url");
 
     if (!name || !email || !password || !family) {
-      return new Response(JSON.stringify({ error: "الرجاء ملء جميع الحقول" }), { 
+      return new Response(JSON.stringify({ error: "الرجاء ملء جميع الحقول المطلوبة" }), { 
         status: 400, 
         headers: { "Content-Type": "application/json" } 
       });
     }
 
-    // 3. 🛑 اللوجيك الجديد: اتأكد إن اللينك موجود (لو لأ، حط الافتراضي)
-    // لو app.js بعت "null" أو "undefined", استخدم الافتراضي
+    // التحقق من أن الأسرة المختارة تابعة للمسابقة المعتمدة
+    if (!COMPETITION_FAMILIES.includes(family)) {
+      return new Response(JSON.stringify({ error: "الأسرة المختارة غير مسجلة في المسابقة الحالية" }), { 
+        status: 400, 
+        headers: { "Content-Type": "application/json" } 
+      });
+    }
+
+    // 3. اتأكد إن الصورة موجودة (لو لأ، استخدم الافتراضية)
     const imageUrlToSave = profileImageUrl || "/default-avatar.png";
     
     // 4. حضّر أمر الإدخال للداتا بيز
@@ -37,13 +45,13 @@ export async function onRequestPost(context) {
     await ps.bind(name, family, email, password, imageUrlToSave).run();
 
     // 6. رجّع رسالة نجاح
-    return new Response(JSON.stringify({ success: true, message: "User created!" }), {
+    return new Response(JSON.stringify({ success: true, message: "تم إنشاء الحساب بنجاح!" }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
-    if (e.message.includes("UNIQUE constraint failed")) {
+    if (e.message && e.message.includes("UNIQUE constraint failed")) {
       return new Response(JSON.stringify({ error: "هذا الإيميل مسجل من قبل" }), {
         status: 409,
         headers: { "Content-Type": "application/json" },

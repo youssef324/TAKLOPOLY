@@ -1,0 +1,367 @@
+/* TAKLOPOLY Neon Edition — additive theme, keep style.css loaded first */
+
+/* ===================================
+   TAKLOPOLY - GAMING NEON THEME
+   =================================== */
+
+:root {
+    --bg: #0b1020;
+    --surface: #171b35;
+    --surface-hover: #222847;
+    --cyan: #00e5ff;
+    --purple: #a855f7;
+    --pink: #ff3cac;
+    --text: #f8fafc;
+    --muted: #aab5d1;
+    --border: rgba(0, 229, 255, 0.25);
+}
+
+body {
+    background:
+        radial-gradient(circle at 15% 10%, rgba(168,85,247,.18), transparent 35%),
+        radial-gradient(circle at 85% 65%, rgba(0,229,255,.12), transparent 40%),
+        var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Header */
+.top-banner {
+    background: rgba(12, 16, 36, .96);
+    border-right: 5px solid var(--cyan);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 5px 30px rgba(0,229,255,.12);
+}
+
+.banner-title-en {
+    color: var(--cyan);
+    font-size: 2rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 18px rgba(0,229,255,.7);
+}
+
+.banner-title-ar {
+    color: var(--text);
+}
+
+/* Background behind login and profile */
+.card-and-forms-wrapper {
+    background:
+        linear-gradient(rgba(11,16,32,.85), rgba(11,16,32,.92)),
+        url('/hero2.jpg') center / cover;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: 0 12px 45px rgba(0,0,0,.35);
+}
+
+/* Cards and sections */
+.card,
+.form-container form,
+.quiz-container,
+.store-container,
+.unlocked-items-container,
+.leaderboard-container,
+.guest-container,
+#admin-panel,
+.admin-section,
+.admin-item-card,
+.store-item-card,
+.stat-box,
+.modal-content,
+#qr-modal-content,
+#admin-searched-user-card,
+.guest-results-container {
+    background: rgba(23, 27, 53, .96);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.25);
+}
+
+/* Keep profile and forms readable */
+.container .card #user-name,
+.container .card #user-family,
+.container .card #user-balance,
+.container .card #user-level,
+.store-item-card h5,
+.admin-item-info strong,
+.champion-card .name,
+.leaderboard-column h3,
+.stat-box span.count,
+.batch-item span {
+    color: var(--text);
+}
+
+.container .card #user-balance,
+.container .card #user-level,
+.store-item-card p.price,
+.stat-box.highlight span.count {
+    color: var(--cyan);
+}
+
+.card-img {
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 22px rgba(0,229,255,.35);
+}
+
+/* Headings */
+.form-container h3,
+.quiz-container h2,
+.store-container h2,
+.leaderboard-container h2,
+.guest-container h2,
+.modal-content h3,
+#admin-panel h2 {
+    color: var(--cyan);
+    text-shadow: 0 0 14px rgba(0,229,255,.25);
+}
+
+/* Inputs */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.form-container input[type="email"],
+.form-container input[type="password"],
+.form-container input[type="text"],
+.form-container select {
+    background: #10172d;
+    color: var(--text);
+    border: 1px solid rgba(168,85,247,.4);
+    border-radius: 10px;
+    padding: 12px;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--cyan);
+    outline-offset: 1px;
+}
+
+/* Buttons */
+button:not(:disabled) {
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        background-color .2s ease;
+}
+
+.form-container button,
+.button-group button,
+#quiz-submit-btn,
+.store-item-card button,
+.guest-family-btn {
+    background: linear-gradient(135deg, #7c3aed, #0891b2);
+    color: white;
+    border: 1px solid rgba(0,229,255,.4);
+    border-radius: 12px;
+    font-weight: 700;
+    padding: 12px 18px;
+    cursor: pointer;
+}
+
+.form-container button:hover,
+.button-group button:hover,
+#quiz-submit-btn:hover,
+.store-item-card button:not(:disabled):hover,
+.guest-family-btn:hover {
+    background: linear-gradient(135deg, #9333ea, #06b6d4);
+    transform: translateY(-2px);
+    box-shadow: 0 0 22px rgba(0,229,255,.35);
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+}
+
+/* Quiz */
+.quiz-option-btn {
+    background: #202642;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.quiz-option-btn:hover {
+    background: #30385c;
+    border-color: var(--cyan);
+}
+
+.quiz-option-btn.selected {
+    background: #30305e;
+    color: white;
+    border-color: var(--purple);
+    box-shadow: 0 0 12px rgba(168,85,247,.3);
+}
+
+/* Store */
+.store-item-card {
+    transition: transform .2s, box-shadow .2s;
+}
+
+.store-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 25px rgba(168,85,247,.2);
+}
+
+.store-item-card.locked {
+    background: #1b2037;
+    opacity: .65;
+}
+
+/* Leaderboard */
+.leaderboard-list li {
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+.champion-card .name,
+.champion-card small,
+.stat-box span.label,
+.admin-item-info small {
+    color: var(--muted);
+}
+
+.champion-card .card-img {
+    box-shadow: 0 0 22px rgba(168,85,247,.3);
+}
+
+/* News ticker */
+.news-ticker-bar {
+    background: #10152c;
+    border-bottom: 2px solid var(--purple);
+}
+
+.ticker-label {
+    background: var(--purple);
+}
+
+.ticker-wrapper {
+    background: #151a34;
+}
+
+/* Announcements */
+.announcement-container {
+    background: #26213d;
+    border: 1px solid var(--purple);
+    border-radius: 16px;
+}
+
+.announcement-container h3 {
+    color: #f5c9ff;
+}
+
+#user-announcement-text {
+    color: var(--text);
+}
+
+/* Modals */
+.modal-overlay,
+#qr-modal-overlay {
+    background: rgba(2, 6, 23, .85);
+}
+
+.close-btn,
+.close-qr-btn {
+    color: var(--cyan);
+}
+
+/* Keep QR code itself on white */
+#qr-code-container {
+    background: white;
+    border: 8px solid white;
+    border-radius: 8px;
+}
+
+/* Guest and stats */
+.guest-results-container,
+#admin-family-results,
+.batch-item,
+.collapsible-container h4 {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.city-tag {
+    background: #5032a1;
+    border: 1px solid var(--purple);
+}
+
+/* Footer */
+.app-footer {
+    background: #090e1d;
+    border-top: 2px solid var(--cyan);
+}
+
+.social-icon {
+    color: var(--cyan);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+        margin: 12px auto;
+    }
+
+    .card-and-forms-wrapper {
+        padding: 14px;
+    }
+
+    .form-container form {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .banner-title-en {
+        font-size: 1.5rem;
+    }
+
+    .leaderboard-column {
+        min-width: 0;
+    }
+
+    #admin-search-form,
+    #admin-balance-controls,
+    #admin-level-controls {
+        flex-wrap: wrap;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    button,
+    .store-item-card {
+        transition: none;
+    }
+}
+
+/* Do not apply neon styling to printed QR cards */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .print-card,
+    .print-card * {
+        color: black !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+    }
+}

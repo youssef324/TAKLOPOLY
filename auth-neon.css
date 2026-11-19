@@ -1,0 +1,711 @@
+/* ==========================================================================
+   TAKLOPOLY — Premium Gaming Neon / Cyberpunk Auth Suite
+   Styles for login.html & signup.html
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Orbitron:wght@600;800;900&display=swap');
+
+:root {
+    /* Base Dark Space Palette */
+    --bg-dark: #070b18;
+    --bg-card: rgba(14, 21, 42, 0.78);
+    --bg-card-border: rgba(0, 229, 255, 0.28);
+    --bg-input: rgba(10, 16, 34, 0.85);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    
+    /* Login Theme: Neon Cyan & Electric Blue */
+    --cyan-core: #00e5ff;
+    --cyan-glow: rgba(0, 229, 255, 0.45);
+    --cyan-subtle: rgba(0, 229, 255, 0.12);
+    --blue-core: #0284c7;
+    --blue-glow: rgba(2, 132, 199, 0.4);
+    --purple-glow: rgba(168, 85, 247, 0.25);
+
+    /* Signup Theme: Neon Pink & Violet */
+    --pink-core: #ff3cac;
+    --pink-glow: rgba(255, 60, 172, 0.45);
+    --pink-subtle: rgba(255, 60, 172, 0.12);
+    --violet-core: #a855f7;
+    --violet-glow: rgba(168, 85, 247, 0.45);
+    --violet-subtle: rgba(168, 85, 247, 0.15);
+
+    /* Shared Radii & Transitions */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --radius-pill: 50px;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Global Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    min-height: 100vh;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-dark);
+    direction: rtl;
+    text-align: right;
+    overflow-x: hidden;
+}
+
+/* Background Atmosphere */
+.auth-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 15%, rgba(0, 229, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(168, 85, 247, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.08) 0%, transparent 60%),
+        var(--bg-dark);
+}
+
+/* Signup-specific Background */
+.auth-body.signup-theme {
+    background:
+        radial-gradient(circle at 15% 20%, rgba(255, 60, 172, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.08) 0%, transparent 60%),
+        var(--bg-dark);
+}
+
+/* Cyberpunk Grid Overlay */
+.cyber-grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ambient Floating Glow Spheres */
+.ambient-glow {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+    animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+
+.glow-top-right {
+    top: -100px;
+    right: -100px;
+    width: 350px;
+    height: 350px;
+    background: var(--cyan-glow);
+}
+
+.signup-theme .glow-top-right {
+    background: var(--pink-glow);
+}
+
+.glow-bottom-left {
+    bottom: -120px;
+    left: -120px;
+    width: 400px;
+    height: 400px;
+    background: var(--purple-glow);
+}
+
+.signup-theme .glow-bottom-left {
+    background: var(--violet-glow);
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.45; }
+    50% { transform: scale(1.15) translate(20px, -15px); opacity: 0.7; }
+    100% { transform: scale(0.95) translate(-15px, 20px); opacity: 0.5; }
+}
+
+/* Top Header Bar */
+.auth-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10, 16, 32, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.brand-meta-right,
+.brand-meta-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.brand-meta-right i,
+.brand-meta-left i {
+    color: var(--cyan-core);
+}
+
+.signup-theme .brand-meta-right i,
+.signup-theme .brand-meta-left i {
+    color: var(--pink-core);
+}
+
+.brand-center-badge {
+    text-align: center;
+}
+
+.brand-logo-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: var(--cyan-core);
+    text-shadow: 0 0 15px var(--cyan-glow), 0 0 30px rgba(0, 229, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.signup-theme .brand-logo-text {
+    color: var(--pink-core);
+    text-shadow: 0 0 15px var(--pink-glow), 0 0 30px rgba(255, 60, 172, 0.25);
+}
+
+.brand-logo-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px var(--cyan-glow));
+}
+
+.signup-theme .brand-logo-img {
+    filter: drop-shadow(0 0 8px var(--pink-glow));
+}
+
+.brand-subtext {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: -2px;
+}
+
+/* Main Container */
+.auth-main-wrapper {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2.5rem 1.5rem;
+}
+
+/* Glassmorphism Card (Base) */
+.auth-card {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--bg-card-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2.2rem;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.65),
+        0 0 30px rgba(0, 229, 255, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
+    overflow: hidden;
+}
+
+/* Distinct Card for Signup (Wider layout for multi-fields) */
+.auth-card.signup-card {
+    max-width: 620px;
+    border-color: rgba(255, 60, 172, 0.3);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.65),
+        0 0 35px rgba(255, 60, 172, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Top Card Glowing Accent Line */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--cyan-core), transparent);
+}
+
+.signup-card::before {
+    background: linear-gradient(90deg, transparent, var(--pink-core), var(--violet-core), transparent);
+}
+
+/* Card Header */
+.card-header-block {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.card-theme-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--cyan-subtle);
+    border: 1px solid var(--cyan-core);
+    color: var(--cyan-core);
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    animation: subtleFloat 4s ease-in-out infinite;
+}
+
+.signup-theme .card-theme-icon {
+    background: var(--pink-subtle);
+    border-color: var(--pink-core);
+    color: var(--pink-core);
+    box-shadow: 0 0 20px var(--pink-glow);
+}
+
+@keyframes subtleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.card-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.35rem;
+}
+
+.card-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+/* Form Layout & Grid */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-grid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Form Groups & Inputs */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.input-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.input-label i {
+    font-size: 0.85rem;
+    color: var(--cyan-core);
+}
+
+.signup-theme .input-label i {
+    color: var(--pink-core);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-prefix {
+    position: absolute;
+    right: 14px;
+    color: var(--text-dim);
+    font-size: 1rem;
+    pointer-events: none;
+    transition: var(--transition-fast);
+}
+
+.auth-input,
+.auth-select {
+    width: 100%;
+    padding: 13px 44px 13px 14px;
+    background: var(--bg-input);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-fast);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.auth-input::placeholder {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+/* Focus States — Login (Cyan) */
+.auth-input:focus,
+.auth-select:focus {
+    border-color: var(--cyan-core);
+    background: rgba(14, 24, 48, 0.95);
+    box-shadow: 
+        0 0 15px var(--cyan-glow),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.auth-input:focus ~ .input-icon-prefix,
+.auth-select:focus ~ .input-icon-prefix {
+    color: var(--cyan-core);
+}
+
+/* Focus States — Signup (Pink) */
+.signup-theme .auth-input:focus,
+.signup-theme .auth-select:focus {
+    border-color: var(--pink-core);
+    background: rgba(24, 16, 42, 0.95);
+    box-shadow: 
+        0 0 15px var(--pink-glow),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.signup-theme .auth-input:focus ~ .input-icon-prefix,
+.signup-theme .auth-select:focus ~ .input-icon-prefix {
+    color: var(--pink-core);
+}
+
+/* Custom Styled Select */
+.auth-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.select-arrow {
+    position: absolute;
+    left: 14px;
+    color: var(--text-dim);
+    pointer-events: none;
+    font-size: 0.8rem;
+    transition: var(--transition-fast);
+}
+
+.auth-select option {
+    background-color: #0b1120;
+    color: var(--text-main);
+    padding: 10px;
+}
+
+/* Custom File Upload Box */
+.file-upload-box {
+    position: relative;
+    border: 2px dashed rgba(255, 60, 172, 0.35);
+    border-radius: var(--radius-md);
+    background: rgba(255, 60, 172, 0.04);
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.file-upload-box:hover {
+    border-color: var(--pink-core);
+    background: rgba(255, 60, 172, 0.08);
+    box-shadow: 0 0 15px rgba(255, 60, 172, 0.2);
+}
+
+.file-upload-box input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-icon {
+    font-size: 1.6rem;
+    color: var(--pink-core);
+}
+
+.file-upload-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.file-upload-hint {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.file-selected-name {
+    font-size: 0.82rem;
+    color: var(--cyan-core);
+    font-weight: 700;
+    margin-top: 0.2rem;
+    display: none;
+}
+
+/* Primary Cyberpunk Buttons */
+.auth-submit-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, var(--cyan-core) 0%, var(--blue-core) 100%);
+    color: #040814;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: var(--transition-fast);
+    box-shadow: 
+        0 4px 20px var(--cyan-glow),
+        0 0 10px rgba(0, 229, 255, 0.4);
+    margin-top: 0.75rem;
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 30px var(--cyan-glow),
+        0 0 25px rgba(0, 229, 255, 0.7);
+    filter: brightness(1.1);
+}
+
+.auth-submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px var(--cyan-glow);
+}
+
+/* Signup Primary Button (Pink / Violet) */
+.signup-theme .auth-submit-btn {
+    background: linear-gradient(135deg, var(--pink-core) 0%, var(--violet-core) 100%);
+    color: #ffffff;
+    box-shadow: 
+        0 4px 20px var(--pink-glow),
+        0 0 10px rgba(255, 60, 172, 0.4);
+}
+
+.signup-theme .auth-submit-btn:hover {
+    box-shadow: 
+        0 8px 30px var(--pink-glow),
+        0 0 25px rgba(255, 60, 172, 0.7);
+}
+
+.signup-theme .auth-submit-btn:active {
+    box-shadow: 0 2px 10px var(--pink-glow);
+}
+
+/* Button Shimmer Effect */
+.auth-submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    transition: 0.6s;
+}
+
+.auth-submit-btn:hover::after {
+    left: 150%;
+}
+
+/* Navigation Switch Link Block */
+.auth-switch-block {
+    text-align: center;
+    margin-top: 1.6rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.auth-switch-text {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
+.auth-switch-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--cyan-core);
+    text-decoration: none;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--cyan-subtle);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    transition: var(--transition-fast);
+}
+
+.auth-switch-link:hover {
+    background: rgba(0, 229, 255, 0.22);
+    border-color: var(--cyan-core);
+    box-shadow: 0 0 15px var(--cyan-glow);
+    transform: translateY(-1px);
+}
+
+.signup-theme .auth-switch-link {
+    color: var(--pink-core);
+    background: var(--pink-subtle);
+    border-color: rgba(255, 60, 172, 0.3);
+}
+
+.signup-theme .auth-switch-link:hover {
+    background: rgba(255, 60, 172, 0.22);
+    border-color: var(--pink-core);
+    box-shadow: 0 0 15px var(--pink-glow);
+}
+
+/* Feedback & Status Message Box */
+#message {
+    min-height: 24px;
+    margin-top: 0.8rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+    display: none;
+}
+
+#message:not(:empty) {
+    display: block;
+}
+
+#message.status-error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171 !important;
+}
+
+#message.status-success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #4ade80 !important;
+}
+
+#message.status-info {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8 !important;
+}
+
+/* Footer */
+.auth-footer {
+    position: relative;
+    z-index: 10;
+    padding: 1.2rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    background: rgba(10, 16, 32, 0.7);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.auth-footer span {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+    .auth-header {
+        padding: 0.8rem 1rem;
+    }
+
+    .brand-meta-right,
+    .brand-meta-left {
+        font-size: 0.75rem;
+    }
+
+    .brand-logo-text {
+        font-size: 1.3rem;
+        letter-spacing: 1.5px;
+    }
+
+    .brand-subtext {
+        font-size: 0.72rem;
+    }
+
+    .auth-main-wrapper {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-card {
+        padding: 2rem 1.4rem;
+        border-radius: var(--radius-md);
+    }
+
+    .form-grid-row {
+        grid-template-columns: 1fr;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+    }
+}
